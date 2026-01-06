@@ -19,8 +19,10 @@ import logger from '@/lib/logger.ts'
 import CButton from '@/components/CButton.vue'
 import PageHeader from '@/components/PageHeader.vue'
 import StatisticCard from '@/components/StatisticCard.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import DialogCreateTicket from '@/views/admin/tickets/DialogCreateTicket.vue'
 import TicketGroupTable from '@/views/admin/tickets/TicketGroupTable.vue'
+import { formatPrice } from '@/utils/price.ts'
 
 const { t } = useI18n()
 
@@ -31,6 +33,10 @@ const selectedTicket = ref<Ticket | null>(null)
 const shownDialog = ref<string>('')
 // Pre-selected group for the create dialog
 const preSelectedGroup = ref<TicketGroup | null>(null)
+// Delete confirmation
+const showDeleteConfirmation = ref(false)
+const ticketToDelete = ref<Ticket | null>(null)
+const isDeleting = ref(false)
 
 // Computed - Statistics
 const statistics = computed(() => {
@@ -85,45 +91,6 @@ const getGroupName = (group: TicketGroup): string => {
   return names[group]
 }
 
-const formatPrice = (price: number): string => {
-  const locale = useI18n().locale.value
-  return editionStore.value?.currency
-    ? new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: editionStore.value?.currency,
-      }).format(price)
-    : '-'
-}
-
-const formatDate = (dateStr?: string): string => {
-  if (!dateStr) return '-'
-  const locale = useI18n().locale.value
-  return new Date(dateStr).toLocaleDateString(locale, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  })
-}
-
-const formatDateRange = (from?: string, until?: string): string => {
-  if (!from && !until) return '-'
-  const locale = useI18n().locale.value
-  if (from && until) {
-    const fromDate = new Date(from).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-    })
-    const untilDate = new Date(until).toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-    return `${fromDate} - ${untilDate}`
-  }
-  if (from) return `From ${formatDate(from)}`
-  return `Until ${formatDate(until)}`
-}
-
 // Actions
 const handleEdit = (ticket: Ticket): void => {
   selectedTicket.value = ticket
@@ -131,19 +98,35 @@ const handleEdit = (ticket: Ticket): void => {
   toast.info(t('admin.tickets.editFunctionalityComingSoon'))
 }
 
-const handleDelete = async (ticket: Ticket): Promise<void> => {
+const handleDelete = (ticket: Ticket): void => {
+  ticketToDelete.value = ticket
+  showDeleteConfirmation.value = true
+}
+
+const confirmDelete = async (): Promise<void> => {
+  if (!ticketToDelete.value) return
+
+  isDeleting.value = true
   try {
-    await ticketService.delete(ticket.id)
+    await ticketService.delete(ticketToDelete.value.id)
     toast.success(t('admin.tickets.deleteSuccess'))
     await loadTickets()
+    showDeleteConfirmation.value = false
+    ticketToDelete.value = null
   } catch (error) {
     logger.error('Error deleting ticket:', {
       error,
-      ticketId: ticket.id,
-      ticketName: ticket.name,
+      ticket: ticketToDelete.value,
     })
     toast.error(t('admin.tickets.deleteFailed'))
+  } finally {
+    isDeleting.value = false
   }
+}
+
+const cancelDelete = (): void => {
+  showDeleteConfirmation.value = false
+  ticketToDelete.value = null
 }
 
 const handleView = (ticket: Ticket): void => {
@@ -330,8 +313,6 @@ onMounted(async () => {
         <DisclosurePanel>
           <TicketGroupTable
             :tickets="ticketsByGroup[group]"
-            :format-price="formatPrice"
-            :format-date-range="formatDateRange"
             @view="handleView"
             @edit="handleEdit"
             @delete="handleDelete"
@@ -348,6 +329,26 @@ onMounted(async () => {
     @close="handleDialogClose"
     @created="handleTicketCreated"
   />
+
+  <!-- Delete Confirmation Dialog -->
+  <ConfirmationDialog
+    :open="showDeleteConfirmation"
+    :title="t('admin.tickets.deleteConfirmTitle')"
+    :confirm-text="t('common.delete')"
+    :cancel-text="t('common.cancel')"
+    :loading="isDeleting"
+    @confirm="confirmDelete"
+    @close="cancelDelete"
+  >
+    <p class="text-sm text-gray-600 dark:text-gray-300">
+      {{
+        t('admin.tickets.deleteConfirmMessage', { name: ticketToDelete?.name })
+      }}
+    </p>
+    <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+      {{ t('admin.tickets.deleteConfirmWarning') }}
+    </p>
+  </ConfirmationDialog>
 </template>
 
 <style scoped></style>

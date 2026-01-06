@@ -8,6 +8,7 @@ export interface Edition {
     title?: string
     url?: string
   }
+  timezone?: string
   poster_url?: string
   currency?: string
 }

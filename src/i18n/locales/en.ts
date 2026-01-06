@@ -341,6 +341,9 @@ const en = {
       edit: 'Edit',
       delete: 'Delete',
       confirmDelete: 'Are you sure you want to delete "{name}"?',
+      deleteConfirmTitle: 'Delete Ticket',
+      deleteConfirmMessage: 'Are you sure you want to delete "{name}"?',
+      deleteConfirmWarning: 'This action cannot be undone.',
       deleteSuccess: 'Ticket deleted successfully',
       deleteFailed: 'Failed to delete ticket',
       createSuccess: 'Ticket created successfully',
@@ -351,6 +354,92 @@ const en = {
       viewDetailsFunctionalityComingSoon:
         'View details functionality coming soon',
       addTicketFunctionalityComingSoon: 'Add ticket functionality coming soon',
+    },
+  },
+  landing: {
+    hero: {
+      liveNow: 'Live Now',
+      comingSoon: 'Coming Soon',
+      defaultTitle: 'Board Game Convention',
+      defaultDescription: 'The ultimate board gaming experience awaits you',
+      discoverMore: 'Discover More',
+    },
+    gallery: {
+      title: 'Moments from Our Community',
+      subtitle: 'Capturing the joy of gaming together',
+    },
+    countdown: {
+      title: 'The countdown begins',
+      days: 'Days',
+      hours: 'Hours',
+      minutes: 'Minutes',
+    },
+    tickets: {
+      sectionTitle: 'Get Your Access',
+      sectionSubtitle: 'Choose your ticket',
+      popular: 'Popular',
+      getTicket: 'Get This Ticket',
+      ticketsLeft: 'Only {count} tickets left!',
+      validPeriod: 'Valid: {from} - {until}',
+      libraryAccess: 'Full library access',
+      tournamentAccess: 'Tournament participation',
+    },
+    features: {
+      sectionTitle: 'The Platform',
+      sectionSubtitle: 'Everything in one place',
+      sectionDescription:
+        'Access all convention features from your pocket. Reserve games, join tournaments, and connect with fellow enthusiasts.',
+      library: {
+        name: 'Game Library',
+        description:
+          'Browse and reserve from hundreds of board games. Find your next favorite!',
+      },
+      tournaments: {
+        name: 'Tournaments',
+        description:
+          'Compete for glory in our organized tournaments. Prizes await the champions!',
+      },
+      fleaMarket: {
+        name: 'Flea Market',
+        description:
+          'Buy, sell, or trade games. Find rare gems or give your games a new home.',
+      },
+      explore: 'Explore',
+    },
+    games: {
+      sectionTitle: 'Game Library',
+      sectionSubtitle: 'Discover amazing games',
+      viewAll: 'View all games',
+      available: 'Available',
+    },
+    map: {
+      sectionTitle: 'Location',
+      sectionSubtitle: 'Find us here',
+      getDirections: 'Get Directions',
+      until: 'Until {date}',
+    },
+    cta: {
+      badge: 'Join the community',
+      title: 'Ready for an',
+      titleHighlight: 'unforgettable experience?',
+      description:
+        'Create your free account to reserve games, join tournaments, and get the most out of the convention.',
+      button: 'Create Free Account',
+    },
+    footer: {
+      privacy: 'Privacy',
+      terms: 'Terms',
+      contact: 'Contact',
+      copyright: '© {year} {name}. All rights reserved.',
+    },
+    nav: {
+      home: 'Home',
+      gallery: 'Gallery',
+      location: 'Location',
+      tickets: 'Tickets',
+      countdown: 'Countdown',
+      features: 'Features',
+      games: 'Games',
     },
   },
 }

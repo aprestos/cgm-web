@@ -150,7 +150,6 @@ import FormTabs from '@/components/FormTabs.vue'
 import type { TabConfig } from '@/components/FormTabs.vue'
 import ticketService from '@/features/tickets/service'
 import type { TicketGroup } from '@/features/tickets/ticket.model'
-import { type CreateTicketInput } from '@/features/tickets/ticket.model'
 import { tenantStore } from '@/stores/tenant'
 import { editionStore } from '@/stores/edition'
 import logger from '@/lib/logger'
@@ -238,6 +237,19 @@ const { r$ } = useRegle(formData, {
   },
 })
 
+const resetForm = (): void => {
+  formData.value = {
+    name: '',
+    price: '',
+    quantity: '',
+    sale_from: '',
+    sale_until: '',
+    valid_from: '',
+    valid_until: '',
+  }
+  r$.$reset()
+}
+
 const submit = async (): Promise<void> => {
   if (isSubmitting.value) return
 
@@ -259,34 +271,24 @@ const submit = async (): Promise<void> => {
   let validFrom: DateTime | null
   let validUntil: DateTime | null
 
-  validFrom = DateTime.fromISO(formData.value.valid_from).set({
-    hour: 0,
-    minute: 0,
-    second: 0,
-    millisecond: 0,
-  })
+  validFrom = DateTime.fromISO(formData.value.valid_from).setZone(
+    editionStore.value.timezone,
+  )
 
   // For single day tickets, set valid_until to the end of the valid_from day
   validUntil = DateTime.fromISO(
     selectedTab.value === 0
       ? formData.value.valid_from
       : formData.value.valid_until,
-  )
-
-  if (!validUntil.isValid) {
-    return
-  }
-  validUntil.set({
-    hour: 23,
-    minute: 59,
-    second: 59,
-    millisecond: 999,
-  })
+  ).setZone(editionStore.value.timezone)
 
   if (!validUntil || !validFrom) return
 
+  validFrom = validFrom.startOf('day')
+  validUntil = validUntil.endOf('day')
+
   try {
-    const input: CreateTicketInput = {
+    await ticketService.create({
       tenant_id: tenantStore.value.id,
       edition_id: editionStore.value.id,
       name: formData.value.name,
@@ -298,24 +300,11 @@ const submit = async (): Promise<void> => {
       sale_until: formData.value.sale_until || undefined,
       valid_from: validFrom.toISO() as string,
       valid_until: validUntil.toISO() as string,
-    }
-
-    await ticketService.create(input)
+    })
 
     toast.success(t('admin.tickets.createSuccess'))
 
-    // Reset form
-    formData.value = {
-      name: '',
-      price: '',
-      quantity: '',
-      sale_from: '',
-      sale_until: '',
-      valid_from: '',
-      valid_until: '',
-    }
-
-    r$.$reset()
+    resetForm()
 
     // Emit events
     emit('created')

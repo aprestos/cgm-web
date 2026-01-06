@@ -1,19 +1,25 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { IconTicket } from '@tabler/icons-vue'
+import { IconTicket, IconEye, IconEdit, IconTrash } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
 import CBadge from '@/components/CBadge.vue'
 import DataTable from '@/components/DataTable.vue'
 import type { DataTableColumn } from '@/components/DataTable.vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
+import { formatPrice } from '@/utils/price.ts'
+import { DateTime } from 'luxon'
 
 interface Props {
   tickets: Ticket[]
-  formatPrice: (price: number) => string
-  formatDateRange: (from?: string, until?: string) => string
 }
 
 defineProps<Props>()
+
+const emit = defineEmits<{
+  view: [ticket: Ticket]
+  edit: [ticket: Ticket]
+  delete: [ticket: Ticket]
+}>()
 
 const { t } = useI18n()
 
@@ -41,6 +47,32 @@ const getStatusBadgeVariant = (
   ticket: Ticket,
 ): 'success' | 'warning' | 'danger' => {
   return ticket.active ? 'success' : 'danger'
+}
+
+const formatDate = (dateStr?: string): string => {
+  if (!dateStr) return '-'
+  const locale = useI18n().locale.value
+
+  return DateTime.fromISO(dateStr).toLocaleString(
+    { day: 'numeric', weekday: 'long' },
+    { locale },
+  )
+}
+
+const formatDateRange = (
+  from: string | undefined,
+  until: string | undefined,
+): string => {
+  if (!from || !until) return '-'
+
+  const fromDate = formatDate(from)
+  const untilDate = formatDate(until)
+
+  if (fromDate === untilDate) {
+    return fromDate
+  } else {
+    return `${formatDate(from)} - ${formatDate(until)}`
+  }
 }
 </script>
 
@@ -114,9 +146,35 @@ const getStatusBadgeVariant = (
     </template>
 
     <!-- Actions slot -->
-    <template #actions>
+    <template #actions="{ item }">
       <div class="flex items-center justify-end gap-2">
-        <!-- to be implemented later -->
+        <button
+          type="button"
+          class="rounded-lg p-2 text-indigo-600 hover:bg-indigo-50 hover:text-indigo-900 dark:text-indigo-400 dark:hover:bg-indigo-900/20 dark:hover:text-indigo-300 transition-colors"
+          :aria-label="t('common.view')"
+          :title="t('common.view')"
+          @click="emit('view', item)"
+        >
+          <IconEye class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          class="rounded-lg p-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
+          :aria-label="t('common.edit')"
+          :title="t('common.edit')"
+          @click="emit('edit', item)"
+        >
+          <IconEdit class="h-5 w-5" />
+        </button>
+        <button
+          type="button"
+          class="rounded-lg p-2 text-red-600 hover:bg-red-50 hover:text-red-900 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors"
+          :aria-label="t('common.delete')"
+          :title="t('common.delete')"
+          @click="emit('delete', item)"
+        >
+          <IconTrash class="h-5 w-5" />
+        </button>
       </div>
     </template>
   </DataTable>

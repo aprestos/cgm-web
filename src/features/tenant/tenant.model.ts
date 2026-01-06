@@ -6,4 +6,5 @@ export interface Tenant {
   current_event: string
   email?: string
   images?: string[]
+  short_description?: string
 }

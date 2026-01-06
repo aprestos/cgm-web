@@ -52,11 +52,19 @@
         </div>
 
         <CInput
-          id="event-name"
+          id="tenant-name"
           v-model="formData.name"
-          label="Event Name"
-          name="event-name"
+          label="Name"
+          name="tenant-name"
           :errors="r$.$errors.name"
+        />
+
+        <CInput
+          id="tenant-short-description"
+          v-model="formData.shortDescription"
+          label="Short description"
+          name="tenant-short-description"
+          :errors="r$.$errors.shortDescription"
         />
 
         <CInput
@@ -192,7 +200,14 @@
 
 <script setup lang="ts">
 import { useRegle } from '@regle/core'
-import { alpha, email, maxLength, minLength, required } from '@regle/rules'
+import {
+  alpha,
+  string,
+  email,
+  maxLength,
+  minLength,
+  required,
+} from '@regle/rules'
 import { computed, ref, watchEffect } from 'vue'
 import { toast } from 'vue-sonner'
 import CButton from '@/components/CButton.vue'
@@ -284,6 +299,7 @@ const removeImage = (index: number): void => {
 const formData = ref({
   name: '',
   email: '',
+  shortDescription: '',
 })
 
 // Regle validation setup
@@ -298,6 +314,11 @@ const { r$ } = useRegle(formData, {
     required,
     email,
   },
+  shortDescription: {
+    string,
+    minLength: minLength(10),
+    maxLength: maxLength(200),
+  },
 })
 
 // Loading state for save operation
@@ -308,6 +329,7 @@ const initializeFormData = (): void => {
   if (tenantStore.value) {
     formData.value.name = tenantStore.value.name || ''
     formData.value.email = tenantStore.value.email || ''
+    formData.value.shortDescription = tenantStore.value.short_description || ''
     logoUrl.value = tenantStore.value.logo || logoUrl.value
     uploadedImages.value = tenantStore.value.images || []
   }
@@ -336,6 +358,7 @@ const saveTenant = async (): Promise<void> => {
     const updates: {
       name?: string
       email?: string
+      short_description?: string
       logo?: string
       images?: string[]
     } = {}
@@ -346,6 +369,10 @@ const saveTenant = async (): Promise<void> => {
 
     if (formData.value.email.trim()) {
       updates.email = formData.value.email.trim()
+    }
+
+    if (formData.value.shortDescription.trim()) {
+      updates.short_description = formData.value.shortDescription.trim()
     }
 
     if (logoUrl.value && logoUrl.value !== tenantStore.value?.logo) {

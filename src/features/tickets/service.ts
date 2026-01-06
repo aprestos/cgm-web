@@ -75,7 +75,11 @@ export const ticketService = {
    * Delete a ticket
    */
   async delete(ticketId: number): Promise<void> {
-    const { error } = await supabase.from('tickets').delete().eq('id', ticketId)
+    const { error } = await supabase
+      .schema('tickets_public')
+      .from('tickets')
+      .delete()
+      .eq('id', ticketId)
 
     if (error) throw error
   },
