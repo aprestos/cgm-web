@@ -4,6 +4,7 @@ export interface Edition {
   start_date?: string
   end_date?: string
   description?: string
+  long_description?: string
   location?: {
     title?: string
     url?: string

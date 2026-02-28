@@ -1,11 +1,21 @@
 <script setup lang="ts">
-import { IconCalendar, IconBooks, IconTrophy } from '@tabler/icons-vue'
+import {
+  IconCalendar,
+  IconBooks,
+  IconTrophy,
+  IconPlus,
+  IconMinus,
+  IconShoppingBagPlus,
+  IconShoppingBag,
+} from '@tabler/icons-vue'
 import type { Ticket } from '@/features/tickets/ticket.model.ts'
 import { DateTime } from 'luxon'
 import { useI18n } from 'vue-i18n'
 import { formatPrice } from '@/utils/price.ts'
+import { useCart } from '@/stores/cart.store'
 
 const { t, locale } = useI18n()
+const { getQuantity, addToCart, increaseQuantity, decreaseQuantity } = useCart()
 
 interface Props {
   tickets: Ticket[]
@@ -130,16 +140,90 @@ const formatDateRange = (from: string, until: string): string => {
             </ul>
 
             <button
+              v-if="getQuantity(ticket.id) === 0"
               type="button"
               :class="[
-                'mt-8 w-full rounded-xl py-3 text-sm font-semibold transition-all duration-300',
+                'mt-8 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300',
                 index === 1
                   ? 'bg-white text-indigo-600 hover:bg-indigo-50'
                   : 'bg-indigo-600 text-white hover:bg-indigo-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
               ]"
+              @click="addToCart(ticket)"
             >
+              <IconShoppingBagPlus class="h-5 w-5" />
               {{ t('landing.tickets.getTicket') }}
             </button>
+
+            <!-- Quantity controls when ticket is in cart -->
+            <div
+              v-else
+              :class="[
+                'mt-8 flex w-full items-center justify-center gap-3',
+                index === 1 ? '' : '',
+              ]"
+            >
+              <IconShoppingBag
+                :class="[
+                  'h-5 w-5',
+                  index === 1
+                    ? 'text-white'
+                    : 'text-indigo-600 dark:text-indigo-400',
+                ]"
+              />
+              <button
+                type="button"
+                :class="[
+                  'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
+                  index === 1
+                    ? 'bg-white/20 text-white hover:bg-white/30'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
+                ]"
+                @click="decreaseQuantity(ticket.id)"
+              >
+                <IconMinus class="h-4 w-4" />
+              </button>
+              <span
+                :class="[
+                  'min-w-[2rem] text-center text-lg font-semibold',
+                  index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                ]"
+              >
+                {{ getQuantity(ticket.id) }}
+              </span>
+              <button
+                type="button"
+                :class="[
+                  'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
+                  index === 1
+                    ? 'bg-white/20 text-white hover:bg-white/30'
+                    : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
+                ]"
+                @click="increaseQuantity(ticket.id)"
+              >
+                <IconPlus class="h-4 w-4" />
+              </button>
+            </div>
+
+            <!-- Total amount for ticket in cart -->
+            <p
+              v-if="getQuantity(ticket.id) > 0"
+              :class="[
+                'mt-3 text-center text-sm font-medium',
+                index === 1
+                  ? 'text-indigo-100'
+                  : 'text-gray-600 dark:text-gray-400',
+              ]"
+            >
+              {{ t('landing.tickets.total') }}:
+              <span
+                :class="[
+                  'font-semibold',
+                  index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                ]"
+              >
+                {{ formatPrice(ticket.price * getQuantity(ticket.id)) }}
+              </span>
+            </p>
           </div>
 
           <!-- Low stock warning -->

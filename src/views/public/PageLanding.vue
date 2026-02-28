@@ -37,23 +37,13 @@ const edition = computed(() => editionStore.value)
 const tenant = computed(() => tenantStore.value)
 const settings = computed(() => settingsStore.value)
 
-// Default board game convention images (used as fallback)
-const defaultConventionImages = [
-  'https://images.unsplash.com/photo-1632501641765-e568d28b0015?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1547638375-ebf04735d792?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1610890716171-6b1bb98ffd09?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1585504198199-20277593b94f?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1606503153255-59d8b8b82176?q=80&w=800&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1611371805429-8b5c1b2c34ba?q=80&w=800&auto=format&fit=crop',
-]
-
 // Convention gallery images (tenant images take priority, fallback to defaults)
 const galleryImages = computed(() => {
   const tenantImages = tenant.value?.images ?? []
   if (tenantImages.length > 0) {
     return tenantImages
   }
-  return defaultConventionImages
+  return []
 })
 
 // Data

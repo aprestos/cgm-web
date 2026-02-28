@@ -11,14 +11,11 @@ import {
 import { RouterLink } from 'vue-router'
 import { tenantStore } from '@/stores/tenant.ts'
 import { useI18n } from 'vue-i18n'
+import { editionStore } from '@/stores/edition.ts'
 
 const { t } = useI18n()
 
 interface Props {
-  editionName?: string
-  tenantName?: string
-  startDate?: string
-  endDate?: string
   locationTitle?: string
   conventionStatus: 'happening' | 'upcoming' | 'ended'
   countdown: { days: number; hours: number; minutes: number } | null
@@ -30,6 +27,7 @@ interface Props {
     style: string
   }
   scrollY: number
+  useLogo?: boolean
 }
 
 interface Emits {
@@ -38,6 +36,13 @@ interface Emits {
 
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
+
+// Get logo from tenant store
+const logoUrl = computed(() => {
+  if (!tenantStore.value) return null
+  // Prefer long logo for hero section, fallback to generic logo
+  return tenantStore.value.logos?.long || tenantStore.value.logo || null
+})
 
 // Hero parallax effect
 const heroTransform = computed(() => {
@@ -82,7 +87,7 @@ function formatShortDate(dateString: string | undefined): string {
 
       <!-- Grid Pattern -->
       <div
-        class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px]"
+        class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-size[64px_64px]"
       />
 
       <!-- Board Game Elements -->
@@ -441,15 +446,26 @@ function formatShortDate(dateString: string | undefined): string {
         {{ t('landing.hero.comingSoon') }}
       </div>
 
+      <!-- Logo Display -->
+      <div v-if="useLogo && logoUrl" class="mb-8">
+        <img
+          :src="logoUrl"
+          :alt="tenantStore?.name || 'Convention Logo'"
+          class="mx-auto h-32 w-auto object-contain sm:h-40 lg:h-48"
+        />
+      </div>
+
       <!-- Main Title -->
       <h1
-        class="bg-gradient-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl lg:text-8xl"
+        v-else
+        class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl lg:text-8xl"
       >
-        {{ editionName || tenantName || t('landing.hero.defaultTitle') }}
+        {{ editionStore?.name || t('landing.hero.defaultTitle') }}
       </h1>
 
       <!-- Subtitle / Description -->
       <p
+        v-if="!useLogo"
         class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl lg:text-2xl"
       >
         {{
@@ -463,8 +479,10 @@ function formatShortDate(dateString: string | undefined): string {
       >
         <div class="flex items-center gap-2">
           <IconCalendar class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <span>{{ formatShortDate(startDate) }}</span>
-          <span v-if="endDate"> - {{ formatShortDate(endDate) }} </span>
+          <span>{{ formatShortDate(editionStore?.start_date) }}</span>
+          <span v-if="editionStore?.end_date">
+            - {{ formatShortDate(editionStore.end_date) }}
+          </span>
         </div>
         <div v-if="locationTitle" class="flex items-center gap-2">
           <IconMapPin class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -495,7 +513,7 @@ function formatShortDate(dateString: string | undefined): string {
         <a
           v-else-if="primaryCTA.href"
           :href="primaryCTA.href"
-          class="group inline-flex items-center gap-3 rounded-full bg-gradient-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
+          class="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
         >
           <component :is="primaryCTA.icon" class="h-6 w-6" />
           {{ primaryCTA.text }}
