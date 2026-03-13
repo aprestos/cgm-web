@@ -17,6 +17,7 @@ export interface Ticket {
   sale_from?: string
   sale_until?: string
   created_at: string
+  isPopularChoice?: boolean
 }
 
 export type CreateTicketInput = Omit<Ticket, 'id' | 'created_at'>

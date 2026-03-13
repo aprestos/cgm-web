@@ -1,4 +1,4 @@
-import type { Tenant } from '@/features/tenant/tenant.model.ts'
+import type { Tenant, LogoType } from '@/features/tenant/tenant.model.ts'
 import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
 
@@ -66,6 +66,7 @@ export const tenantService = {
       email?: string
       name?: string
       logo?: string
+      logos?: Partial<Record<LogoType, string>>
       images?: string[]
     },
   ): Promise<Tenant | null> {

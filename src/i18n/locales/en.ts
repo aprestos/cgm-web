@@ -320,6 +320,7 @@ const en = {
       actions: 'Actions',
       general: 'General',
       vip: 'VIP',
+      admin: 'Admin',
       earlyBird: 'Early Bird',
       group: 'Group',
       selectGroup: 'Select a group',

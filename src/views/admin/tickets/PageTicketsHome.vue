@@ -86,7 +86,7 @@ const ticketsByGroup = computed(() => {
 const getGroupName = (group: TicketGroup): string => {
   const names: Record<TicketGroup, string> = {
     [TicketGroup.GENERAL]: t('admin.tickets.general'),
-    [TicketGroup.ADMIN]: t('admin.tickets.vip'),
+    [TicketGroup.ADMIN]: t('admin.tickets.admin'),
   }
   return names[group]
 }

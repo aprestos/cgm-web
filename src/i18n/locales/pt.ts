@@ -318,6 +318,7 @@ const pt = {
       actions: 'Ações',
       general: 'Geral',
       vip: 'VIP',
+      admin: 'Admin',
       earlyBird: 'Early Bird',
       group: 'Grupo',
       selectGroup: 'Seleciona um grupo',
