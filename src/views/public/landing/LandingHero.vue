@@ -12,6 +12,7 @@ import { RouterLink } from 'vue-router'
 import { tenantStore } from '@/stores/tenant.ts'
 import { useI18n } from 'vue-i18n'
 import { editionStore } from '@/stores/edition.ts'
+import LandingPoster from './LandingPoster.vue'
 
 const { t } = useI18n()
 
@@ -28,6 +29,7 @@ interface Props {
   }
   scrollY: number
   useLogo?: boolean
+  posterUrl?: string
 }
 
 interface Emits {
@@ -418,117 +420,159 @@ function formatShortDate(dateString: string | undefined): string {
 
     <!-- Hero Content -->
     <div
-      class="relative z-10 mx-auto max-w-7xl px-4 text-center"
+      class="relative z-10 mx-auto max-w-7xl px-4"
       :style="{ opacity: heroOpacity }"
     >
-      <!-- Live Badge -->
       <div
-        v-if="conventionStatus === 'happening'"
-        class="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-300 dark:ring-emerald-500/30"
+        :class="[
+          'flex items-center gap-12',
+          posterUrl
+            ? 'flex-col lg:flex-row lg:justify-between'
+            : 'flex-col justify-center',
+        ]"
       >
-        <span class="relative flex h-2 w-2">
-          <span
-            class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 dark:bg-emerald-400 opacity-75"
-          />
-          <span
-            class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"
-          />
-        </span>
-        {{ t('landing.hero.liveNow') }}
-      </div>
-
-      <!-- Upcoming Badge -->
-      <div
-        v-else-if="countdown"
-        class="mb-8 inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-500/30"
-      >
-        <IconSparkles class="h-4 w-4" />
-        {{ t('landing.hero.comingSoon') }}
-      </div>
-
-      <!-- Logo Display -->
-      <div v-if="useLogo && logoUrl" class="mb-8">
-        <img
-          :src="logoUrl"
-          :alt="tenantStore?.name || 'Convention Logo'"
-          class="mx-auto h-32 w-auto object-contain sm:h-40 lg:h-48"
-        />
-      </div>
-
-      <!-- Main Title -->
-      <h1
-        v-else
-        class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl lg:text-8xl"
-      >
-        {{ editionStore?.name || t('landing.hero.defaultTitle') }}
-      </h1>
-
-      <!-- Subtitle / Description -->
-      <p
-        v-if="!useLogo"
-        class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl lg:text-2xl"
-      >
-        {{
-          tenantStore?.short_description || t('landing.hero.defaultDescription')
-        }}
-      </p>
-
-      <!-- Event Date & Location -->
-      <div
-        class="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-400"
-      >
-        <div class="flex items-center gap-2">
-          <IconCalendar class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <span>{{ formatShortDate(editionStore?.start_date) }}</span>
-          <span v-if="editionStore?.end_date">
-            - {{ formatShortDate(editionStore.end_date) }}
-          </span>
-        </div>
-        <div v-if="locationTitle" class="flex items-center gap-2">
-          <IconMapPin class="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
-          <span>{{ locationTitle }}</span>
-        </div>
-      </div>
-
-      <!-- Primary CTA -->
-      <div
-        class="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
-      >
-        <RouterLink
-          v-if="primaryCta.route"
-          :to="{ name: primaryCta.route }"
+        <!-- Text Content -->
+        <div
           :class="[
-            'group inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-300',
-            primaryCta.style === 'live'
-              ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/25'
-              : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 hover:shadow-gray-900/25 dark:hover:shadow-white/25',
+            posterUrl
+              ? 'text-center lg:text-left lg:flex-1'
+              : 'text-center w-full',
           ]"
         >
-          <component :is="primaryCta.icon" class="h-6 w-6" />
-          {{ primaryCta.text }}
-          <IconArrowRight
-            class="h-5 w-5 transition-transform group-hover:translate-x-1"
-          />
-        </RouterLink>
-        <a
-          v-else-if="primaryCta.href"
-          :href="primaryCta.href"
-          class="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
-        >
-          <component :is="primaryCta.icon" class="h-6 w-6" />
-          {{ primaryCta.text }}
-          <IconArrowRight
-            class="h-5 w-5 transition-transform group-hover:translate-x-1"
-          />
-        </a>
+          <!-- Live Badge -->
+          <div
+            v-if="conventionStatus === 'happening'"
+            class="mb-8 inline-flex items-center gap-2 rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-4 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 ring-1 ring-emerald-300 dark:ring-emerald-500/30"
+          >
+            <span class="relative flex h-2 w-2">
+              <span
+                class="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 dark:bg-emerald-400 opacity-75"
+              />
+              <span
+                class="relative inline-flex h-2 w-2 rounded-full bg-emerald-500 dark:bg-emerald-400"
+              />
+            </span>
+            {{ t('landing.hero.liveNow') }}
+          </div>
 
-        <a
-          href="#map"
-          class="inline-flex items-center gap-2 rounded-full px-6 py-4 text-gray-600 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-white"
-        >
-          {{ t('landing.hero.discoverMore') }}
-          <IconChevronRight class="h-5 w-5" />
-        </a>
+          <!-- Upcoming Badge -->
+          <div
+            v-else-if="countdown"
+            class="mb-8 inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-500/30"
+          >
+            <IconSparkles class="h-4 w-4" />
+            {{ t('landing.hero.comingSoon') }}
+          </div>
+
+          <!-- Logo Display -->
+          <div v-if="useLogo && logoUrl" class="mb-8">
+            <img
+              :src="logoUrl"
+              :alt="tenantStore?.name || 'Convention Logo'"
+              class="mx-auto h-32 w-auto object-contain sm:h-40 lg:h-48"
+              :class="{ 'lg:mx-0': posterUrl }"
+            />
+          </div>
+
+          <!-- Main Title -->
+          <h1
+            v-else
+            class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl"
+            :class="posterUrl ? 'lg:text-6xl xl:text-7xl' : 'lg:text-8xl'"
+          >
+            {{ editionStore?.name || t('landing.hero.defaultTitle') }}
+          </h1>
+
+          <!-- Subtitle / Description -->
+          <p
+            v-if="!useLogo"
+            class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl lg:text-2xl"
+            :class="{ 'lg:mx-0': posterUrl }"
+          >
+            {{
+              tenantStore?.shortDescription ||
+              t('landing.hero.defaultDescription')
+            }}
+          </p>
+
+          <!-- Event Date & Location -->
+          <div
+            class="mt-8 flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400"
+            :class="
+              posterUrl ? 'justify-center lg:justify-start' : 'justify-center'
+            "
+          >
+            <div class="flex items-center gap-2">
+              <IconCalendar
+                class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+              />
+              <span>{{ formatShortDate(editionStore?.start_date) }}</span>
+              <span v-if="editionStore?.end_date">
+                - {{ formatShortDate(editionStore.end_date) }}
+              </span>
+            </div>
+            <div v-if="locationTitle" class="flex items-center gap-2">
+              <IconMapPin
+                class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+              />
+              <span>{{ locationTitle }}</span>
+            </div>
+          </div>
+
+          <!-- Primary CTA -->
+          <div
+            class="mt-12 flex flex-col items-center gap-4 sm:flex-row"
+            :class="
+              posterUrl
+                ? 'sm:justify-center lg:justify-start'
+                : 'sm:justify-center'
+            "
+          >
+            <RouterLink
+              v-if="primaryCta.route"
+              :to="{ name: primaryCta.route }"
+              :class="[
+                'group inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-300',
+                primaryCta.style === 'live'
+                  ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/25'
+                  : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 hover:shadow-gray-900/25 dark:hover:shadow-white/25',
+              ]"
+            >
+              <component :is="primaryCta.icon" class="h-6 w-6" />
+              {{ primaryCta.text }}
+              <IconArrowRight
+                class="h-5 w-5 transition-transform group-hover:translate-x-1"
+              />
+            </RouterLink>
+            <a
+              v-else-if="primaryCta.href"
+              :href="primaryCta.href"
+              class="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
+            >
+              <component :is="primaryCta.icon" class="h-6 w-6" />
+              {{ primaryCta.text }}
+              <IconArrowRight
+                class="h-5 w-5 transition-transform group-hover:translate-x-1"
+              />
+            </a>
+
+            <a
+              href="#map"
+              class="inline-flex items-center gap-2 rounded-full px-6 py-4 text-gray-600 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-white"
+            >
+              {{ t('landing.hero.discoverMore') }}
+              <IconChevronRight class="h-5 w-5" />
+            </a>
+          </div>
+        </div>
+
+        <!-- Poster (right side on lg, below CTA on mobile) -->
+        <div v-if="posterUrl" class="w-56 sm:w-64 lg:w-72 xl:w-80 shrink-0">
+          <LandingPoster
+            :poster-url="posterUrl"
+            :edition-name="editionStore?.name"
+          />
+        </div>
       </div>
     </div>
 

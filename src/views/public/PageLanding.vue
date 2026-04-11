@@ -286,6 +286,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       :countdown="countdown"
       :primary-cta="primaryCTA"
       :scroll-y="scrollY"
+      :poster-url="edition?.poster_url"
       @scroll-to="scrollToSection"
     />
 

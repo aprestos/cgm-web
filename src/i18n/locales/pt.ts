@@ -370,6 +370,11 @@ const pt = {
       exploreLibrary: 'Explorar a Ludoteca',
       joinCommunity: 'Juntar-me à Comunidade',
     },
+    poster: {
+      viewPoster: 'Ver cartaz do evento',
+      eventPoster: 'Cartaz do evento',
+      altText: 'Cartaz do evento {name}',
+    },
     gallery: {
       title: 'Momentos dos eventos anteriores',
       subtitle: 'Viagem ao passado',
