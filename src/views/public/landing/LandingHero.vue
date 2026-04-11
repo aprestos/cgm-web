@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, onMounted, onUnmounted } from 'vue'
 import {
   IconCalendar,
   IconMapPin,
@@ -46,14 +46,36 @@ const logoUrl = computed(() => {
   return tenantStore.value.logos?.long || tenantStore.value.logo || null
 })
 
-// Hero parallax effect
+// Track viewport height for responsive parallax
+const viewportHeight = ref<number>(800)
+
+function updateViewportHeight(): void {
+  viewportHeight.value = window.innerHeight
+}
+
+onMounted(() => {
+  updateViewportHeight()
+  window.addEventListener('resize', updateViewportHeight)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', updateViewportHeight)
+})
+
+// Whether we're on a mobile-sized viewport
+const isMobile = computed(() => viewportHeight.value < 768)
+
+// Hero parallax effect — gentler on mobile
 const heroTransform = computed(() => {
-  const offset = props.scrollY * 0.5
+  const multiplier = isMobile.value ? 0.2 : 0.5
+  const offset = props.scrollY * multiplier
   return `translateY(${offset}px)`
 })
 
 const heroOpacity = computed(() => {
-  const opacity = 1 - props.scrollY / 600
+  // Fade relative to viewport height so it works on any screen size
+  const fadeDistance = viewportHeight.value * (isMobile.value ? 1.2 : 0.8)
+  const opacity = 1 - props.scrollY / fadeDistance
   return Math.max(0, Math.min(1, opacity))
 })
 
@@ -80,11 +102,15 @@ function formatShortDate(dateString: string | undefined): string {
       />
       <div
         class="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-indigo-300/50 dark:bg-indigo-600/40 blur-3xl"
-        :style="{ transform: `translateY(${-props.scrollY * 0.3}px)` }"
+        :style="{
+          transform: `translateY(${-props.scrollY * (isMobile ? 0.15 : 0.3)}px)`,
+        }"
       />
       <div
         class="absolute left-1/2 top-1/3 h-64 w-64 -translate-x-1/2 rounded-full bg-fuchsia-300/30 dark:bg-fuchsia-600/20 blur-3xl"
-        :style="{ transform: `translateY(${props.scrollY * 0.2}px)` }"
+        :style="{
+          transform: `translateY(${props.scrollY * (isMobile ? 0.1 : 0.2)}px)`,
+        }"
       />
 
       <!-- Grid Pattern -->
@@ -425,7 +451,7 @@ function formatShortDate(dateString: string | undefined): string {
     >
       <div
         :class="[
-          'flex items-center gap-12',
+          'flex items-center gap-6 lg:gap-12',
           posterUrl
             ? 'flex-col lg:flex-row lg:justify-between'
             : 'flex-col justify-center',
@@ -477,7 +503,7 @@ function formatShortDate(dateString: string | undefined): string {
           <!-- Main Title -->
           <h1
             v-else
-            class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-5xl font-bold tracking-tight text-transparent sm:text-7xl"
+            class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl md:text-7xl"
             :class="posterUrl ? 'lg:text-6xl xl:text-7xl' : 'lg:text-8xl'"
           >
             {{ editionStore?.name || t('landing.hero.defaultTitle') }}
@@ -567,7 +593,7 @@ function formatShortDate(dateString: string | undefined): string {
         </div>
 
         <!-- Poster (right side on lg, below CTA on mobile) -->
-        <div v-if="posterUrl" class="w-56 sm:w-64 lg:w-72 xl:w-80 shrink-0">
+        <div v-if="posterUrl" class="w-64 sm:w-72 lg:w-72 xl:w-80 shrink-0">
           <LandingPoster
             :poster-url="posterUrl"
             :edition-name="editionStore?.name"
