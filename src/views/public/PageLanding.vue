@@ -101,7 +101,7 @@ const primaryCTA = computed(() => {
   if (conventionStatus.value === 'happening') {
     if (isLibraryEnabled.value) {
       return {
-        text: 'Enter the Library',
+        text: t('landing.hero.enterLibrary'),
         route: RouteNames.public.library,
         icon: IconBooks,
         style: 'live',
@@ -111,7 +111,7 @@ const primaryCTA = computed(() => {
 
   if (isTicketsEnabled.value && activeTickets.value.length > 0) {
     return {
-      text: 'Get Your Tickets',
+      text: t('landing.hero.getTickets'),
       href: '#tickets',
       icon: IconTicket,
       style: 'tickets',
@@ -120,7 +120,7 @@ const primaryCTA = computed(() => {
 
   if (isLibraryEnabled.value) {
     return {
-      text: 'Explore the Library',
+      text: t('landing.hero.exploreLibrary'),
       route: RouteNames.public.library,
       icon: IconBooks,
       style: 'default',
@@ -128,7 +128,7 @@ const primaryCTA = computed(() => {
   }
 
   return {
-    text: 'Join the Community',
+    text: t('landing.hero.joinCommunity'),
     route: RouteNames.auth.signIn,
     icon: IconUsers,
     style: 'default',
@@ -337,15 +337,9 @@ const platformFeatures = computed(() => {
 
     <!-- Hero Section -->
     <LandingHero
-      :edition-name="edition?.name"
-      :tenant-name="tenant?.name"
-      :description="edition?.description"
-      :start-date="edition?.start_date"
-      :end-date="edition?.end_date"
-      :location-title="edition?.location?.title"
       :convention-status="conventionStatus"
       :countdown="countdown"
-      :primary-c-t-a="primaryCTA"
+      :primary-cta="primaryCTA"
       :scroll-y="scrollY"
       @scroll-to="scrollToSection"
     />

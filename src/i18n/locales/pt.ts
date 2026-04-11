@@ -365,6 +365,10 @@ const pt = {
       defaultDescription:
         'A melhor experiência de jogos de tabuleiro espera por ti',
       discoverMore: 'Descobrir Mais',
+      enterLibrary: 'Entrar na Ludoteca',
+      getTickets: 'Obter Bilhetes',
+      exploreLibrary: 'Explorar a Ludoteca',
+      joinCommunity: 'Juntar-me à Comunidade',
     },
     gallery: {
       title: 'Momentos dos eventos anteriores',

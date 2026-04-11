@@ -19,7 +19,7 @@ interface Props {
   locationTitle?: string
   conventionStatus: 'happening' | 'upcoming' | 'ended'
   countdown: { days: number; hours: number; minutes: number } | null
-  primaryCTA: {
+  primaryCta: {
     text: string
     route?: string
     href?: string
@@ -495,28 +495,28 @@ function formatShortDate(dateString: string | undefined): string {
         class="mt-12 flex flex-col items-center gap-4 sm:flex-row sm:justify-center"
       >
         <RouterLink
-          v-if="primaryCTA.route"
-          :to="{ name: primaryCTA.route }"
+          v-if="primaryCta.route"
+          :to="{ name: primaryCta.route }"
           :class="[
             'group inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-300',
-            primaryCTA.style === 'live'
+            primaryCta.style === 'live'
               ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/25'
               : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 hover:shadow-gray-900/25 dark:hover:shadow-white/25',
           ]"
         >
-          <component :is="primaryCTA.icon" class="h-6 w-6" />
-          {{ primaryCTA.text }}
+          <component :is="primaryCta.icon" class="h-6 w-6" />
+          {{ primaryCta.text }}
           <IconArrowRight
             class="h-5 w-5 transition-transform group-hover:translate-x-1"
           />
         </RouterLink>
         <a
-          v-else-if="primaryCTA.href"
-          :href="primaryCTA.href"
+          v-else-if="primaryCta.href"
+          :href="primaryCta.href"
           class="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
         >
-          <component :is="primaryCTA.icon" class="h-6 w-6" />
-          {{ primaryCTA.text }}
+          <component :is="primaryCta.icon" class="h-6 w-6" />
+          {{ primaryCta.text }}
           <IconArrowRight
             class="h-5 w-5 transition-transform group-hover:translate-x-1"
           />

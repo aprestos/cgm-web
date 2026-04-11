@@ -364,6 +364,10 @@ const en = {
       defaultTitle: 'Board Game Convention',
       defaultDescription: 'The ultimate board gaming experience awaits you',
       discoverMore: 'Discover More',
+      enterLibrary: 'Enter the Library',
+      getTickets: 'Get Your Tickets',
+      exploreLibrary: 'Explore the Library',
+      joinCommunity: 'Join the Community',
     },
     gallery: {
       title: 'Moments from Our Community',
