@@ -380,6 +380,7 @@ const en = {
       sectionSubtitle: 'Choose your ticket',
       popular: 'Popular',
       getTicket: 'Get This Ticket',
+      total: 'Total',
       ticketsLeft: 'Only {count} tickets left!',
       validPeriod: 'Valid: {from} - {until}',
       libraryAccess: 'Full library access',
