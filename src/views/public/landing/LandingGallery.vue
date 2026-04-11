@@ -56,7 +56,7 @@ onMounted(() => {
         <div
           v-for="(image, index) in displayImages"
           :key="`row1-${index}`"
-          class="relative flex-shrink-0 h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
+          class="relative shrink-0 h-56 w-80 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
         >
           <img
             :src="image"
@@ -65,14 +65,14 @@ onMounted(() => {
             loading="lazy"
           />
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
+            class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
           />
         </div>
         <!-- Duplicate for seamless loop -->
         <div
           v-for="(image, index) in displayImages"
           :key="`row1-dup-${index}`"
-          class="relative flex-shrink-0 h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
+          class="relative shrink-0 h-56 w-80 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
         >
           <img
             :src="image"
@@ -81,7 +81,7 @@ onMounted(() => {
             loading="lazy"
           />
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
+            class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
           />
         </div>
       </div>
@@ -94,7 +94,7 @@ onMounted(() => {
         <div
           v-for="(image, index) in [...displayImages].reverse()"
           :key="`row2-${index}`"
-          class="relative flex-shrink-0 h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
+          class="relative shrink-0 h-56 w-80 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
         >
           <img
             :src="image"
@@ -103,14 +103,14 @@ onMounted(() => {
             loading="lazy"
           />
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
+            class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
           />
         </div>
         <!-- Duplicate for seamless loop -->
         <div
           v-for="(image, index) in [...displayImages].reverse()"
           :key="`row2-dup-${index}`"
-          class="relative flex-shrink-0 h-48 w-72 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
+          class="relative shrink-0 h-56 w-80 sm:h-56 sm:w-80 md:h-64 md:w-96 overflow-hidden rounded-2xl"
         >
           <img
             :src="image"
@@ -119,7 +119,7 @@ onMounted(() => {
             loading="lazy"
           />
           <div
-            class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
+            class="absolute inset-0 bg-linear-to-t from-black/30 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300"
           />
         </div>
       </div>
@@ -127,10 +127,10 @@ onMounted(() => {
 
     <!-- Fade edges -->
     <div
-      class="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-gray-100 dark:from-gray-900 to-transparent z-10"
+      class="pointer-events-none absolute inset-y-0 left-0 w-8 sm:w-16 md:w-24 bg-linear-to-r from-gray-100 dark:from-gray-900 to-transparent z-10"
     />
     <div
-      class="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-gray-100 dark:from-gray-900 to-transparent z-10"
+      class="pointer-events-none absolute inset-y-0 right-0 w-8 sm:w-16 md:w-24 bg-linear-to-l from-gray-100 dark:from-gray-900 to-transparent z-10"
     />
   </section>
 </template>

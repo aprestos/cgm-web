@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import {
   Dialog,
   DialogPanel,
@@ -21,6 +21,16 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const showLightbox = ref<boolean>(false)
+const isImagePreloaded = ref<boolean>(false)
+
+// Preload the full-size poster image so the lightbox opens instantly
+onMounted(() => {
+  const img = new Image()
+  img.src = props.posterUrl
+  img.onload = (): void => {
+    isImagePreloaded.value = true
+  }
+})
 
 function openLightbox(): void {
   showLightbox.value = true
@@ -89,15 +99,15 @@ const altText = props.editionName
     <Dialog class="relative z-100" @close="closeLightbox">
       <TransitionChild
         as="template"
-        enter="ease-out duration-300"
+        enter="ease-out duration-200"
         enter-from="opacity-0"
         enter-to="opacity-100"
-        leave="ease-in duration-200"
+        leave="ease-in duration-150"
         leave-from="opacity-100"
         leave-to="opacity-0"
       >
         <div
-          class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity dark:bg-black/90"
+          class="fixed inset-0 bg-black/80 transition-opacity dark:bg-black/90"
         />
       </TransitionChild>
 
@@ -105,18 +115,18 @@ const altText = props.editionName
         <div class="flex min-h-full items-center justify-center p-4 sm:p-8">
           <TransitionChild
             as="template"
-            enter="ease-out duration-300"
-            enter-from="opacity-0 scale-90"
+            enter="ease-out duration-200"
+            enter-from="opacity-0 scale-95"
             enter-to="opacity-100 scale-100"
-            leave="ease-in duration-200"
+            leave="ease-in duration-150"
             leave-from="opacity-100 scale-100"
-            leave-to="opacity-0 scale-90"
+            leave-to="opacity-0 scale-95"
           >
             <DialogPanel class="relative max-h-[90vh] max-w-3xl">
               <!-- Close Button -->
               <button
                 type="button"
-                class="absolute -right-3 -top-3 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-md transition-all hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 sm:-right-4 sm:-top-4"
+                class="absolute right-2 top-2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition-all hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50 sm:-right-4 sm:-top-4 sm:bg-white/10 sm:hover:bg-white/20"
                 :aria-label="t('common.close')"
                 @click="closeLightbox"
               >
@@ -166,7 +176,12 @@ const altText = props.editionName
     box-shadow 0.5s ease;
 }
 
-.poster-card:hover {
-  transform: perspective(800px) rotateY(0deg) translateY(-4px);
+@media (min-width: 1024px) {
+  .poster-card {
+    transform: perspective(800px) rotateY(-3deg);
+  }
+  .poster-card:hover {
+    transform: perspective(800px) rotateY(0deg) translateY(-4px);
+  }
 }
 </style>

@@ -31,7 +31,7 @@ function formatDate(dateString: string | undefined): string {
 </script>
 
 <template>
-  <section id="map" class="relative overflow-hidden py-32">
+  <section id="map" class="relative overflow-hidden py-16 lg:py-32">
     <div class="absolute inset-0 bg-gray-100 dark:bg-gray-950" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-4">
@@ -43,7 +43,7 @@ function formatDate(dateString: string | undefined): string {
           {{ t('landing.map.sectionTitle') }}
         </h2>
         <p
-          class="mt-4 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl"
+          class="mt-4 text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl lg:text-5xl"
         >
           {{ t('landing.map.sectionSubtitle') }}
         </p>
@@ -51,11 +51,11 @@ function formatDate(dateString: string | undefined): string {
 
       <!-- Location Card -->
       <div
-        class="mt-12 overflow-hidden rounded-3xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-xl dark:shadow-none"
+        class="mt-8 sm:mt-12 overflow-hidden rounded-3xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-xl dark:shadow-none"
       >
         <div class="grid lg:grid-cols-2">
           <!-- Info -->
-          <div class="flex flex-col justify-center p-8 lg:p-12">
+          <div class="flex flex-col justify-center p-6 sm:p-8 lg:p-12">
             <div
               class="inline-flex rounded-2xl bg-emerald-100 dark:bg-emerald-500/20 p-4 self-start"
             >
@@ -99,13 +99,13 @@ function formatDate(dateString: string | undefined): string {
           </div>
 
           <!-- Map -->
-          <div class="aspect-square lg:aspect-auto">
+          <div class="aspect-video lg:aspect-auto">
             <iframe
               v-if="mapEmbedUrl"
               :src="mapEmbedUrl"
               width="100%"
               height="100%"
-              style="border: 0; min-height: 400px"
+              style="border: 0; min-height: 300px"
               allowfullscreen
               loading="lazy"
               referrerpolicy="no-referrer-when-downgrade"
@@ -113,7 +113,7 @@ function formatDate(dateString: string | undefined): string {
             />
             <div
               v-else
-              class="flex h-full min-h-[400px] items-center justify-center bg-gray-100 dark:bg-gray-800"
+              class="flex h-full min-h-75 items-center justify-center bg-gray-100 dark:bg-gray-800"
             >
               <IconMapPin class="h-16 w-16 text-gray-300 dark:text-gray-600" />
             </div>
