@@ -21,7 +21,7 @@ const emit = defineEmits<{
   delete: [ticket: Ticket]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Table columns definition
 const tableColumns = computed<DataTableColumn<Ticket>[]>(() => [
@@ -51,11 +51,10 @@ const getStatusBadgeVariant = (
 
 const formatDate = (dateStr?: string): string => {
   if (!dateStr) return '-'
-  const locale = useI18n().locale.value
 
   return DateTime.fromISO(dateStr).toLocaleString(
     { day: 'numeric', weekday: 'long' },
-    { locale },
+    { locale: locale.value },
   )
 }
 
