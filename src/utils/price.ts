@@ -1,12 +1,18 @@
-import { useI18n } from 'vue-i18n'
 import { editionStore } from '@/stores/edition.ts'
 
-export const formatPrice = (price: number): string => {
-  const locale = useI18n().locale.value
-  return editionStore.value?.currency
-    ? new Intl.NumberFormat(locale, {
+export const formatPrice = (price: number, locale?: string): string => {
+  const resolvedLocale: string | undefined =
+    locale ??
+    (typeof navigator !== 'undefined' && typeof navigator.language === 'string'
+      ? navigator.language
+      : undefined)
+
+  const currency = editionStore.value?.currency
+
+  return currency
+    ? new Intl.NumberFormat(resolvedLocale, {
         style: 'currency',
-        currency: editionStore.value?.currency,
+        currency,
       }).format(price)
     : '-'
 }

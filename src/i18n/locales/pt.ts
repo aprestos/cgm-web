@@ -385,6 +385,7 @@ const pt = {
       validPeriod: 'Válido: {from} - {until}',
       libraryAccess: 'Acesso completo à ludoteca',
       tournamentAccess: 'Participação em torneios',
+      total: 'Total',
     },
     features: {
       sectionTitle: 'A Plataforma',
