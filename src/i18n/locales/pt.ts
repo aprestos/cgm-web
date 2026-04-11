@@ -318,6 +318,7 @@ const pt = {
       actions: 'Ações',
       general: 'Geral',
       vip: 'VIP',
+      admin: 'Admin',
       earlyBird: 'Early Bird',
       group: 'Grupo',
       selectGroup: 'Seleciona um grupo',
@@ -340,6 +341,9 @@ const pt = {
       edit: 'Editar',
       delete: 'Eliminar',
       confirmDelete: 'Tens a certeza que queres eliminar "{name}"?',
+      deleteConfirmTitle: 'Eliminar Bilhete',
+      deleteConfirmMessage: 'Tens a certeza que queres eliminar "{name}"?',
+      deleteConfirmWarning: 'Esta ação não pode ser revertida.',
       deleteSuccess: 'Bilhete eliminado com sucesso',
       deleteFailed: 'Falha ao eliminar bilhete',
       createSuccess: 'Bilhete criado com sucesso',
@@ -351,6 +355,98 @@ const pt = {
         'Funcionalidade de visualização em breve',
       addTicketFunctionalityComingSoon:
         'Funcionalidade de adicionar bilhete em breve',
+    },
+  },
+  landing: {
+    hero: {
+      liveNow: 'A Decorrer',
+      comingSoon: 'Em Breve',
+      defaultTitle: 'Convenção de Jogos de Tabuleiro',
+      defaultDescription:
+        'A melhor experiência de jogos de tabuleiro espera por ti',
+      discoverMore: 'Descobrir Mais',
+      enterLibrary: 'Entrar na Ludoteca',
+      getTickets: 'Obter Bilhetes',
+      exploreLibrary: 'Explorar a Ludoteca',
+      joinCommunity: 'Juntar-me à Comunidade',
+    },
+    gallery: {
+      title: 'Momentos dos eventos anteriores',
+      subtitle: 'Viagem ao passado',
+    },
+    countdown: {
+      title: 'A contagem decrescente começa',
+      days: 'Dias',
+      hours: 'Horas',
+      minutes: 'Minutos',
+    },
+    tickets: {
+      sectionTitle: 'Garante o Teu Acesso',
+      sectionSubtitle: 'Escolhe o teu bilhete',
+      popular: 'Popular',
+      getTicket: 'Adicionar ao carrinho',
+      ticketsLeft: 'Apenas {count} bilhetes restantes!',
+      validPeriod: 'Válido: {from} - {until}',
+      libraryAccess: 'Acesso completo à ludoteca',
+      tournamentAccess: 'Participação em torneios',
+      total: 'Total',
+    },
+    features: {
+      sectionTitle: 'A Plataforma',
+      sectionSubtitle: 'Tudo num só lugar',
+      sectionDescription:
+        'Acede a todas as funcionalidades da convenção no teu bolso. Reserva jogos, participa em torneios e conecta-te com outros entusiastas.',
+      library: {
+        name: 'Ludoteca',
+        description:
+          'Explora e reserva entre centenas de jogos de tabuleiro. Encontra o teu próximo favorito!',
+      },
+      tournaments: {
+        name: 'Torneios',
+        description:
+          'Compete pela glória nos nossos torneios organizados. Prémios aguardam os campeões!',
+      },
+      fleaMarket: {
+        name: 'Feira de Usados',
+        description:
+          'Compra, vende ou troca jogos. Encontra raridades ou dá uma nova casa aos teus jogos.',
+      },
+      explore: 'Explorar',
+    },
+    games: {
+      sectionTitle: 'Ludoteca',
+      sectionSubtitle: 'Descobre jogos incríveis',
+      viewAll: 'Ver todos os jogos',
+      available: 'Disponível',
+    },
+    map: {
+      sectionTitle: 'Localização',
+      sectionSubtitle: 'Encontra-nos aqui',
+      getDirections: 'Obter Direções',
+      until: 'Até {date}',
+    },
+    cta: {
+      badge: 'Junta-te à comunidade',
+      title: 'Pronto para uma',
+      titleHighlight: 'experiência inesquecível?',
+      description:
+        'Cria a tua conta gratuita para reservar jogos, participar em torneios e aproveitar ao máximo a convenção.',
+      button: 'Criar Conta Gratuita',
+    },
+    footer: {
+      privacy: 'Privacidade',
+      terms: 'Termos',
+      contact: 'Contacto',
+      copyright: '© {year} {name}. Todos os direitos reservados.',
+    },
+    nav: {
+      home: 'Início',
+      gallery: 'Galeria',
+      location: 'Localização',
+      tickets: 'Bilhetes',
+      countdown: 'Contagem',
+      features: 'Funcionalidades',
+      games: 'Jogos',
     },
   },
 }

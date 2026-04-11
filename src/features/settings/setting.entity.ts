@@ -1,15 +1,9 @@
+import type { SettingType } from '@/features/settings/type.enum.ts'
+
 export interface Setting {
   tenant_id: string
   edition_id: string
-  type: Type
+  type: SettingType
   enabled: boolean
   content: unknown
-}
-
-export enum Type {
-  library = 'library',
-  tournaments = 'tournaments',
-  events = 'events',
-  flea = 'flea',
-  tickets = 'tickets',
 }

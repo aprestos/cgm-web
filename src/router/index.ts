@@ -108,19 +108,61 @@ const router = createRouter({
           children: [
             {
               path: '',
-              redirect: { name: RouteNames.admin.settingsGeneral },
+              redirect: { name: RouteNames.admin.settingsOrganization },
             },
             {
-              path: 'general',
-              name: RouteNames.admin.settingsGeneral,
+              path: 'organization',
+              name: RouteNames.admin.settingsOrganization,
               component: (): Promise<unknown> =>
-                import('../views/admin/settings/general/GeneralSettings.vue'),
+                import('../views/admin/settings/organization/OrganizationSettings.vue'),
+            },
+            {
+              path: 'edition',
+              name: RouteNames.admin.settingsEdition,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/edition/EditionSettings.vue'),
+            },
+            {
+              path: 'features',
+              name: RouteNames.admin.settingsFeatures,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/features/FeaturesSettings.vue'),
             },
             {
               path: 'library',
               name: RouteNames.admin.settingsLibrary,
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/library/LibrarySettings.vue'),
+            },
+            {
+              path: 'tournaments',
+              name: RouteNames.admin.settingsTournaments,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/tournaments/TournamentsSettings.vue'),
+            },
+            {
+              path: 'tickets',
+              name: RouteNames.admin.settingsTickets,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/tickets/TicketsSettings.vue'),
+            },
+            {
+              path: 'events-module',
+              name: RouteNames.admin.settingsEventsModule,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/events/EventsModuleSettings.vue'),
+            },
+            {
+              path: 'flea-market',
+              name: RouteNames.admin.settingsFleaMarket,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/flea-market/FleaMarketSettings.vue'),
+            },
+            {
+              path: 'advanced',
+              name: RouteNames.admin.settingsAdvanced,
+              component: (): Promise<unknown> =>
+                import('../views/admin/settings/advanced/AdvancedSettings.vue'),
             },
           ],
         },

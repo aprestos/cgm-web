@@ -1,31 +1,42 @@
 import { supabase } from '@/lib/supabase.ts'
-import { Type, type Setting as SettingEntity } from './setting.entity'
+import { type Setting as SettingEntity } from './setting.entity'
 import type { Settings, Library, Setting } from './setting.model'
+import { SettingType } from '@/features/settings/type.enum.ts'
+import logger from '@/lib/logger.ts'
 
 const mapToSettings = (entities: Array<SettingEntity> | null): Settings => {
-  if (!entities) return {}
-  const settings: Settings = {}
+  const settings: Settings = {
+    events: { enabled: false },
+    flea: { enabled: false },
+    library: { enabled: false },
+    prototypes: { enabled: false },
+    tickets: { enabled: false },
+    tournaments: { enabled: false },
+  }
+
+  if (!entities) return settings
+
   entities?.forEach((setting: SettingEntity) => {
     switch (setting.type) {
-      case Type.library:
+      case SettingType.library:
         settings.library = mapToSetting<Library>(setting)
         break
-      case Type.tournaments:
+      case SettingType.tournaments:
         settings.tournaments = {
           enabled: setting?.enabled || false,
         }
         break
-      case Type.events:
+      case SettingType.events:
         settings.events = {
           enabled: setting?.enabled || false,
         }
         break
-      case Type.flea:
+      case SettingType.flea:
         settings.flea = {
           enabled: setting?.enabled || false,
         }
         break
-      case Type.tickets:
+      case SettingType.tickets:
         settings.tickets = {
           enabled: setting?.enabled || false,
         }
@@ -60,6 +71,9 @@ export const settingsService = {
         enabled: false,
       },
       tickets: {
+        enabled: false,
+      },
+      prototypes: {
         enabled: false,
       },
     }
@@ -97,7 +111,13 @@ export const settingsService = {
         .single()
       return mapToSetting(result.data as SettingEntity)
     } catch (error) {
-      console.error((error as Error).message)
+      logger.error('unable to update settings', {
+        error,
+        tenantId,
+        editionId,
+        type,
+        enabled,
+      })
       throw error
     }
   },

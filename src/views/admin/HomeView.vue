@@ -78,7 +78,7 @@ const navigation = ref([
 const bottomNavigation = ref([
   {
     id: 'settings',
-    routeName: RouteNames.admin.settingsGeneral as string,
+    routeName: RouteNames.admin.settingsOrganization as string,
     icon: IconSettings,
     enabled: false, // Will be set in onMounted
   },

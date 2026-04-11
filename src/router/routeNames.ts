@@ -5,8 +5,15 @@ enum Admin {
   tournaments = 'admin.tournaments',
   tickets = 'admin.tickets',
   settings = 'admin.settings',
-  settingsGeneral = 'admin.settings.general',
+  settingsOrganization = 'admin.settings.organization',
+  settingsEdition = 'admin.settings.edition',
+  settingsFeatures = 'admin.settings.features',
   settingsLibrary = 'admin.settings.library',
+  settingsTournaments = 'admin.settings.tournaments',
+  settingsTickets = 'admin.settings.tickets',
+  settingsEventsModule = 'admin.settings.events-module',
+  settingsFleaMarket = 'admin.settings.flea-market',
+  settingsAdvanced = 'admin.settings.advanced',
 }
 
 enum Public {

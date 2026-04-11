@@ -1,12 +1,10 @@
-export interface Settings {
-  library?: Setting<Library>
-  tournaments?: Setting<unknown>
-  events?: Setting<unknown>
-  flea?: Setting<Flea>
-  tickets?: Setting<Tickets>
+import type { SettingType } from '@/features/settings/type.enum.ts'
+
+export type Settings = {
+  [K in SettingType]: Setting
 }
 
-export interface Setting<T> {
+export interface Setting<T = unknown> {
   enabled: boolean
   value?: T
 }
