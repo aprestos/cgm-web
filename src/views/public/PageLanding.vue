@@ -69,8 +69,8 @@ const activeTickets = computed(() =>
   availableTickets.value.filter((ticket) => {
     if (!ticket.active) return false
     const now = new Date()
-    if (ticket.sale_from && new Date(ticket.sale_from) > now) return false
-    return !(ticket.sale_until && new Date(ticket.sale_until) < now)
+    if (ticket.saleFrom && new Date(ticket.saleFrom) > now) return false
+    return !(ticket.saleUntil && new Date(ticket.saleUntil) < now)
   }),
 )
 
@@ -409,9 +409,3 @@ const platformFeatures = computed(() => {
     <LandingFooter :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
   </div>
 </template>
-
-<style>
-html {
-  scroll-behavior: smooth;
-}
-</style>

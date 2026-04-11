@@ -37,7 +37,7 @@
               ></span>
               <input
                 id="availability"
-                v-model="formData.is_popular_choice"
+                v-model="formData.isPopularChoice"
                 type="checkbox"
                 class="absolute inset-0 size-full appearance-none focus:outline-hidden"
                 name="availability"
@@ -67,20 +67,20 @@
             <div class="grid sm:grid-cols-2 gap-6">
               <CInput
                 id="ticket-sale-from"
-                v-model="formData.sale_from"
+                v-model="formData.saleFrom"
                 :label="t('admin.tickets.saleFrom')"
                 type="datetime-local"
-                :errors="r$.$errors.sale_from"
+                :errors="r$.$errors.saleFrom"
                 :helper-text="t('admin.tickets.optional')"
                 class="col-span-full sm:col-span-1"
               />
 
               <CInput
                 id="ticket-sale-until"
-                v-model="formData.sale_until"
+                v-model="formData.saleUntil"
                 :label="t('admin.tickets.saleUntil')"
                 type="datetime-local"
-                :errors="r$.$errors.sale_until"
+                :errors="r$.$errors.saleUntil"
                 :helper-text="t('admin.tickets.optional')"
                 class="col-span-full sm:col-span-1"
               />
@@ -99,10 +99,10 @@
             <div class="grid grid-cols-1 gap-x-6 gap-y-8">
               <CInput
                 id="ticket-valid-date"
-                v-model="formData.valid_from"
+                v-model="formData.validFrom"
                 :label="t('admin.tickets.accessDay')"
                 type="date"
-                :errors="r$.$errors.valid_from"
+                :errors="r$.$errors.validFrom"
                 :min="
                   editionStore?.start_date
                     ? DateTime.fromISO(editionStore?.start_date).toFormat(
@@ -119,19 +119,19 @@
             <div class="grid grid-cols-2 gap-x-6 gap-y-8">
               <CInput
                 id="ticket-valid-from-multi"
-                v-model="formData.valid_from"
+                v-model="formData.validFrom"
                 :label="t('admin.tickets.validFrom')"
                 type="date"
-                :errors="r$.$errors.valid_from"
+                :errors="r$.$errors.validFrom"
                 class="col-span-full sm:col-span-1"
               />
 
               <CInput
                 id="ticket-valid-until-multi"
-                v-model="formData.valid_until"
+                v-model="formData.validUntil"
                 :label="t('admin.tickets.validUntil')"
                 type="date"
-                :errors="r$.$errors.valid_until"
+                :errors="r$.$errors.validUntil"
                 class="col-span-full sm:col-span-1"
               />
             </div>
@@ -199,20 +199,20 @@ const formData = ref<{
   name: string
   price: string
   quantity: string
-  sale_from: string
-  sale_until: string
-  valid_from: string
-  valid_until: string
-  is_popular_choice: boolean
+  saleFrom: string
+  saleUntil: string
+  validFrom: string
+  validUntil: string
+  isPopularChoice: boolean
 }>({
   name: '',
   price: '',
   quantity: '',
-  sale_from: '',
-  sale_until: '',
-  valid_from: '',
-  valid_until: '',
-  is_popular_choice: false,
+  saleFrom: '',
+  saleUntil: '',
+  validFrom: '',
+  validUntil: '',
+  isPopularChoice: false,
 })
 
 const isSubmitting = ref<boolean>(false)
@@ -236,9 +236,9 @@ const tabs = computed<TabConfig[]>(() => [
 
 const handleTabChange = (index: number): void => {
   selectedTab.value = index
-  // Clear valid_until when switching to single day
+  // Clear validUntil when switching to single day
   if (index === 0) {
-    formData.value.valid_until = ''
+    formData.value.validUntil = ''
   }
 }
 
@@ -246,23 +246,23 @@ const { r$ } = useRegle(formData, {
   name: { required },
   price: { required, minValue: minValue(0) },
   quantity: { required, minValue: minValue(1) },
-  valid_from: {
+  validFrom: {
     required,
     dateAfter: dateAfter(DateTime.local().startOf('day').toJSDate()),
   },
-  valid_until: {
+  validUntil: {
     required: requiredIf(() => selectedTab.value === 1),
     dateAfter: dateAfter(
       DateTime.local().minus({ days: 1 }).startOf('day').toJSDate(),
     ),
     // must be after valid from, to be implemented later
   },
-  sale_from: {
+  saleFrom: {
     dateAfter: dateAfter(
       DateTime.local().minus({ days: 1 }).startOf('day').toJSDate(),
     ),
   },
-  sale_until: {
+  saleUntil: {
     dateAfter: dateAfter(
       DateTime.local().minus({ days: 1 }).startOf('day').toJSDate(),
     ),
@@ -275,11 +275,11 @@ const resetForm = (): void => {
     name: '',
     price: '',
     quantity: '',
-    sale_from: '',
-    sale_until: '',
-    valid_from: '',
-    valid_until: '',
-    is_popular_choice: false,
+    saleFrom: '',
+    saleUntil: '',
+    validFrom: '',
+    validUntil: '',
+    isPopularChoice: false,
   }
   r$.$reset()
 }
@@ -305,15 +305,15 @@ const submit = async (): Promise<void> => {
   let validFrom: DateTime | null
   let validUntil: DateTime | null
 
-  validFrom = DateTime.fromISO(formData.value.valid_from).setZone(
+  validFrom = DateTime.fromISO(formData.value.validFrom).setZone(
     editionStore.value.timezone,
   )
 
-  // For single day tickets, set valid_until to the end of the valid_from day
+  // For single day tickets, set validUntil to the end of the validFrom day
   validUntil = DateTime.fromISO(
     selectedTab.value === 0
-      ? formData.value.valid_from
-      : formData.value.valid_until,
+      ? formData.value.validFrom
+      : formData.value.validUntil,
   ).setZone(editionStore.value.timezone)
 
   if (!validUntil || !validFrom) return
@@ -323,17 +323,17 @@ const submit = async (): Promise<void> => {
 
   try {
     await ticketService.create({
-      tenant_id: tenantStore.value.id,
-      edition_id: editionStore.value.id,
+      tenantId: tenantStore.value.id,
+      editionId: editionStore.value.id,
       name: formData.value.name,
       price: parseFloat(formData.value.price),
       group: props.group as TicketGroup,
       quantity: parseInt(formData.value.quantity, 10),
       active: true,
-      sale_from: formData.value.sale_from || undefined,
-      sale_until: formData.value.sale_until || undefined,
-      valid_from: validFrom.toISO() as string,
-      valid_until: validUntil.toISO() as string,
+      saleFrom: formData.value.saleFrom || undefined,
+      saleUntil: formData.value.saleUntil || undefined,
+      validFrom: validFrom.toISO() as string,
+      validUntil: validUntil.toISO() as string,
     })
 
     toast.success(t('admin.tickets.createSuccess'))

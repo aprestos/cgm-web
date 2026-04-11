@@ -126,7 +126,7 @@ const formatDateRange = (from: string, until: string): string => {
               <li class="flex items-center gap-3">
                 <IconCalendar class="h-4 w-4 flex-shrink-0" />
                 <span>{{
-                  formatDateRange(ticket.valid_from, ticket.valid_until)
+                  formatDateRange(ticket.validFrom, ticket.validUntil)
                 }}</span>
               </li>
               <li v-if="isLibraryEnabled" class="flex items-center gap-3">

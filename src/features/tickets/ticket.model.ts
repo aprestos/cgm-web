@@ -5,24 +5,24 @@ export enum TicketGroup {
 
 export interface Ticket {
   id: number
-  edition_id: number
-  tenant_id: string
+  editionId: number
+  tenantId: string
   name: string
   group: TicketGroup
   price: number
   active: boolean
   quantity: number
-  valid_from: string
-  valid_until: string
-  sale_from?: string
-  sale_until?: string
-  created_at: string
+  validFrom: string
+  validUntil: string
+  saleFrom?: string
+  saleUntil?: string
+  createdAt: string
   isPopularChoice?: boolean
 }
 
-export type CreateTicketInput = Omit<Ticket, 'id' | 'created_at'>
+export type CreateTicketInput = Omit<Ticket, 'id' | 'createdAt'>
 
 export type UpdateTicketInput = Omit<
   Ticket,
-  'id' | 'edition_id' | 'tenant_id' | 'created_at'
+  'id' | 'editionId' | 'tenantId' | 'createdAt'
 >

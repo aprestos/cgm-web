@@ -134,14 +134,14 @@ const formatDateRange = (
     <!-- Custom cell for sale period -->
     <template #cell-sale_period="{ item }">
       <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ formatDateRange(item.sale_from, item.sale_until) }}
+        {{ formatDateRange(item.saleFrom, item.saleUntil) }}
       </div>
     </template>
 
     <!-- Custom cell for valid period -->
     <template #cell-valid_period="{ item }">
       <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ formatDateRange(item.valid_from, item.valid_until) }}
+        {{ formatDateRange(item.validFrom, item.validUntil) }}
       </div>
     </template>
 
