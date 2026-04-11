@@ -51,7 +51,6 @@ congrem.io is a modern, full-featured web application designed to help organizer
 
 ### Styling & UI
 - **Tailwind CSS 4+** - Utility-first CSS framework
-- **DaisyUI** - Component library built on Tailwind
 - **HeadlessUI** - Unstyled, accessible components
 - **Tabler Icons** - Comprehensive icon library
 
@@ -386,7 +385,7 @@ We welcome contributions from the community! Whether it's bug fixes, new feature
 
 ---
 
-<div align="center">
+<div>
 
 **Made with ❤️ for the board game community**
 

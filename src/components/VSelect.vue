@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useDebounceFn } from '@vueuse/core'
-import { defineEmits, defineProps, ref } from 'vue'
+import { ref } from 'vue'
 import VueSelect, { type Option } from 'vue3-select-component'
 
 interface Props<T = any> {
