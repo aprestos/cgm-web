@@ -22,7 +22,7 @@ const sectionTranslationKeys: Record<string, string> = {
   map: 'landing.nav.location',
   tickets: 'landing.nav.tickets',
   countdown: 'landing.nav.countdown',
-  features: 'landing.nav.features',
+  library: 'landing.nav.library',
   games: 'landing.nav.games',
 }
 

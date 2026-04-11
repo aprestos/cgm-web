@@ -2,13 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { editionStore } from '@/stores/edition.ts'
 import { settingsStore } from '@/features/settings/useSettings.store.ts'
-import {
-  IconBooks,
-  IconUsers,
-  IconTicket,
-  IconTrophy,
-  IconShoppingBag,
-} from '@tabler/icons-vue'
+import { IconBooks, IconUsers, IconTicket } from '@tabler/icons-vue'
 import { RouteNames } from '@/router/routeNames.ts'
 import { tenantStore } from '@/stores/tenant.ts'
 import { useI18n } from 'vue-i18n'
@@ -24,7 +18,6 @@ import LandingHero from './landing/LandingHero.vue'
 import LandingGallery from './landing/LandingGallery.vue'
 import LandingTickets from './landing/LandingTickets.vue'
 import LandingCountdown from './landing/LandingCountdown.vue'
-import LandingFeatures from './landing/LandingFeatures.vue'
 import LandingGames from './landing/LandingGames.vue'
 import LandingMap from './landing/LandingMap.vue'
 import LandingCta from './landing/LandingCta.vue'
@@ -63,7 +56,6 @@ const isLibraryEnabled = computed(
 const isTournamentsEnabled = computed(
   () => settings.value?.tournaments?.enabled ?? false,
 )
-const isFleaEnabled = computed(() => settings.value?.flea?.enabled ?? false)
 
 const activeTickets = computed(() =>
   availableTickets.value.filter((ticket) => {
@@ -184,10 +176,6 @@ const navigationSections = computed(() => {
     sections.push('countdown')
   }
 
-  if (platformFeatures.value.length > 0) {
-    sections.push('features')
-  }
-
   if (isLibraryEnabled.value && trendingGames.value.length > 0) {
     sections.push('games')
   }
@@ -272,49 +260,6 @@ function getRandomItems<T>(items: T[], count: number): T[] {
   }
   return shuffled
 }
-
-// Features for the platform
-const platformFeatures = computed(() => {
-  const features = []
-
-  if (isLibraryEnabled.value) {
-    features.push({
-      id: 'library',
-      name: t('landing.features.library.name'),
-      description: t('landing.features.library.description'),
-      icon: IconBooks,
-      route: RouteNames.public.library,
-      gradient: 'from-violet-600 to-indigo-600',
-      available: true,
-    })
-  }
-
-  if (isTournamentsEnabled.value) {
-    features.push({
-      id: 'tournaments',
-      name: t('landing.features.tournaments.name'),
-      description: t('landing.features.tournaments.description'),
-      icon: IconTrophy,
-      route: RouteNames.public.tournaments,
-      gradient: 'from-amber-500 to-orange-600',
-      available: true,
-    })
-  }
-
-  if (isFleaEnabled.value) {
-    features.push({
-      id: 'flea',
-      name: t('landing.features.fleaMarket.name'),
-      description: t('landing.features.fleaMarket.description'),
-      icon: IconShoppingBag,
-      route: RouteNames.public.fleaMarket,
-      gradient: 'from-emerald-500 to-teal-600',
-      available: true,
-    })
-  }
-
-  return features
-})
 </script>
 
 <template>
@@ -374,20 +319,6 @@ const platformFeatures = computed(() => {
       v-if="countdown && conventionStatus === 'upcoming'"
       :countdown="countdown"
       :start-date="edition?.start_date"
-    />
-
-    <!-- Second Gallery Strip (minimal, no title) -->
-    <LandingGallery
-      v-if="galleryImages.length > 3"
-      :images="galleryImages.slice(0, 4)"
-      title=""
-      subtitle=""
-    />
-
-    <!-- Features / Platform Section -->
-    <LandingFeatures
-      v-if="platformFeatures.length > 0"
-      :features="platformFeatures"
     />
 
     <!-- Games Preview Section -->

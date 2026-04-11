@@ -76,18 +76,18 @@ const formatDateRange = (from: string, until: string): string => {
       <!-- Tickets Grid -->
       <div class="mt-16 grid gap-8 lg:grid-cols-3">
         <div
-          v-for="(ticket, index) in tickets"
+          v-for="ticket in tickets"
           :key="ticket.id"
           :class="[
             'relative overflow-hidden rounded-3xl p-8 transition-all duration-300',
-            index === 1
-              ? 'bg-gradient-to-b from-indigo-600 to-violet-700 ring-2 ring-indigo-400 lg:scale-105 shadow-2xl'
+            ticket.isPopularChoice
+              ? 'bg-linear-to-b from-indigo-600 to-violet-700 ring-2 ring-indigo-400 lg:scale-105 shadow-2xl'
               : 'bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl',
           ]"
         >
           <!-- Popular Badge -->
           <div
-            v-if="index === 1"
+            v-if="ticket.isPopularChoice"
             class="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
           >
             {{ t('landing.tickets.popular') }}
@@ -98,7 +98,9 @@ const formatDateRange = (from: string, until: string): string => {
             <h3
               :class="[
                 'text-xl font-semibold',
-                index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                ticket.isPopularChoice
+                  ? 'text-white'
+                  : 'text-gray-900 dark:text-white',
               ]"
             >
               {{ ticket.name }}
@@ -108,7 +110,9 @@ const formatDateRange = (from: string, until: string): string => {
               <span
                 :class="[
                   'text-5xl font-bold tracking-tight',
-                  index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                  ticket.isPopularChoice
+                    ? 'text-white'
+                    : 'text-gray-900 dark:text-white',
                 ]"
               >
                 {{ formatPrice(ticket.price) }}
@@ -118,7 +122,7 @@ const formatDateRange = (from: string, until: string): string => {
             <ul
               :class="[
                 'mt-8 space-y-3 text-sm',
-                index === 1
+                ticket.isPopularChoice
                   ? 'text-indigo-100'
                   : 'text-gray-600 dark:text-gray-400',
               ]"
@@ -144,7 +148,7 @@ const formatDateRange = (from: string, until: string): string => {
               type="button"
               :class="[
                 'mt-8 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300',
-                index === 1
+                ticket.isPopularChoice
                   ? 'bg-white text-indigo-600 hover:bg-indigo-50'
                   : 'bg-indigo-600 text-white hover:bg-indigo-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
               ]"
@@ -159,13 +163,13 @@ const formatDateRange = (from: string, until: string): string => {
               v-else
               :class="[
                 'mt-8 flex w-full items-center justify-center gap-3',
-                index === 1 ? '' : '',
+                ticket.isPopularChoice ? '' : '',
               ]"
             >
               <IconShoppingBag
                 :class="[
                   'h-5 w-5',
-                  index === 1
+                  ticket.isPopularChoice
                     ? 'text-white'
                     : 'text-indigo-600 dark:text-indigo-400',
                 ]"
@@ -174,7 +178,7 @@ const formatDateRange = (from: string, until: string): string => {
                 type="button"
                 :class="[
                   'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
-                  index === 1
+                  ticket.isPopularChoice
                     ? 'bg-white/20 text-white hover:bg-white/30'
                     : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
                 ]"
@@ -185,7 +189,9 @@ const formatDateRange = (from: string, until: string): string => {
               <span
                 :class="[
                   'min-w-[2rem] text-center text-lg font-semibold',
-                  index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                  ticket.isPopularChoice
+                    ? 'text-white'
+                    : 'text-gray-900 dark:text-white',
                 ]"
               >
                 {{ getQuantity(ticket.id) }}
@@ -194,7 +200,7 @@ const formatDateRange = (from: string, until: string): string => {
                 type="button"
                 :class="[
                   'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
-                  index === 1
+                  ticket.isPopularChoice
                     ? 'bg-white/20 text-white hover:bg-white/30'
                     : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
                 ]"
@@ -209,7 +215,7 @@ const formatDateRange = (from: string, until: string): string => {
               v-if="getQuantity(ticket.id) > 0"
               :class="[
                 'mt-3 text-center text-sm font-medium',
-                index === 1
+                ticket.isPopularChoice
                   ? 'text-indigo-100'
                   : 'text-gray-600 dark:text-gray-400',
               ]"
@@ -218,7 +224,9 @@ const formatDateRange = (from: string, until: string): string => {
               <span
                 :class="[
                   'font-semibold',
-                  index === 1 ? 'text-white' : 'text-gray-900 dark:text-white',
+                  ticket.isPopularChoice
+                    ? 'text-white'
+                    : 'text-gray-900 dark:text-white',
                 ]"
               >
                 {{ formatPrice(ticket.price * getQuantity(ticket.id)) }}
@@ -231,7 +239,7 @@ const formatDateRange = (from: string, until: string): string => {
             v-if="ticket.quantity && ticket.quantity < 50"
             :class="[
               'mt-4 text-center text-xs',
-              index === 1
+              ticket.isPopularChoice
                 ? 'text-indigo-200'
                 : 'text-amber-600 dark:text-amber-400',
             ]"
