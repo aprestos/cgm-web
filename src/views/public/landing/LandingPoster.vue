@@ -170,6 +170,7 @@ const altText = props.editionName
 }
 
 .poster-card {
+  transform: perspective(800px) rotateY(-3deg);
   transition:
     transform 0.5s cubic-bezier(0.23, 1, 0.32, 1),
     box-shadow 0.5s ease;
