@@ -1,7 +1,11 @@
 export enum LogoType {
   favicon = 'favicon',
   square = 'square',
+  square_dark = 'square.dark',
+  square_light = 'square.light',
   long = 'long',
+  long_dark = 'long.dark',
+  long_light = 'long.light',
 }
 
 export interface Tenant {
@@ -9,9 +13,9 @@ export interface Tenant {
   name: string
   domain: string
   logo?: string
-  logos?: Record<LogoType, string>
-  current_event: string
+  logos?: Partial<Record<LogoType, string | undefined>>
+  currentEvent: string
   email?: string
   images?: string[]
-  short_description?: string
+  shortDescription?: string
 }

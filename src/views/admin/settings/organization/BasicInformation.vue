@@ -102,7 +102,7 @@ const initializeFormData = (): void => {
   if (tenantStore.value) {
     formData.value.name = tenantStore.value.name || ''
     formData.value.email = tenantStore.value.email || ''
-    formData.value.shortDescription = tenantStore.value.short_description || ''
+    formData.value.shortDescription = tenantStore.value.shortDescription || ''
 
     // Store initial values
     initialValues.value = {

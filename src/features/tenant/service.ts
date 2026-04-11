@@ -1,6 +1,7 @@
-import type { Tenant, LogoType } from '@/features/tenant/tenant.model.ts'
+import type { Tenant } from '@/features/tenant/tenant.model.ts'
 import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
+import { toCamelCase, toSnakeCase } from '@/utils/caseConverter.ts'
 
 export const tenantService = {
   async get(): Promise<Array<Tenant>> {
@@ -23,10 +24,10 @@ export const tenantService = {
         .or(
           `domain.eq.${normalizedDomain},other_domains.cs.{${normalizedDomain}}`,
         )
-        .single<Tenant>()
+        .single()
 
       if (data) {
-        return data
+        return toCamelCase(data) as Tenant
       }
 
       // If not found and dev tenant ID is configured, use that as fallback
@@ -49,12 +50,12 @@ export const tenantService = {
         .from('tenants')
         .select()
         .eq('id', id)
-        .single<Tenant>()
+        .single()
       if (error) {
         logger.error('Unable to fetch tenant', { id, error })
         return null
       }
-      return data
+      return data ? (toCamelCase(data) as Tenant) : null
     } catch (error) {
       console.error((error as Error).message)
       return null
@@ -62,13 +63,7 @@ export const tenantService = {
   },
   async updateTenant(
     tenantId: string,
-    updates: {
-      email?: string
-      name?: string
-      logo?: string
-      logos?: Partial<Record<LogoType, string>>
-      images?: string[]
-    },
+    updates: Partial<Tenant>,
   ): Promise<Tenant | null> {
     // Filter out undefined values to only update defined fields
     const filteredUpdates = Object.fromEntries(
@@ -83,7 +78,7 @@ export const tenantService = {
 
     const { data, error } = await supabase
       .from('tenants')
-      .update(filteredUpdates)
+      .update(toSnakeCase(filteredUpdates))
       .eq('id', tenantId)
       .select()
       .single<Tenant>()
@@ -96,31 +91,6 @@ export const tenantService = {
     }
 
     return data
-  },
-
-  async generateReservationId(
-    tenantId: string,
-    editionId: string,
-  ): Promise<number> {
-    try {
-      const { data, error } = await supabase.rpc('generate_reservation_id', {
-        p_tenant_id: tenantId,
-        p_edition_id: editionId,
-      })
-
-      if (error) {
-        console.error('Error generating reservation ID:', error.message)
-        throw error
-      }
-
-      return data as number
-    } catch (error) {
-      console.error(
-        'Failed to generate reservation ID:',
-        (error as Error).message,
-      )
-      throw error
-    }
   },
 }
 

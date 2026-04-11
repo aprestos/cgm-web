@@ -350,8 +350,9 @@ const saveBranding = async (): Promise<void> => {
   isSaving.value = true
 
   try {
-    const existingLogos = tenantStore.value?.logos ?? {}
-    const updatedLogos = {
+    const existingLogos: Partial<Record<LogoType, string | undefined>> =
+      tenantStore.value?.logos ?? {}
+    const updatedLogos: Partial<Record<LogoType, string | undefined>> = {
       ...existingLogos,
       ...(squareLogoUrl.value
         ? { [LogoType.square]: squareLogoUrl.value }

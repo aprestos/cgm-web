@@ -369,6 +369,11 @@ const en = {
       exploreLibrary: 'Explore the Library',
       joinCommunity: 'Join the Community',
     },
+    poster: {
+      viewPoster: 'View event poster',
+      eventPoster: 'Event poster',
+      altText: '{name} event poster',
+    },
     gallery: {
       title: 'Moments from Our Community',
       subtitle: 'Capturing the joy of gaming together',
