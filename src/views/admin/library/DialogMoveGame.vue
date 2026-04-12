@@ -64,10 +64,10 @@ import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CSelect from '@/components/CSelect.vue'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import { toast } from 'vue-sonner'
-import libraryService from '@/features/library/service.ts'
+import libraryService from '@/features/library/games/service.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 
 const { t } = useI18n()

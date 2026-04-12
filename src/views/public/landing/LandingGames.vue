@@ -3,7 +3,7 @@ import { IconArrowRight, IconDice5 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
 import { RouteNames } from '@/router/routeNames.ts'
 import { useI18n } from 'vue-i18n'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 
 const { t } = useI18n()
 

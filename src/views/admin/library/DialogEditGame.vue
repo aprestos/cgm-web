@@ -9,9 +9,9 @@ import CInput from '@/components/CInput.vue'
 import CSelect from '@/components/CSelect.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import DialogComponent from '@/components/DialogComponent.vue'
-import libraryService from '@/features/library/service.ts'
+import libraryService from '@/features/library/games/service.ts'
 import { toast } from 'vue-sonner'
 
 const { t } = useI18n()

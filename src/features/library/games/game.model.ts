@@ -14,12 +14,11 @@ export interface LibraryGame {
   id: number
   owner: string
   notes: string
-  event_id: number
+  editionId: number
   location?: LibraryLocation
   game: Game
   status: LibraryGameStatus
-  reserved_until?: string
-  language_dependence?: string
+  reservedUntil?: string
 }
 
 export const getStatus = (game: LibraryGame | null): string => {
@@ -27,8 +26,8 @@ export const getStatus = (game: LibraryGame | null): string => {
 
   if (game.status === LibraryGameStatus.reserved) {
     if (
-      game.reserved_until &&
-      DateTime.fromISO(game.reserved_until).plus({ minute: 1 }).toMillis() >
+      game.reservedUntil &&
+      DateTime.fromISO(game.reservedUntil).plus({ minute: 1 }).toMillis() >
         DateTime.now().toMillis()
     ) {
       return 'reserved'

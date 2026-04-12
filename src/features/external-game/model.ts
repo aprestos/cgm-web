@@ -1,18 +1,18 @@
 export type Game = GameSummary & {
-  min_players: number
-  max_players: number
-  min_playtime: number
-  max_playtime: number
-  min_age: number
-  best_at: string
-  recommended_at: string
-  language_dependence?: string
+  minPlayers: number
+  maxPlayers: number
+  minPlaytime: number
+  maxPlaytime: number
+  minAge: number
+  bestAt: string
+  recommendedAt: string
+  languageDependence?: string
 }
 
 export interface GameSummary {
   id: number
-  external_id: string
-  bgg_id: string
+  externalId: string
+  bggId: string
   name: string
   image: string
   year: string

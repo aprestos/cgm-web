@@ -97,6 +97,25 @@ export function toCamelCase<T extends Record<string, unknown>>(
   return result as CamelCaseKeys<T>
 }
 
+/**
+ * Converts snake_case keys to camelCase and asserts the result as the target type.
+ * Use when the input is loosely typed (e.g. Supabase without generated DB types)
+ * and you know the expected output shape.
+ *
+ * @example
+ *   // Instead of: toCamelCase(data) as unknown as Ticket
+ *   toCamelCaseAs<Ticket>(data)
+ */
+export function toCamelCaseAs<TTarget>(obj: Record<string, unknown>): TTarget
+export function toCamelCaseAs<TTarget>(
+  obj: Record<string, unknown>[],
+): TTarget[]
+export function toCamelCaseAs<TTarget>(
+  obj: Record<string, unknown> | Record<string, unknown>[],
+): TTarget | TTarget[] {
+  return toCamelCase(obj as Record<string, unknown>) as TTarget
+}
+
 /** Converts all keys of an object from camelCase to snake_case (recursive) */
 export function toSnakeCase<T extends Record<string, unknown>>(
   obj: T,
@@ -125,4 +144,22 @@ export function toSnakeCase<T extends Record<string, unknown>>(
     }
   }
   return result as SnakeCaseKeys<T>
+}
+
+/**
+ * Converts camelCase keys to snake_case and asserts the result as the target type.
+ * Use when you need a specific snake_case shape for database writes.
+ *
+ * @example
+ *   // Instead of: toSnakeCase(input as unknown as Record<string, unknown>)
+ *   toSnakeCaseAs<InsertRow>(input)
+ */
+export function toSnakeCaseAs<TTarget>(obj: Record<string, unknown>): TTarget
+export function toSnakeCaseAs<TTarget>(
+  obj: Record<string, unknown>[],
+): TTarget[]
+export function toSnakeCaseAs<TTarget>(
+  obj: Record<string, unknown> | Record<string, unknown>[],
+): TTarget | TTarget[] {
+  return toSnakeCase(obj as Record<string, unknown>) as TTarget
 }

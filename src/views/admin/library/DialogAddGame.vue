@@ -16,7 +16,7 @@
                 async (query) => {
                   const results = await gameService.search(query)
                   return results.map((item) => ({
-                    value: item.external_id,
+                    value: item.externalId,
                     label: item.name,
                     secondaryLabel: item.year ? `(${item.year})` : undefined,
                   })) as Array<Option<string>>
@@ -94,11 +94,12 @@ import CSelect from '@/components/CSelect.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import type { Game } from '@/features/external-game/model.ts'
 import gameService from '@/features/external-game/service.ts'
-import { libraryService } from '@/features/library/service.ts'
+import { libraryService } from '@/features/library/games/service.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import logger from '@/lib/logger.ts'
 import { toast } from 'vue-sonner'
 import CSelect2 from '@/CSelect2.vue'
+import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 
 const { t } = useI18n()
 
@@ -155,6 +156,7 @@ const submit = async (): Promise<void> => {
         game.id,
         data.selectedLocation as number,
         data.owner,
+        LibraryGameStatus.notAvailable,
         data.notes,
       )
 

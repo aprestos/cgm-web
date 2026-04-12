@@ -1,5 +1,5 @@
 <template>
-  <DialogComponent size="lg" :open="open" title="" @close="closeModal">
+  <DialogComponent title="" size="lg" :open="open" @close="closeModal">
     <!-- Loading SkeletonLoader -->
     <div
       v-if="!game"
@@ -89,7 +89,7 @@
                 <IconUsers class="h-5 w-5 text-gray-400" />
                 <span
                   >{{
-                    getRange(game?.game?.min_players, game?.game?.max_players)
+                    getRange(game?.game?.minPlayers, game?.game?.maxPlayers)
                   }}
                   {{ t('game.detail.players') }}</span
                 >
@@ -112,14 +112,14 @@
                   class="ml-3 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400"
                 >
                   <div
-                    v-if="game?.game?.best_at"
+                    v-if="game?.game?.bestAt"
                     class="flex items-center gap-1"
                   >
                     <div class="w-2 h-2 rounded-sm bg-green-500"></div>
                     <span>{{ t('game.detail.best') }}</span>
                   </div>
                   <div
-                    v-if="game?.game?.recommended_at"
+                    v-if="game?.game?.recommendedAt"
                     class="flex items-center gap-1"
                   >
                     <div class="w-2 h-2 rounded-sm bg-blue-300"></div>
@@ -135,7 +135,7 @@
               <ClockIcon class="h-5 w-5 text-gray-400" />
               <span
                 >{{
-                  getRange(game?.game?.min_playtime, game?.game?.max_playtime)
+                  getRange(game?.game?.minPlaytime, game?.game?.maxPlaytime)
                 }}
                 {{ t('game.detail.min') }}</span
               >
@@ -144,7 +144,7 @@
               class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
             >
               <CalendarIcon class="h-5 w-5 text-gray-400" />
-              <span>{{ t('game.detail.age') }} {{ game?.game?.min_age }}+</span>
+              <span>{{ t('game.detail.age') }} {{ game?.game?.minAge }}+</span>
             </div>
             <div
               class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
@@ -153,7 +153,7 @@
               <span>{{
                 t(
                   'game.detail.languageDependence.' +
-                    game?.game?.language_dependence,
+                    game?.game?.languageDependence,
                 )
               }}</span>
             </div>
@@ -175,8 +175,8 @@
           <div class="mt-4">
             <a
               :href="
-                game?.game?.bgg_id
-                  ? `https://boardgamegeek.com/boardgame/${game.game.bgg_id}`
+                game?.game?.bggId
+                  ? `https://boardgamegeek.com/boardgame/${game.game.bggId}`
                   : 'https://boardgamegeek.com/'
               "
               target="_blank"
@@ -217,8 +217,8 @@ import {
   DocumentTextIcon,
 } from '@heroicons/vue/20/solid'
 import { IconWorld, IconUsers } from '@tabler/icons-vue'
-import libraryService from '@/features/library/service.ts'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import libraryService from '@/features/library/games/service.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 
 const { t } = useI18n()
@@ -275,16 +275,16 @@ const getRange = (min: number, max: number): string => {
 // Player count visualization helpers
 const getPlayerCountRange = (): number[] => {
   if (!game.value?.game) return []
-  const min = game.value.game.min_players
-  const max = game.value.game.max_players
+  const min = game.value.game.minPlayers
+  const max = game.value.game.maxPlayers
   return Array.from({ length: max - min + 1 }, (_, i) => min + i)
 }
 
 const getPlayerCountClass = (count: number): string => {
   if (!game.value?.game) return 'bg-gray-200'
 
-  const bestAt = parseBestAt(game.value.game.best_at)
-  const recommendedAt = parseRecommendedAt(game.value.game.recommended_at)
+  const bestAt = parseBestAt(game.value.game.bestAt)
+  const recommendedAt = parseRecommendedAt(game.value.game.recommendedAt)
 
   if (bestAt.includes(count)) {
     return 'bg-green-500'
@@ -298,8 +298,8 @@ const getPlayerCountClass = (count: number): string => {
 const getPlayerCountTooltip = (count: number): string => {
   if (!game.value?.game) return `${count} ${t('game.detail.players')}`
 
-  const bestAt = parseBestAt(game.value.game.best_at)
-  const recommendedAt = parseRecommendedAt(game.value.game.recommended_at)
+  const bestAt = parseBestAt(game.value.game.bestAt)
+  const recommendedAt = parseRecommendedAt(game.value.game.recommendedAt)
 
   if (bestAt.includes(count)) {
     return `${count} ${t('game.detail.players')} - ${t('game.detail.best')}`

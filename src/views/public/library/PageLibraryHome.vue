@@ -238,7 +238,10 @@ import {
 import GameList from '@/views/public/library/GameList.vue'
 import ReservationList from '@/views/public/library/ReservationList.vue'
 import LibraryFilters from '@/views/public/library/LibraryFilters.vue'
-import { type FilterOptions, SortOption } from '@/features/library/service.ts'
+import {
+  type FilterOptions,
+  SortOption,
+} from '@/features/library/games/service.ts'
 import {
   Dialog,
   DialogPanel,

@@ -1,8 +1,10 @@
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
+import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/stores/edition'
+import { editionStore } from '@/stores/edition.ts'
 import { tenantStore } from '@/stores/tenant.ts'
 import logger from '@/lib/logger.ts'
+import { toCamelCaseAs } from '@/utils/caseConverter.ts'
 
 export enum SortOption {
   DEFAULT = 'trending',
@@ -26,16 +28,17 @@ export const libraryService = {
       .select('*', { count: 'exact', head: true })
     return result.count || 0
   },
+
   async get(): Promise<Array<LibraryGame>> {
     try {
-      const result = await supabase
+      const { data } = await supabase
         .from('library_games')
         .select(
           'id,owner,notes,game:games(*),location:locations(id,name),edition_id,status,reserved_until',
         )
         .eq('tenant_id', tenantStore.value?.id)
         .eq('edition_id', editionStore.value?.id)
-      return result.data as unknown as LibraryGame[]
+      return data ? toCamelCaseAs<LibraryGame>(data) : []
     } catch (error) {
       logger.error('Error on libraryService.get()', { error })
       return []
@@ -44,12 +47,12 @@ export const libraryService = {
 
   async getById(id: string): Promise<LibraryGame | null> {
     try {
-      const result = await supabase
+      const { data } = await supabase
         .from('library_games')
         .select('id,owner,notes,game:games(*),edition_id,status,reserved_until')
         .eq('id', id)
         .single()
-      return result.data as unknown as LibraryGame
+      return data ? toCamelCaseAs<LibraryGame>(data) : null
     } catch (error) {
       logger.error('Unable to fetch library game by id', { error })
       return null
@@ -60,6 +63,7 @@ export const libraryService = {
     gameId: number,
     locationId: number,
     owner: string,
+    status: LibraryGameStatus = LibraryGameStatus.notAvailable,
     notes?: string,
   ): Promise<void> {
     const { error } = await supabase.from('library_games').insert({
@@ -67,7 +71,7 @@ export const libraryService = {
       edition_id: editionStore.value?.id,
       game_id: gameId,
       location_id: locationId,
-      status: 'not-available',
+      status,
       owner: owner,
       notes: notes || undefined,
     })
@@ -134,8 +138,8 @@ export const libraryService = {
       if (filters.selectedFilters.players?.length) {
         const playerFilters = filters.selectedFilters.players
         filtered = filtered.filter((game) => {
-          const minPlayers = game.game.min_players
-          const maxPlayers = game.game.max_players
+          const minPlayers = game.game.minPlayers
+          const maxPlayers = game.game.maxPlayers
           return playerFilters.some((playerCount) => {
             if (playerCount === '10+') {
               return minPlayers <= 10 && maxPlayers >= 10
@@ -150,8 +154,8 @@ export const libraryService = {
       if (filters.selectedFilters.playtime?.length) {
         const playtimeFilters = filters.selectedFilters.playtime
         filtered = filtered.filter((game) => {
-          const maxPlaytime = game.game.max_playtime
-          const minPlaytime = game.game.min_playtime
+          const maxPlaytime = game.game.maxPlaytime
+          const minPlaytime = game.game.minPlaytime
           return playtimeFilters.some((time) => {
             const minutes = parseInt(time)
             return maxPlaytime >= minutes && minPlaytime <= minutes
@@ -170,21 +174,19 @@ export const libraryService = {
                 return parseInt(game.game.year) === new Date().getFullYear()
               case 'family':
                 // Filter family-friendly games (suitable for all ages, typically min_age <= 8)
-                return game.game.min_age <= 8 && game.game.max_players >= 3
+                return game.game.minAge <= 8 && game.game.maxPlayers >= 3
               case 'classics':
                 // Filter classic games (older than 10 years)
                 return parseInt(game.game.year) <= new Date().getFullYear() - 15
               case 'two-player-only':
                 // Filter 2-player only games (older than 10 years)
-                return (
-                  game.game.min_players === 2 && game.game.max_players === 2
-                )
+                return game.game.minPlayers === 2 && game.game.maxPlayers === 2
               case 'children':
                 // Filter children games (minage until 5)
-                return game.game.min_age <= 5
+                return game.game.minAge <= 5
               case 'Most played':
                 // This would require play count data - for now return games with good player count range
-                return game.game.min_players <= 4 && game.game.max_players >= 4
+                return game.game.minPlayers <= 4 && game.game.maxPlayers >= 4
               default:
                 return false
             }
@@ -231,7 +233,7 @@ export const libraryService = {
       return []
     }
 
-    return data as LibraryGame[]
+    return data ? toCamelCaseAs<LibraryGame>(data) : []
   },
 
   async updateGame(

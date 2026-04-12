@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import {
   getStatusColor,
   getStatusLabel,
   getStatus,
-} from '@/features/library/game.model.ts'
+} from '@/features/library/games/game.model.ts'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { HandRaisedIcon } from '@heroicons/vue/24/outline'
 import CButton from '@/components/CButton.vue'

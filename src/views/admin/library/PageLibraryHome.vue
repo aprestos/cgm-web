@@ -157,8 +157,8 @@
         <template #cell-players="{ item }">
           <span class="text-gray-500 dark:text-gray-200">{{
             getRange(
-              (item as LibraryGame).game.min_players,
-              (item as LibraryGame).game.max_players,
+              (item as LibraryGame).game.minPlayers,
+              (item as LibraryGame).game.maxPlayers,
             )
           }}</span>
         </template>
@@ -167,8 +167,8 @@
         <template #cell-playtime="{ item }">
           <span class="text-gray-500 dark:text-gray-200">{{
             getRange(
-              (item as LibraryGame).game.min_playtime,
-              (item as LibraryGame).game.max_playtime,
+              (item as LibraryGame).game.minPlaytime,
+              (item as LibraryGame).game.maxPlaytime,
             )
           }}</span>
         </template>
@@ -176,8 +176,8 @@
         <!-- Custom cell for age -->
         <template #cell-age="{ item }">
           <span class="text-gray-500 dark:text-gray-200">{{
-            (item as LibraryGame).game.min_age
-              ? (item as LibraryGame).game.min_age + '+'
+            (item as LibraryGame).game.minAge
+              ? (item as LibraryGame).game.minAge + '+'
               : '-'
           }}</span>
         </template>
@@ -271,7 +271,10 @@ import DataTable from '@/components/DataTable.vue'
 import CInput from '@/components/CInput.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import StatisticCard from '@/components/StatisticCard.vue'
-import { getStatus, type LibraryGame } from '@/features/library/game.model.ts'
+import {
+  getStatus,
+  type LibraryGame,
+} from '@/features/library/games/game.model.ts'
 import libraryReservationService from '@/features/library/reservations/service.ts'
 import GameActions from '@/views/admin/library/GameActions.vue'
 import GameStatus from '@/views/admin/library/GameStatus.vue'
@@ -284,7 +287,7 @@ import DialogWithdrawGame from '@/views/admin/library/DialogWithdrawGame.vue'
 import DialogAddGame from '@/views/admin/library/DialogAddGame.vue'
 import DialogGameHistory from '@/views/admin/library/DialogGameHistory.vue'
 import DialogEditGame from '@/views/admin/library/DialogEditGame.vue'
-import libraryService from '@/features/library/service.ts'
+import libraryService from '@/features/library/games/service.ts'
 import PageHeader from '@/components/PageHeader.vue'
 
 const { t } = useI18n()

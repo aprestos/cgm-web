@@ -127,8 +127,8 @@ import DialogComponent from '@/components/DialogComponent.vue'
 import CircularCountdown from '@/components/CircularCountdown.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import { toast } from 'vue-sonner'
-import libraryService from '@/features/library/service.ts'
-import { LibraryGameStatus } from '@/features/library/game.model.ts'
+import libraryService from '@/features/library/games/service.ts'
+import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 
 interface Props {
   reservation: LibraryReservation | null
@@ -171,7 +171,7 @@ const confirmCancel = async (): Promise<void> => {
       props.reservation.library_game.id as number,
       {
         status: LibraryGameStatus.available,
-        reserved_until: undefined,
+        reservedUntil: undefined,
       },
     )
 

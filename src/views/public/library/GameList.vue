@@ -2,11 +2,14 @@
 import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import { getStatus, type LibraryGame } from '@/features/library/game.model.ts'
+import {
+  getStatus,
+  type LibraryGame,
+} from '@/features/library/games/game.model.ts'
 import {
   libraryService,
   type FilterOptions,
-} from '@/features/library/service.ts'
+} from '@/features/library/games/service.ts'
 import GameItem from './GameItem.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import libraryReservationService from '@/features/library/reservations/service.ts'
