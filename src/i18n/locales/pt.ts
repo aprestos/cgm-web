@@ -158,8 +158,18 @@ const pt = {
   },
   navigation: {
     library: 'Ludoteca',
+    tickets: 'Bilhetes',
     admin: 'Admin',
     profile: 'Perfil',
+  },
+  ticketsPage: {
+    unavailableTitle: 'A venda de bilhetes nao esta disponivel de momento',
+    unavailableDescription:
+      'Volta mais tarde para consultar novas disponibilidades.',
+    loading: 'A carregar bilhetes...',
+    loadError:
+      'Nao foi possivel carregar os bilhetes agora. Tenta novamente daqui a pouco.',
+    empty: 'Nao existem bilhetes disponiveis neste momento.',
   },
   withdraw: {
     history: 'Histórico de requisições',
@@ -395,6 +405,7 @@ const pt = {
       libraryAccess: 'Acesso completo à ludoteca',
       tournamentAccess: 'Participação em torneios',
       total: 'Total',
+      checkout: 'Finalizar Compra',
     },
     features: {
       sectionTitle: 'A Plataforma',

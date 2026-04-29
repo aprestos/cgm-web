@@ -162,8 +162,18 @@ const en = {
   },
   navigation: {
     library: 'Library',
+    tickets: 'Tickets',
     admin: 'Admin',
     profile: 'Profile',
+  },
+  ticketsPage: {
+    unavailableTitle: 'Ticket sales are currently unavailable',
+    unavailableDescription:
+      'Please check again later for new ticket availability.',
+    loading: 'Loading tickets...',
+    loadError:
+      'We could not load tickets right now. Please try again in a moment.',
+    empty: 'No tickets are available right now.',
   },
   withdraw: {
     history: 'Withdrawal History',
@@ -390,6 +400,7 @@ const en = {
       popular: 'Popular',
       getTicket: 'Get This Ticket',
       total: 'Total',
+      checkout: 'Proceed to Checkout',
       ticketsLeft: 'Only {count} tickets left!',
       validPeriod: 'Valid: {from} - {until}',
       libraryAccess: 'Full library access',

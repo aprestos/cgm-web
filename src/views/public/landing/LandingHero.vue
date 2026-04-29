@@ -17,7 +17,6 @@ import LandingPoster from './LandingPoster.vue'
 const { t } = useI18n()
 
 interface Props {
-  locationTitle?: string
   conventionStatus: 'happening' | 'upcoming' | 'ended'
   countdown: { days: number; hours: number; minutes: number } | null
   primaryCta: {
@@ -537,12 +536,18 @@ function formatShortDate(dateString: string | undefined): string {
                 - {{ formatShortDate(editionStore.end_date) }}
               </span>
             </div>
-            <div v-if="locationTitle" class="flex items-center gap-2">
-              <IconMapPin
-                class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
-              />
-              <span>{{ locationTitle }}</span>
-            </div>
+            <a
+              v-if="editionStore?.location?.url"
+              :href="editionStore?.location?.url"
+              target="_blank"
+            >
+              <div class="flex items-center gap-2">
+                <IconMapPin
+                  class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                />
+                <span>{{ editionStore.location.title }}</span>
+              </div>
+            </a>
           </div>
 
           <!-- Primary CTA -->

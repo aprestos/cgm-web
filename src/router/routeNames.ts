@@ -19,6 +19,7 @@ enum Admin {
 enum Public {
   root = 'root',
   home = 'public.home',
+  tickets = 'public.tickets',
   library = 'public.library',
   tournaments = 'public.tournaments',
   prototypes = 'public.prototypes',

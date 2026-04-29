@@ -7,15 +7,24 @@ import {
   IconMinus,
   IconShoppingBagPlus,
   IconShoppingBag,
+  IconArrowRight,
 } from '@tabler/icons-vue'
+import { computed } from 'vue'
 import type { Ticket } from '@/features/tickets/ticket.model.ts'
-import { DateTime } from 'luxon'
 import { useI18n } from 'vue-i18n'
 import { formatPrice } from '@/utils/price.ts'
 import { useCart } from '@/stores/cart.store'
+import { formatDateRange } from '@/utils/date.ts'
 
 const { t, locale } = useI18n()
-const { getQuantity, addToCart, increaseQuantity, decreaseQuantity } = useCart()
+const {
+  getQuantity,
+  addToCart,
+  increaseQuantity,
+  decreaseQuantity,
+  totalItems,
+  totalPrice,
+} = useCart()
 
 interface Props {
   tickets: Ticket[]
@@ -23,39 +32,25 @@ interface Props {
   isTournamentsEnabled: boolean
 }
 
+interface Emits {
+  (e: 'checkout'): void
+}
+
 defineProps<Props>()
+const emit = defineEmits<Emits>()
 
-const formatDate = (dateStr?: string): string => {
-  if (!dateStr) return '-'
-
-  return DateTime.fromISO(dateStr).toLocaleString(
-    { month: 'long', day: 'numeric' },
-    { locale: locale.value },
-  )
-}
-
-const formatDateRange = (from: string, until: string): string => {
-  if (!from || !until) return '-'
-
-  const fromDate = formatDate(from)
-  const untilDate = formatDate(until)
-
-  if (fromDate === untilDate) {
-    return fromDate
-  } else {
-    return `${formatDate(from)} - ${formatDate(until)}`
-  }
-}
+const hasItems = computed(() => totalItems.value > 0)
+const formattedTotal = computed(() => formatPrice(totalPrice.value))
 </script>
 
 <template>
   <section id="tickets" class="relative overflow-hidden py-32">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-gradient-to-b from-white via-indigo-50/50 to-white dark:from-gray-950 dark:via-indigo-950/30 dark:to-gray-950"
+      class="absolute inset-0 bg-linear-to-b from-white via-indigo-50/50 to-white dark:from-gray-950 dark:via-indigo-950/30 dark:to-gray-950"
     />
     <div
-      class="absolute left-0 top-1/2 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-600/30 blur-3xl"
+      class="absolute left-0 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-600/30 blur-3xl"
     />
 
     <div class="relative z-10 mx-auto max-w-5xl px-4">
@@ -128,110 +123,101 @@ const formatDateRange = (from: string, until: string): string => {
               ]"
             >
               <li class="flex items-center gap-3">
-                <IconCalendar class="h-4 w-4 flex-shrink-0" />
+                <IconCalendar class="h-4 w-4 shrink-0" />
                 <span>{{
-                  formatDateRange(ticket.validFrom, ticket.validUntil)
+                  formatDateRange(ticket.validFrom, ticket.validUntil, locale)
                 }}</span>
               </li>
               <li v-if="isLibraryEnabled" class="flex items-center gap-3">
-                <IconBooks class="h-4 w-4 flex-shrink-0" />
+                <IconBooks class="h-4 w-4 shrink-0" />
                 <span>{{ t('landing.tickets.libraryAccess') }}</span>
               </li>
               <li v-if="isTournamentsEnabled" class="flex items-center gap-3">
-                <IconTrophy class="h-4 w-4 flex-shrink-0" />
+                <IconTrophy class="h-4 w-4 shrink-0" />
                 <span>{{ t('landing.tickets.tournamentAccess') }}</span>
               </li>
             </ul>
 
-            <button
-              v-if="getQuantity(ticket.id) === 0"
-              type="button"
-              :class="[
-                'mt-8 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300',
-                ticket.isPopularChoice
-                  ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                  : 'bg-indigo-600 text-white hover:bg-indigo-500 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
-              ]"
-              @click="addToCart(ticket)"
-            >
-              <IconShoppingBagPlus class="h-5 w-5" />
-              {{ t('landing.tickets.getTicket') }}
-            </button>
+            <!-- Action area: add-to-cart button ↔ quantity selector -->
+            <div class="mt-8">
+              <Transition
+                mode="out-in"
+                enter-active-class="transition-all duration-300 ease-out motion-reduce:transition-none"
+                leave-active-class="transition-all duration-200 ease-in motion-reduce:transition-none"
+                enter-from-class="opacity-0 scale-75"
+                leave-to-class="opacity-0 scale-75"
+              >
+                <button
+                  v-if="getQuantity(ticket.id) === 0"
+                  key="add-btn"
+                  type="button"
+                  :class="[
+                    'flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300 cursor-pointer',
+                    ticket.isPopularChoice
+                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      : 'bg-black text-white hover:bg-black/70 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
+                  ]"
+                  @click="addToCart(ticket)"
+                >
+                  <IconShoppingBagPlus class="h-5 w-5" />
+                  {{ t('landing.tickets.getTicket') }}
+                </button>
 
-            <!-- Quantity controls when ticket is in cart -->
-            <div
-              v-else
-              :class="[
-                'mt-8 flex w-full items-center justify-center gap-3',
-                ticket.isPopularChoice ? '' : '',
-              ]"
-            >
-              <IconShoppingBag
-                :class="[
-                  'h-5 w-5',
-                  ticket.isPopularChoice
-                    ? 'text-white'
-                    : 'text-indigo-600 dark:text-indigo-400',
-                ]"
-              />
-              <button
-                type="button"
-                :class="[
-                  'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
-                  ticket.isPopularChoice
-                    ? 'bg-white/20 text-white hover:bg-white/30'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
-                ]"
-                @click="decreaseQuantity(ticket.id)"
-              >
-                <IconMinus class="h-4 w-4" />
-              </button>
-              <span
-                :class="[
-                  'min-w-[2rem] text-center text-lg font-semibold',
-                  ticket.isPopularChoice
-                    ? 'text-white'
-                    : 'text-gray-900 dark:text-white',
-                ]"
-              >
-                {{ getQuantity(ticket.id) }}
-              </span>
-              <button
-                type="button"
-                :class="[
-                  'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
-                  ticket.isPopularChoice
-                    ? 'bg-white/20 text-white hover:bg-white/30'
-                    : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
-                ]"
-                @click="increaseQuantity(ticket.id)"
-              >
-                <IconPlus class="h-4 w-4" />
-              </button>
+                <!-- Quantity controls when ticket is in cart -->
+                <div
+                  v-else
+                  key="qty-ctrl"
+                  :class="[
+                    'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2',
+                    ticket.isPopularChoice
+                      ? 'bg-white/20'
+                      : 'bg-black dark:bg-white/10',
+                  ]"
+                >
+                  <button
+                    type="button"
+                    :class="[
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
+                      ticket.isPopularChoice
+                        ? 'text-white hover:bg-white/20'
+                        : 'text-white hover:bg-white/20',
+                    ]"
+                    @click="decreaseQuantity(ticket.id)"
+                  >
+                    <IconMinus class="h-4 w-4" />
+                  </button>
+
+                  <!-- Quantity number pulses on every change via :key trick -->
+                  <Transition
+                    mode="out-in"
+                    enter-active-class="transition-all duration-150 ease-out motion-reduce:transition-none"
+                    leave-active-class="transition-all duration-100 ease-in motion-reduce:transition-none"
+                    enter-from-class="opacity-0 scale-50"
+                    leave-to-class="opacity-0 scale-50"
+                  >
+                    <span
+                      :key="getQuantity(ticket.id)"
+                      class="min-w-8 text-center text-sm font-semibold text-white"
+                    >
+                      {{ getQuantity(ticket.id) }}
+                    </span>
+                  </Transition>
+
+                  <button
+                    type="button"
+                    :class="[
+                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
+                      ticket.isPopularChoice
+                        ? 'text-white hover:bg-white/20'
+                        : 'text-white hover:bg-white/20',
+                    ]"
+                    @click="increaseQuantity(ticket.id)"
+                  >
+                    <IconPlus class="h-4 w-4" />
+                  </button>
+                </div>
+              </Transition>
             </div>
-
-            <!-- Total amount for ticket in cart -->
-            <p
-              v-if="getQuantity(ticket.id) > 0"
-              :class="[
-                'mt-3 text-center text-sm font-medium',
-                ticket.isPopularChoice
-                  ? 'text-indigo-100'
-                  : 'text-gray-600 dark:text-gray-400',
-              ]"
-            >
-              {{ t('landing.tickets.total') }}:
-              <span
-                :class="[
-                  'font-semibold',
-                  ticket.isPopularChoice
-                    ? 'text-white'
-                    : 'text-gray-900 dark:text-white',
-                ]"
-              >
-                {{ formatPrice(ticket.price * getQuantity(ticket.id)) }}
-              </span>
-            </p>
           </div>
 
           <!-- Low stock warning -->
@@ -247,6 +233,32 @@ const formatDateRange = (from: string, until: string): string => {
             {{ t('landing.tickets.ticketsLeft', { count: ticket.quantity }) }}
           </p>
         </div>
+      </div>
+      <!-- Checkout Button -->
+      <div class="mt-12 flex h-14 items-center justify-center">
+        <Transition
+          enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+          enter-from-class="opacity-0 scale-75 blur-sm"
+          enter-to-class="opacity-100 scale-100 blur-0"
+          leave-active-class="transition-all duration-300 ease-in"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-75"
+        >
+          <button
+            v-if="hasItems"
+            type="button"
+            class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-105 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/40 dark:shadow-indigo-700/30"
+            @click="emit('checkout')"
+          >
+            <IconShoppingBag class="h-5 w-5" />
+            <span>
+              {{ t('landing.tickets.checkout') }} · {{ formattedTotal }}
+            </span>
+            <IconArrowRight
+              class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+            />
+          </button>
+        </Transition>
       </div>
     </div>
   </section>

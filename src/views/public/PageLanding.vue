@@ -12,7 +12,6 @@ import type { Ticket } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
 
 // Components
-import LandingNavDots from './landing/LandingNavDots.vue'
 import LandingHeader from './landing/LandingHeader.vue'
 import LandingHero from './landing/LandingHero.vue'
 import LandingGallery from './landing/LandingGallery.vue'
@@ -22,6 +21,8 @@ import LandingGames from './landing/LandingGames.vue'
 import LandingMap from './landing/LandingMap.vue'
 import LandingCta from './landing/LandingCta.vue'
 import LandingFooter from './landing/LandingFooter.vue'
+import LandingCartDrawer from '@/views/public/landing/LandingCartDrawer.vue'
+import logger from '@/lib/logger.ts'
 
 const { t } = useI18n()
 
@@ -155,29 +156,10 @@ const mapEmbedUrl = computed(() => {
 
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
-  const sections = ['hero']
+  const sections = []
 
-  // Gallery after hero
-  if (galleryImages.value.length > 0) {
-    sections.push('gallery')
-  }
-
-  // Map/Location is second
-  if (edition.value?.location?.title) {
-    sections.push('map')
-  }
-
-  // Tickets is third
   if (isTicketsEnabled.value && activeTickets.value.length > 0) {
     sections.push('tickets')
-  }
-
-  if (countdown.value && conventionStatus.value === 'upcoming') {
-    sections.push('countdown')
-  }
-
-  if (isLibraryEnabled.value && trendingGames.value.length > 0) {
-    sections.push('games')
   }
 
   return sections
@@ -260,6 +242,13 @@ function getRandomItems<T>(items: T[], count: number): T[] {
   }
   return shuffled
 }
+
+const isCartDrawerOpen = ref<boolean>(false)
+
+function openCartDrawer(): void {
+  logger.info('Opening cart drawer')
+  isCartDrawerOpen.value = true
+}
 </script>
 
 <template>
@@ -271,13 +260,10 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       :tenant-logo="tenant?.logo"
       :tenant-name="tenant?.name"
       :edition-name="edition?.name"
-    />
-
-    <!-- Fixed Navigation Dots -->
-    <LandingNavDots
       :sections="navigationSections"
       :active-section="activeSection"
-      @scroll-to="scrollToSection"
+      @navigate="scrollToSection"
+      @cart-click="openCartDrawer"
     />
 
     <!-- Hero Section -->
@@ -333,5 +319,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
 
     <!-- Footer -->
     <LandingFooter :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
+
+    <LandingCartDrawer v-model:open="isCartDrawerOpen" />
   </div>
 </template>
