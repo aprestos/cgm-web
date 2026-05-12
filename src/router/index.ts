@@ -5,7 +5,6 @@ import {
   hasAnyOfRoles,
 } from '@/router/guards'
 import { RouteNames } from '@/router/routeNames.ts'
-import HomeView from '../views/public/HomeView.vue'
 
 // Extend Vue Router's RouteMeta interface
 declare module 'vue-router' {
@@ -21,13 +20,27 @@ const router = createRouter({
   routes: [
     {
       path: '',
-      name: RouteNames.public.home,
       component: (): Promise<unknown> =>
-        import('../views/public/PageLanding.vue'),
+        import('../views/landing/BaseLandingPage.vue'),
+      children: [
+        {
+          path: '',
+          name: RouteNames.landing.home,
+          component: (): Promise<unknown> =>
+            import('../views/landing/home/PageLanding.vue'),
+        },
+        {
+          path: 'checkout',
+          name: RouteNames.landing.checkout,
+          component: (): Promise<unknown> =>
+            import('../views/landing/checkout/PageCheckout.vue'),
+        },
+      ],
     },
     {
       path: '',
-      component: HomeView,
+      component: (): Promise<unknown> =>
+        import('@/views/public/BasePublicPage.vue'),
       children: [
         {
           path: 'library',
@@ -40,6 +53,12 @@ const router = createRouter({
           name: RouteNames.public.fleaMarket,
           component: (): Promise<unknown> =>
             import('@/views/public/flea-market/PageFleaMarketHome.vue'),
+        },
+        {
+          path: 'checkout',
+          name: RouteNames.public.checkout,
+          component: (): Promise<unknown> =>
+            import('../views/landing/checkout/PageCheckout.vue'),
         },
       ],
     },

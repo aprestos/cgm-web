@@ -52,8 +52,8 @@ export const formatRange = (
 }
 
 export const formatDateRange = (
-  start: string,
-  end: string,
+  start: string | undefined,
+  end: string | undefined,
   locale: string,
 ): string => {
   const formatter: Intl.DateTimeFormat & {
@@ -62,6 +62,10 @@ export const formatDateRange = (
     month: 'long',
     day: 'numeric',
   })
+
+  if (!start || !end) {
+    return '-'
+  }
 
   const startDate = new Date(start)
   const endDate = new Date(end)
@@ -75,4 +79,34 @@ export const formatDateRange = (
   }
 
   return formatter.formatRange(startDate, endDate)
+}
+
+export const formatWeekday = (
+  start: string | undefined,
+  end: string | undefined,
+  locale: string,
+): string => {
+  if (!start || !end) {
+    return '-'
+  }
+
+  const startDate = DateTime.fromISO(start).startOf('day')
+  const endDate = DateTime.fromISO(end).startOf('day')
+
+  if (!startDate.isValid || !endDate.isValid || endDate < startDate) {
+    return '-'
+  }
+
+  if (startDate.hasSame(endDate, 'day')) {
+    return startDate.setLocale(locale).toLocaleString({
+      weekday: 'long',
+    })
+  }
+
+  const dayCount = Math.floor(endDate.diff(startDate, 'days').days) + 1
+  return new Intl.NumberFormat(locale, {
+    style: 'unit',
+    unit: 'day',
+    unitDisplay: 'long',
+  }).format(dayCount)
 }

@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import {
   IconCalendar,
-  IconBooks,
-  IconTrophy,
   IconPlus,
   IconMinus,
   IconShoppingBagPlus,
@@ -10,11 +8,12 @@ import {
   IconArrowRight,
 } from '@tabler/icons-vue'
 import { computed } from 'vue'
-import type { Ticket } from '@/features/tickets/ticket.model.ts'
+import type { Ticket } from '@/features/tickets/ticket.model.js'
 import { useI18n } from 'vue-i18n'
-import { formatPrice } from '@/utils/price.ts'
+import { formatPrice } from '@/utils/price.js'
 import { useCart } from '@/stores/cart.store'
-import { formatDateRange } from '@/utils/date.ts'
+import { formatDateRange, formatWeekday } from '@/utils/date.js'
+import { RouteNames } from '@/router/routeNames.ts'
 
 const { t, locale } = useI18n()
 const {
@@ -28,16 +27,9 @@ const {
 
 interface Props {
   tickets: Ticket[]
-  isLibraryEnabled: boolean
-  isTournamentsEnabled: boolean
-}
-
-interface Emits {
-  (e: 'checkout'): void
 }
 
 defineProps<Props>()
-const emit = defineEmits<Emits>()
 
 const hasItems = computed(() => totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
@@ -69,20 +61,20 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
       </div>
 
       <!-- Tickets Grid -->
-      <div class="mt-16 grid gap-8 lg:grid-cols-3">
+      <div class="mt-16 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
         <div
           v-for="ticket in tickets"
           :key="ticket.id"
           :class="[
             'relative overflow-hidden rounded-3xl p-8 transition-all duration-300',
-            ticket.isPopularChoice
+            ticket.isPopular
               ? 'bg-linear-to-b from-indigo-600 to-violet-700 ring-2 ring-indigo-400 lg:scale-105 shadow-2xl'
               : 'bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl',
           ]"
         >
           <!-- Popular Badge -->
           <div
-            v-if="ticket.isPopularChoice"
+            v-if="ticket.isPopular"
             class="absolute right-4 top-4 rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm"
           >
             {{ t('landing.tickets.popular') }}
@@ -92,20 +84,37 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
           <div>
             <h3
               :class="[
-                'text-xl font-semibold',
-                ticket.isPopularChoice
+                'text-xl font-semibold flex items-center gap-3',
+                ticket.isPopular
                   ? 'text-white'
+                  : 'text-gray-700 dark:text-white',
+              ]"
+            >
+              <span>{{
+                formatWeekday(ticket.validFrom, ticket.validUntil, locale)
+              }}</span>
+            </h3>
+            <div
+              :class="[
+                'mt-1 flex flex-row items-center text-gray-700 gap-2 dark:text-white/60',
+                ticket.isPopular
+                  ? 'text-white/80'
                   : 'text-gray-900 dark:text-white',
               ]"
             >
-              {{ ticket.name }}
-            </h3>
+              <IconCalendar class="h-5 w-5 shrink-0" />
+              <span>
+                {{
+                  formatDateRange(ticket.validFrom, ticket.validUntil, locale)
+                }}
+              </span>
+            </div>
 
             <div class="mt-4 flex items-baseline gap-1">
               <span
                 :class="[
                   'text-5xl font-bold tracking-tight',
-                  ticket.isPopularChoice
+                  ticket.isPopular
                     ? 'text-white'
                     : 'text-gray-900 dark:text-white',
                 ]"
@@ -113,31 +122,6 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                 {{ formatPrice(ticket.price) }}
               </span>
             </div>
-
-            <ul
-              :class="[
-                'mt-8 space-y-3 text-sm',
-                ticket.isPopularChoice
-                  ? 'text-indigo-100'
-                  : 'text-gray-600 dark:text-gray-400',
-              ]"
-            >
-              <li class="flex items-center gap-3">
-                <IconCalendar class="h-4 w-4 shrink-0" />
-                <span>{{
-                  formatDateRange(ticket.validFrom, ticket.validUntil, locale)
-                }}</span>
-              </li>
-              <li v-if="isLibraryEnabled" class="flex items-center gap-3">
-                <IconBooks class="h-4 w-4 shrink-0" />
-                <span>{{ t('landing.tickets.libraryAccess') }}</span>
-              </li>
-              <li v-if="isTournamentsEnabled" class="flex items-center gap-3">
-                <IconTrophy class="h-4 w-4 shrink-0" />
-                <span>{{ t('landing.tickets.tournamentAccess') }}</span>
-              </li>
-            </ul>
-
             <!-- Action area: add-to-cart button ↔ quantity selector -->
             <div class="mt-8">
               <Transition
@@ -153,9 +137,9 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                   type="button"
                   :class="[
                     'flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300 cursor-pointer',
-                    ticket.isPopularChoice
+                    ticket.isPopular
                       ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                      : 'bg-black text-white hover:bg-black/70 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
+                      : 'bg-gray-100 text-black hover:bg-gray-300 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
                   ]"
                   @click="addToCart(ticket)"
                 >
@@ -169,7 +153,7 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                   key="qty-ctrl"
                   :class="[
                     'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2',
-                    ticket.isPopularChoice
+                    ticket.isPopular
                       ? 'bg-white/20'
                       : 'bg-black dark:bg-white/10',
                   ]"
@@ -178,7 +162,7 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                     type="button"
                     :class="[
                       'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
-                      ticket.isPopularChoice
+                      ticket.isPopular
                         ? 'text-white hover:bg-white/20'
                         : 'text-white hover:bg-white/20',
                     ]"
@@ -207,7 +191,7 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                     type="button"
                     :class="[
                       'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
-                      ticket.isPopularChoice
+                      ticket.isPopular
                         ? 'text-white hover:bg-white/20'
                         : 'text-white hover:bg-white/20',
                     ]"
@@ -225,7 +209,7 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
             v-if="ticket.quantity && ticket.quantity < 50"
             :class="[
               'mt-4 text-center text-xs',
-              ticket.isPopularChoice
+              ticket.isPopular
                 ? 'text-indigo-200'
                 : 'text-amber-600 dark:text-amber-400',
             ]"
@@ -244,20 +228,23 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
           leave-from-class="opacity-100 scale-100"
           leave-to-class="opacity-0 scale-75"
         >
-          <button
+          <RouterLink
             v-if="hasItems"
-            type="button"
-            class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-105 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/40 dark:shadow-indigo-700/30"
-            @click="emit('checkout')"
+            :to="{ name: RouteNames.landing.checkout }"
           >
-            <IconShoppingBag class="h-5 w-5" />
-            <span>
-              {{ t('landing.tickets.checkout') }} · {{ formattedTotal }}
-            </span>
-            <IconArrowRight
-              class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-            />
-          </button>
+            <button
+              type="button"
+              class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-105 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/40 dark:shadow-indigo-700/30"
+            >
+              <IconShoppingBag class="h-5 w-5" />
+              <span>
+                {{ t('landing.tickets.checkout') }} · {{ formattedTotal }}
+              </span>
+              <IconArrowRight
+                class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+              />
+            </button>
+          </RouterLink>
         </Transition>
       </div>
     </div>

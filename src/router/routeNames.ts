@@ -25,6 +25,12 @@ enum Public {
   prototypes = 'public.prototypes',
   fleaMarket = 'public.flea-market',
   user = 'public.user',
+  checkout = 'public.checkout',
+}
+
+enum Landing {
+  home = 'landing.home',
+  checkout = 'landing.checkout',
 }
 
 enum Auth {
@@ -41,6 +47,7 @@ enum ErrorRoutes {
 export const RouteNames = {
   admin: Admin,
   public: Public,
+  landing: Landing,
   auth: Auth,
   error: ErrorRoutes,
 }

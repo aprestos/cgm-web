@@ -7,87 +7,6 @@
   >
     <form>
       <div class="space-y-6 mx-auto max-w-7xl">
-        <!-- Common fields (render once) -->
-        <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-          <CInput
-            id="ticket-name"
-            v-model="formData.name"
-            :label="t('admin.tickets.name')"
-            :errors="r$.$errors.name"
-          />
-
-          <div class="col-span-full flex items-center justify-between">
-            <span class="flex grow flex-col">
-              <label
-                id="availability-label"
-                class="text-sm/6 font-medium text-gray-900 dark:text-white"
-                >Popular choice</label
-              >
-              <span
-                id="availability-description"
-                class="text-sm text-gray-500 dark:text-gray-400"
-                >When selected the ticket will be shown as popular</span
-              >
-            </span>
-            <div
-              class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500"
-            >
-              <span
-                class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"
-              ></span>
-              <input
-                id="availability"
-                v-model="formData.isPopularChoice"
-                type="checkbox"
-                class="absolute inset-0 size-full appearance-none focus:outline-hidden"
-                name="availability"
-                aria-labelledby="availability-label"
-                aria-describedby="availability-description"
-              />
-            </div>
-          </div>
-
-          <CInputCurrency
-            id="ticket-price"
-            v-model="formData.price"
-            :label="t('admin.tickets.price')"
-            :errors="r$.$errors.price"
-          />
-
-          <CInput
-            id="ticket-quantity"
-            v-model="formData.quantity"
-            :label="t('admin.tickets.quantity')"
-            type="number"
-            :errors="r$.$errors.quantity"
-          />
-
-          <!-- Sale Period: side-by-side grid for start and end -->
-          <div class="sm:col-span-6">
-            <div class="grid sm:grid-cols-2 gap-6">
-              <CInput
-                id="ticket-sale-from"
-                v-model="formData.saleFrom"
-                :label="t('admin.tickets.saleFrom')"
-                type="datetime-local"
-                :errors="r$.$errors.saleFrom"
-                :helper-text="t('admin.tickets.optional')"
-                class="col-span-full sm:col-span-1"
-              />
-
-              <CInput
-                id="ticket-sale-until"
-                v-model="formData.saleUntil"
-                :label="t('admin.tickets.saleUntil')"
-                type="datetime-local"
-                :errors="r$.$errors.saleUntil"
-                :helper-text="t('admin.tickets.optional')"
-                class="col-span-full sm:col-span-1"
-              />
-            </div>
-          </div>
-        </div>
-
         <!-- FormTabs for Single Day vs Multiple Days (only validity fields inside) -->
         <FormTabs
           v-model="selectedTab"
@@ -137,6 +56,79 @@
             </div>
           </template>
         </FormTabs>
+
+        <!-- Common fields (render once) -->
+        <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
+          <CInputCurrency
+            id="ticket-price"
+            v-model="formData.price"
+            :label="t('admin.tickets.price')"
+            :errors="r$.$errors.price"
+          />
+
+          <CInput
+            id="ticket-quantity"
+            v-model="formData.quantity"
+            :label="t('admin.tickets.quantity')"
+            type="number"
+            :errors="r$.$errors.quantity"
+          />
+
+          <!-- Sale Period: side-by-side grid for start and end -->
+          <div class="sm:col-span-6">
+            <div class="grid sm:grid-cols-2 gap-6">
+              <CInput
+                id="ticket-sale-from"
+                v-model="formData.saleFrom"
+                :label="t('admin.tickets.saleFrom')"
+                type="datetime-local"
+                :errors="r$.$errors.saleFrom"
+                :helper-text="t('admin.tickets.optional')"
+                class="col-span-full sm:col-span-1"
+              />
+
+              <CInput
+                id="ticket-sale-until"
+                v-model="formData.saleUntil"
+                :label="t('admin.tickets.saleUntil')"
+                type="datetime-local"
+                :errors="r$.$errors.saleUntil"
+                :helper-text="t('admin.tickets.optional')"
+                class="col-span-full sm:col-span-1"
+              />
+            </div>
+          </div>
+          <div class="col-span-full flex items-center justify-between">
+            <span class="flex grow flex-col">
+              <label
+                id="availability-label"
+                class="text-sm/6 font-medium text-gray-900 dark:text-white"
+                >Popular choice</label
+              >
+              <span
+                id="availability-description"
+                class="text-sm text-gray-500 dark:text-gray-400"
+                >When selected the ticket will be shown as popular</span
+              >
+            </span>
+            <div
+              class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500"
+            >
+              <span
+                class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"
+              ></span>
+              <input
+                id="availability"
+                v-model="formData.isPopular"
+                type="checkbox"
+                class="absolute inset-0 size-full appearance-none focus:outline-hidden"
+                name="availability"
+                aria-labelledby="availability-label"
+                aria-describedby="availability-description"
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- Action Buttons -->
@@ -196,23 +188,21 @@ interface Props {
 const props = defineProps<Props>()
 
 const formData = ref<{
-  name: string
   price: string
   quantity: string
   saleFrom: string
   saleUntil: string
   validFrom: string
   validUntil: string
-  isPopularChoice: boolean
+  isPopular: boolean
 }>({
-  name: '',
   price: '',
   quantity: '',
   saleFrom: '',
   saleUntil: '',
   validFrom: '',
   validUntil: '',
-  isPopularChoice: false,
+  isPopular: false,
 })
 
 const isSubmitting = ref<boolean>(false)
@@ -243,7 +233,6 @@ const handleTabChange = (index: number): void => {
 }
 
 const { r$ } = useRegle(formData, {
-  name: { required },
   price: { required, minValue: minValue(0) },
   quantity: { required, minValue: minValue(1) },
   validFrom: {
@@ -272,14 +261,13 @@ const { r$ } = useRegle(formData, {
 
 const resetForm = (): void => {
   formData.value = {
-    name: '',
     price: '',
     quantity: '',
     saleFrom: '',
     saleUntil: '',
     validFrom: '',
     validUntil: '',
-    isPopularChoice: false,
+    isPopular: false,
   }
   r$.$reset()
 }
@@ -325,8 +313,7 @@ const submit = async (): Promise<void> => {
     await ticketService.create({
       tenantId: tenantStore.value.id,
       editionId: editionStore.value.id,
-      name: formData.value.name,
-      price: parseFloat(formData.value.price),
+      price: parseInt(formData.value.price),
       group: props.group as TicketGroup,
       quantity: parseInt(formData.value.quantity, 10),
       active: true,
@@ -334,6 +321,7 @@ const submit = async (): Promise<void> => {
       saleUntil: formData.value.saleUntil || undefined,
       validFrom: validFrom.toISO() as string,
       validUntil: validUntil.toISO() as string,
+      isPopular: formData.value.isPopular || false,
     })
 
     toast.success(t('admin.tickets.createSuccess'))

@@ -1,28 +1,24 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { editionStore } from '@/stores/edition.ts'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { editionStore } from '@/stores/edition.js'
+import { settingsStore } from '@/features/settings/useSettings.store.js'
 import { IconBooks, IconUsers, IconTicket } from '@tabler/icons-vue'
-import { RouteNames } from '@/router/routeNames.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { RouteNames } from '@/router/routeNames.js'
+import { tenantStore } from '@/stores/tenant.js'
 import { useI18n } from 'vue-i18n'
-import type { LibraryGame } from '@/features/library/games/game.model.ts'
-import { libraryService } from '@/features/library/games/service.ts'
-import type { Ticket } from '@/features/tickets/ticket.model.ts'
-import { ticketService } from '@/features/tickets/service.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.js'
+import { libraryService } from '@/features/library/games/service.js'
+import type { Ticket } from '@/features/tickets/ticket.model.js'
+import { ticketService } from '@/features/tickets/service.js'
 
 // Components
-import LandingHeader from './landing/LandingHeader.vue'
-import LandingHero from './landing/LandingHero.vue'
-import LandingGallery from './landing/LandingGallery.vue'
-import LandingTickets from './landing/LandingTickets.vue'
-import LandingCountdown from './landing/LandingCountdown.vue'
-import LandingGames from './landing/LandingGames.vue'
-import LandingMap from './landing/LandingMap.vue'
-import LandingCta from './landing/LandingCta.vue'
-import LandingFooter from './landing/LandingFooter.vue'
-import LandingCartDrawer from '@/views/public/landing/LandingCartDrawer.vue'
-import logger from '@/lib/logger.ts'
+import HeroView from './HeroView.vue'
+import GalleryView from './GalleryView.vue'
+import TicketsView from './TicketsView.vue'
+import CountdownView from './CountdownView.vue'
+import LibraryView from './LibraryView.vue'
+import CtaView from './CtaView.vue'
+import FooterView from './FooterView.vue'
 
 const { t } = useI18n()
 
@@ -147,19 +143,16 @@ const countdown = computed(() => {
   return { days, hours, minutes }
 })
 
-// Location map URL
-const mapEmbedUrl = computed(() => {
-  const location = edition.value?.location?.title
-  if (!location) return null
-  return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location)}`
-})
-
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
   const sections = []
 
   if (isTicketsEnabled.value && activeTickets.value.length > 0) {
     sections.push('tickets')
+  }
+
+  if (isLibraryEnabled.value) {
+    sections.push('library')
   }
 
   return sections
@@ -242,32 +235,14 @@ function getRandomItems<T>(items: T[], count: number): T[] {
   }
   return shuffled
 }
-
-const isCartDrawerOpen = ref<boolean>(false)
-
-function openCartDrawer(): void {
-  logger.info('Opening cart drawer')
-  isCartDrawerOpen.value = true
-}
 </script>
 
 <template>
   <div
     class="relative bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white overflow-x-hidden"
   >
-    <!-- Fixed Header with Logo -->
-    <LandingHeader
-      :tenant-logo="tenant?.logo"
-      :tenant-name="tenant?.name"
-      :edition-name="edition?.name"
-      :sections="navigationSections"
-      :active-section="activeSection"
-      @navigate="scrollToSection"
-      @cart-click="openCartDrawer"
-    />
-
     <!-- Hero Section -->
-    <LandingHero
+    <HeroView
       :convention-status="conventionStatus"
       :countdown="countdown"
       :primary-cta="primaryCTA"
@@ -277,24 +252,14 @@ function openCartDrawer(): void {
     />
 
     <!-- Gallery Section - Convention Photos -->
-    <LandingGallery
+    <GalleryView
       v-if="galleryImages.length > 0"
       id="gallery"
       :images="galleryImages"
     />
 
-    <!-- Map Section (Second) -->
-    <LandingMap
-      v-if="edition?.location?.title"
-      :location-title="edition.location.title"
-      :location-url="edition.location.url"
-      :start-date="edition.start_date"
-      :end-date="edition.end_date"
-      :map-embed-url="mapEmbedUrl"
-    />
-
     <!-- Tickets Section (Third) -->
-    <LandingTickets
+    <TicketsView
       v-if="isTicketsEnabled && activeTickets.length > 0"
       :tickets="activeTickets"
       :is-library-enabled="isLibraryEnabled"
@@ -302,24 +267,23 @@ function openCartDrawer(): void {
     />
 
     <!-- Countdown Section -->
-    <LandingCountdown
+    <CountdownView
       v-if="countdown && conventionStatus === 'upcoming'"
       :countdown="countdown"
       :start-date="edition?.start_date"
     />
 
     <!-- Games Preview Section -->
-    <LandingGames
+    <LibraryView
       v-if="isLibraryEnabled && trendingGames.length > 0"
+      section-id="library"
       :games="trendingGames"
     />
 
     <!-- Final CTA Section -->
-    <LandingCta />
+    <CtaView />
 
     <!-- Footer -->
-    <LandingFooter :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
-
-    <LandingCartDrawer v-model:open="isCartDrawerOpen" />
+    <FooterView :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
   </div>
 </template>

@@ -76,7 +76,15 @@
                                   <div
                                     class="flex justify-between text-base font-medium text-gray-900"
                                   >
-                                    <h3>{{ item.ticket.name }}</h3>
+                                    <h3>
+                                      {{
+                                        formatWeekday(
+                                          item.ticket.validFrom,
+                                          item.ticket.validUntil,
+                                          locale,
+                                        )
+                                      }}
+                                    </h3>
                                     <p class="ml-4">
                                       {{ formatPrice(item.ticket.price) }}
                                     </p>
@@ -168,10 +176,10 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
-import { useCart } from '@/stores/cart.store.ts'
-import { formatPrice } from '@/utils/price.ts'
+import { useCart } from '@/stores/cart.store.js'
+import { formatPrice } from '@/utils/price.js'
 import { IconTicketFilled } from '@tabler/icons-vue'
-import { formatDateRange } from '@/utils/date.ts'
+import { formatDateRange, formatWeekday } from '@/utils/date.js'
 import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()

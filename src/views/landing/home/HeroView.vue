@@ -5,14 +5,14 @@ import {
   IconMapPin,
   IconArrowDown,
   IconArrowRight,
-  IconChevronRight,
   IconSparkles,
 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/stores/tenant.js'
 import { useI18n } from 'vue-i18n'
-import { editionStore } from '@/stores/edition.ts'
-import LandingPoster from './LandingPoster.vue'
+import { editionStore } from '@/stores/edition.js'
+import PosterView from './PosterView.vue'
+import { formatDateRange } from '@/utils/date.js'
 
 const { t } = useI18n()
 
@@ -45,24 +45,35 @@ const logoUrl = computed(() => {
   return tenantStore.value.logos?.long || tenantStore.value.logo || null
 })
 
-// Track viewport height for responsive parallax
-const viewportHeight = ref<number>(800)
+interface ViewportSize {
+  width: number
+  height: number
+}
 
-function updateViewportHeight(): void {
-  viewportHeight.value = window.innerHeight
+// Track viewport size for responsive hero behavior
+const viewportSize = ref<ViewportSize>({
+  width: 1280,
+  height: 800,
+})
+
+function updateViewportSize(): void {
+  viewportSize.value = {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }
 }
 
 onMounted(() => {
-  updateViewportHeight()
-  window.addEventListener('resize', updateViewportHeight)
+  updateViewportSize()
+  window.addEventListener('resize', updateViewportSize)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('resize', updateViewportHeight)
+  window.removeEventListener('resize', updateViewportSize)
 })
 
 // Whether we're on a mobile-sized viewport
-const isMobile = computed(() => viewportHeight.value < 768)
+const isMobile = computed(() => viewportSize.value.width < 768)
 
 // Hero parallax effect — gentler on mobile
 const heroTransform = computed(() => {
@@ -73,24 +84,16 @@ const heroTransform = computed(() => {
 
 const heroOpacity = computed(() => {
   // Fade relative to viewport height so it works on any screen size
-  const fadeDistance = viewportHeight.value * (isMobile.value ? 1.2 : 0.8)
+  const fadeDistance = viewportSize.value.height * (isMobile.value ? 1.2 : 0.8)
   const opacity = 1 - props.scrollY / fadeDistance
   return Math.max(0, Math.min(1, opacity))
 })
-
-function formatShortDate(dateString: string | undefined): string {
-  if (!dateString) return 'TBA'
-  return new Date(dateString).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  })
-}
 </script>
 
 <template>
   <section
     id="hero"
-    class="relative flex min-h-screen items-center justify-center overflow-hidden"
+    class="relative flex min-h-svh items-center justify-center overflow-hidden px-0 pb-16 pt-28 sm:pb-20 sm:pt-32"
   >
     <!-- Animated Background -->
     <div class="absolute inset-0">
@@ -118,7 +121,7 @@ function formatShortDate(dateString: string | undefined): string {
       />
 
       <!-- Board Game Elements -->
-      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <div class="pointer-events-none absolute inset-0 overflow-hidden">
         <!-- Floating Dice -->
         <div
           class="absolute top-[15%] left-[10%] animate-float opacity-20 dark:opacity-10"
@@ -297,7 +300,7 @@ function formatShortDate(dateString: string | undefined): string {
 
         <!-- Board Game Box -->
         <div
-          class="absolute top-[40%] left-[5%] animate-float-delayed opacity-12 dark:opacity-6"
+          class="absolute top-[40%] left-[5%] hidden animate-float-delayed opacity-12 dark:opacity-6 sm:block"
           style="animation-delay: 3s"
         >
           <svg
@@ -359,7 +362,7 @@ function formatShortDate(dateString: string | undefined): string {
 
         <!-- Hexagon Tile -->
         <div
-          class="absolute top-[35%] right-[8%] animate-float opacity-15 dark:opacity-8"
+          class="absolute top-[35%] right-[8%] hidden animate-float opacity-15 dark:opacity-8 sm:block"
           style="animation-delay: 1.8s"
         >
           <svg
@@ -388,7 +391,9 @@ function formatShortDate(dateString: string | undefined): string {
         </div>
 
         <!-- Small Dice scattered -->
-        <div class="absolute top-[80%] left-[25%] opacity-10 dark:opacity-5">
+        <div
+          class="absolute top-[80%] left-[25%] hidden opacity-10 dark:opacity-5 sm:block"
+        >
           <svg
             width="25"
             height="25"
@@ -413,7 +418,7 @@ function formatShortDate(dateString: string | undefined): string {
         </div>
 
         <div
-          class="absolute bottom-[15%] left-[35%] opacity-10 dark:opacity-5"
+          class="absolute bottom-[15%] left-[35%] hidden opacity-10 dark:opacity-5 sm:block"
           style="animation-delay: 0.7s"
         >
           <svg
@@ -445,7 +450,7 @@ function formatShortDate(dateString: string | undefined): string {
 
     <!-- Hero Content -->
     <div
-      class="relative z-10 mx-auto max-w-7xl px-4"
+      class="relative z-10 mx-auto max-w-7xl px-4 sm:px-6"
       :style="{ opacity: heroOpacity }"
     >
       <div
@@ -502,7 +507,7 @@ function formatShortDate(dateString: string | undefined): string {
           <!-- Main Title -->
           <h1
             v-else
-            class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 dark:from-white dark:via-white dark:to-white/60 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-5xl md:text-7xl"
+            class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-white dark:via-white dark:to-white/60 sm:text-5xl md:text-7xl"
             :class="posterUrl ? 'lg:text-6xl xl:text-7xl' : 'lg:text-8xl'"
           >
             {{ editionStore?.name || t('landing.hero.defaultTitle') }}
@@ -511,7 +516,7 @@ function formatShortDate(dateString: string | undefined): string {
           <!-- Subtitle / Description -->
           <p
             v-if="!useLogo"
-            class="mx-auto mt-6 max-w-2xl text-lg text-gray-600 dark:text-gray-400 sm:text-xl lg:text-2xl"
+            class="mx-auto mt-5 max-w-2xl text-base text-gray-600 dark:text-gray-400 sm:mt-6 sm:text-xl lg:text-2xl"
             :class="{ 'lg:mx-0': posterUrl }"
           >
             {{
@@ -522,7 +527,7 @@ function formatShortDate(dateString: string | undefined): string {
 
           <!-- Event Date & Location -->
           <div
-            class="mt-8 flex flex-wrap items-center gap-6 text-sm text-gray-600 dark:text-gray-400"
+            class="mt-7 flex flex-col gap-3 text-sm text-gray-600 dark:text-gray-400 sm:mt-8 sm:flex-row sm:flex-wrap sm:items-center sm:gap-6"
             :class="
               posterUrl ? 'justify-center lg:justify-start' : 'justify-center'
             "
@@ -531,10 +536,13 @@ function formatShortDate(dateString: string | undefined): string {
               <IconCalendar
                 class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
               />
-              <span>{{ formatShortDate(editionStore?.start_date) }}</span>
-              <span v-if="editionStore?.end_date">
-                - {{ formatShortDate(editionStore.end_date) }}
-              </span>
+              <span>{{
+                formatDateRange(
+                  editionStore?.start_date,
+                  editionStore?.end_date,
+                  useI18n().locale.value,
+                )
+              }}</span>
             </div>
             <a
               v-if="editionStore?.location?.url"
@@ -550,9 +558,17 @@ function formatShortDate(dateString: string | undefined): string {
             </a>
           </div>
 
+          <!-- Poster (mobile/tablet, before CTA) -->
+          <div v-if="posterUrl" class="mt-8 w-56 shrink-0 sm:w-72 lg:hidden">
+            <PosterView
+              :poster-url="posterUrl"
+              :edition-name="editionStore?.name"
+            />
+          </div>
+
           <!-- Primary CTA -->
           <div
-            class="mt-12 flex flex-col items-center gap-4 sm:flex-row"
+            class="mt-10 flex w-full flex-col items-center gap-4 sm:mt-12 sm:flex-row"
             :class="
               posterUrl
                 ? 'sm:justify-center lg:justify-start'
@@ -563,7 +579,7 @@ function formatShortDate(dateString: string | undefined): string {
               v-if="primaryCta.route"
               :to="{ name: primaryCta.route }"
               :class="[
-                'group inline-flex items-center gap-3 rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all duration-300',
+                'group inline-flex w-full items-center justify-center gap-3 rounded-full px-6 py-3.5 text-base font-semibold shadow-lg transition-all duration-300 sm:w-auto sm:px-8 sm:py-4 sm:text-lg',
                 primaryCta.style === 'live'
                   ? 'bg-emerald-600 text-white hover:bg-emerald-500 hover:shadow-emerald-500/25'
                   : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 hover:shadow-gray-900/25 dark:hover:shadow-white/25',
@@ -578,7 +594,7 @@ function formatShortDate(dateString: string | undefined): string {
             <a
               v-else-if="primaryCta.href"
               :href="primaryCta.href"
-              class="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25"
+              class="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
             >
               <component :is="primaryCta.icon" class="h-6 w-6" />
               {{ primaryCta.text }}
@@ -586,20 +602,15 @@ function formatShortDate(dateString: string | undefined): string {
                 class="h-5 w-5 transition-transform group-hover:translate-x-1"
               />
             </a>
-
-            <a
-              href="#map"
-              class="inline-flex items-center gap-2 rounded-full px-6 py-4 text-gray-600 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-white"
-            >
-              {{ t('landing.hero.discoverMore') }}
-              <IconChevronRight class="h-5 w-5" />
-            </a>
           </div>
         </div>
 
         <!-- Poster (right side on lg, below CTA on mobile) -->
-        <div v-if="posterUrl" class="w-64 sm:w-72 lg:w-72 xl:w-80 shrink-0">
-          <LandingPoster
+        <div
+          v-if="posterUrl"
+          class="hidden w-56 shrink-0 sm:w-72 lg:block lg:w-72 xl:w-80"
+        >
+          <PosterView
             :poster-url="posterUrl"
             :edition-name="editionStore?.name"
           />
@@ -609,7 +620,7 @@ function formatShortDate(dateString: string | undefined): string {
 
     <!-- Scroll Indicator -->
     <button
-      class="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-gray-400 dark:text-white/60 transition-colors hover:text-gray-900 dark:hover:text-white"
+      class="absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-bounce text-gray-400 transition-colors hover:text-gray-900 dark:text-white/60 dark:hover:text-white md:inline-flex"
       aria-label="Scroll down"
       @click="emit('scrollTo', 'map')"
     >

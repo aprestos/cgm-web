@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import type { CSSProperties } from 'vue'
 import { IconMenu2, IconShoppingCart, IconX } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { RouteNames } from '@/router/routeNames.ts'
-import { useCart } from '@/stores/cart.store.ts'
-import { formatPrice } from '@/utils/price.ts'
+import { RouteNames } from '@/router/routeNames.js'
+import { useCart } from '@/stores/cart.store.js'
+import { formatPrice } from '@/utils/price.js'
+import { tenantStore } from '@/stores/tenant.js'
 
 interface Props {
-  tenantLogo?: string
-  tenantName?: string
   sections?: string[]
   activeSection?: string
 }
@@ -19,8 +19,6 @@ interface Emits {
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  tenantLogo: '',
-  tenantName: '',
   sections: () => [],
   activeSection: '',
 })
@@ -30,31 +28,33 @@ const { t } = useI18n()
 const { totalItems, totalPrice } = useCart()
 const isMobileMenuOpen = ref<boolean>(false)
 const scrollY = ref<number>(0)
+const DEFAULT_HERO_FADE_DISTANCE = 420
+const MIN_HERO_FADE_DISTANCE = 240
+const MAX_HEADER_OPACITY = 0.85
+const HERO_FADE_RATIO = 0.8
+const heroFadeDistance = ref<number>(DEFAULT_HERO_FADE_DISTANCE)
+const heroResizeObserver = ref<ResizeObserver | null>(null)
 
 const hasItems = computed(() => totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
 const desktopSections = computed(() => props.sections.slice(0, 5))
-const isHeaderScrolled = computed(() => scrollY.value > 100)
+const headerProgress = computed<number>(() => {
+  const progress = scrollY.value / heroFadeDistance.value
+  return Math.min(Math.max(progress, 0), 1)
+})
+const headerBackgroundOpacity = computed<number>(
+  () => headerProgress.value * MAX_HEADER_OPACITY,
+)
+const headerBlurStyle = computed<CSSProperties>(() => {
+  const blur = (headerProgress.value * 6).toFixed(2)
+  return {
+    backdropFilter: `blur(${blur}px)`,
+    WebkitBackdropFilter: `blur(${blur}px)`,
+  }
+})
 
 function getSectionLabel(section: string): string {
-  switch (section) {
-    case 'hero':
-      return t('landing.nav.home')
-    case 'gallery':
-      return t('landing.nav.gallery')
-    case 'map':
-      return t('landing.nav.location')
-    case 'tickets':
-      return t('landing.nav.tickets')
-    case 'countdown':
-      return t('landing.nav.countdown')
-    case 'features':
-      return t('landing.nav.features')
-    case 'games':
-      return t('landing.nav.games')
-    default:
-      return section
-  }
+  return t(`landing.nav.${section}`)
 }
 
 function handleNavigationClick(section: string): void {
@@ -79,39 +79,80 @@ function handleScroll(): void {
   scrollY.value = window.scrollY
 }
 
+function getHeroFadeDistance(): number {
+  const heroElement = document.getElementById('hero')
+
+  if (!heroElement) {
+    return DEFAULT_HERO_FADE_DISTANCE
+  }
+
+  const heroHeight = heroElement.getBoundingClientRect().height
+  return Math.max(heroHeight * HERO_FADE_RATIO, MIN_HERO_FADE_DISTANCE)
+}
+
+function updateHeroFadeDistance(): void {
+  heroFadeDistance.value = getHeroFadeDistance()
+}
+
+function observeHeroSection(): void {
+  const heroElement = document.getElementById('hero')
+
+  if (!heroElement || typeof ResizeObserver === 'undefined') {
+    return
+  }
+
+  heroResizeObserver.value = new ResizeObserver(() => {
+    updateHeroFadeDistance()
+  })
+
+  heroResizeObserver.value.observe(heroElement)
+}
+
 onMounted(() => {
+  updateHeroFadeDistance()
+  observeHeroSection()
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
+  window.addEventListener('resize', updateHeroFadeDistance)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  window.removeEventListener('resize', updateHeroFadeDistance)
+  heroResizeObserver.value?.disconnect()
+  heroResizeObserver.value = null
 })
 </script>
 
 <template>
   <header
-    class="fixed inset-x-0 top-0 z-40 px-4 sm:px-6 transition-all duration-300"
-    :class="
-      isHeaderScrolled
-        ? 'bg-white/85 py-3 shadow-lg ring-1 ring-gray-200 backdrop-blur-sm dark:bg-gray-950/85 dark:ring-white/10'
-        : 'bg-transparent py-4'
-    "
+    class="fixed inset-x-0 top-0 z-40 px-3 pt-[max(env(safe-area-inset-top),0.5rem)] sm:px-6 sm:pt-4 transition-[padding] duration-300"
+    :class="headerProgress > 0 ? 'py-3' : 'py-4'"
+    :style="headerBlurStyle"
   >
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 bg-gray-50 transition-opacity duration-150 dark:bg-gray-950"
+      :style="{ opacity: headerBackgroundOpacity }"
+    />
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 shadow-lg ring-1 ring-gray-200/70 transition-opacity duration-150 dark:ring-white/10"
+      :style="{ opacity: headerProgress }"
+    />
+
     <div
       class="mx-auto grid w-full max-w-7xl grid-cols-[1fr_auto_1fr] items-center gap-3"
     >
       <RouterLink
-        :to="{ name: RouteNames.public.home }"
+        :to="{ name: RouteNames.landing.home }"
         class="group flex min-w-0 items-center gap-3"
       >
         <div
-          v-if="tenantLogo"
-          class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl p-2 transition-all duration-300 dark:bg-gray-900/90 dark:ring-white/10"
+          v-if="tenantStore?.logo"
+          class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl p-2 transition-all duration-300 sm:h-12 sm:w-12 dark:bg-gray-900/90 dark:ring-white/10"
         >
           <img
-            :src="tenantLogo"
-            :alt="tenantName || 'Logo'"
+            :src="tenantStore?.logo"
+            :alt="tenantStore?.name || 'Logo'"
             class="h-full w-full object-contain"
           />
         </div>
@@ -169,7 +210,7 @@ onUnmounted(() => {
 
         <button
           type="button"
-          class="flex h-12 w-12 items-center justify-center rounded-xl text-gray-800 transition-colors hover:text-primary lg:hidden dark:text-white"
+          class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100/90 text-gray-800 transition-colors hover:text-primary lg:hidden dark:bg-gray-900/80 dark:text-white"
           :aria-expanded="isMobileMenuOpen"
           :aria-label="
             isMobileMenuOpen ? t('landing.nav.home') : t('landing.nav.home')
@@ -192,7 +233,7 @@ onUnmounted(() => {
           <div
             v-if="isMobileMenuOpen"
             id="landing-mobile-menu"
-            class="absolute right-0 top-full mt-3 w-[min(22rem,calc(100vw-2rem))] overflow-hidden rounded-2xl bg-white/95 p-3 shadow-2xl ring-1 ring-gray-200 backdrop-blur-sm lg:hidden dark:bg-gray-900/95 dark:ring-white/10"
+            class="absolute right-0 top-full mt-3 w-[min(22rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl bg-gray-50/95 p-3 shadow-2xl ring-1 ring-gray-200/70 backdrop-blur-sm lg:hidden dark:bg-gray-900/95 dark:ring-white/10"
           >
             <nav
               class="flex flex-col gap-1"

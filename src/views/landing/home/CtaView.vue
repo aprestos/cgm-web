@@ -7,7 +7,7 @@ import {
   IconBrandTwitter,
 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
-import { RouteNames } from '@/router/routeNames.ts'
+import { RouteNames } from '@/router/routeNames.js'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
