@@ -3,7 +3,7 @@ import {
   getStatus,
   type LibraryGame,
   type LibraryGameStatus,
-} from '@/features/library/game.model.ts'
+} from '@/features/library/games/game.model.ts'
 import {
   IconArrowBarUp,
   IconArrowBarToDownDashed,
@@ -18,7 +18,7 @@ import {
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import libraryService from '@/features/library/service.ts'
+import libraryService from '@/features/library/games/service.ts'
 
 const { t } = useI18n()
 

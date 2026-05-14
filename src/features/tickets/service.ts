@@ -4,7 +4,7 @@ import type {
   CreateTicketInput,
   UpdateTicketInput,
 } from './ticket.model'
-import { toCamelCase, toSnakeCase } from '@/utils/caseConverter'
+import { toCamelCaseAs, toSnakeCaseAs } from '@/utils/caseConverter'
 
 export const ticketService = {
   /**
@@ -19,7 +19,7 @@ export const ticketService = {
       .eq('tenant_id', tenantId)
 
     if (error) throw error
-    return toCamelCase(data ?? []) as Ticket[]
+    return toCamelCaseAs<Ticket>(data ?? [])
   },
 
   /**
@@ -34,14 +34,14 @@ export const ticketService = {
       .single()
 
     if (error) throw error
-    return data ? (toCamelCase(data) as unknown as Ticket) : null
+    return data ? toCamelCaseAs<Ticket>(data) : null
   },
 
   /**
    * Create a new ticket
    */
   async create(input: CreateTicketInput): Promise<Ticket> {
-    const ticketData = toSnakeCase({
+    const ticketData = toSnakeCaseAs<Record<string, unknown>>({
       ...input,
       active: true,
     } as Record<string, unknown>)
@@ -54,7 +54,7 @@ export const ticketService = {
       .single()
 
     if (error) throw error
-    return toCamelCase(data as Record<string, unknown>) as unknown as Ticket
+    return toCamelCaseAs<Ticket>(data)
   },
 
   /**
@@ -63,13 +63,17 @@ export const ticketService = {
   async update(ticketId: number, input: UpdateTicketInput): Promise<Ticket> {
     const { data, error } = await supabase
       .from('tickets')
-      .update(toSnakeCase(input as unknown as Record<string, unknown>))
+      .update(
+        toSnakeCaseAs<Record<string, unknown>>(
+          input as unknown as Record<string, unknown>,
+        ),
+      )
       .eq('id', ticketId)
       .select()
       .single()
 
     if (error) throw error
-    return toCamelCase(data as Record<string, unknown>) as unknown as Ticket
+    return toCamelCaseAs<Ticket>(data)
   },
 
   /**

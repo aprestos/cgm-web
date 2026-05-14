@@ -1,7 +1,7 @@
 import type { Tenant } from '@/features/tenant/tenant.model.ts'
 import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
-import { toCamelCase, toSnakeCase } from '@/utils/caseConverter.ts'
+import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
 
 export const tenantService = {
   async get(): Promise<Array<Tenant>> {
@@ -27,7 +27,7 @@ export const tenantService = {
         .single()
 
       if (data) {
-        return toCamelCase(data) as Tenant
+        return toCamelCaseAs<Tenant>(data)
       }
 
       // If not found and dev tenant ID is configured, use that as fallback
@@ -55,7 +55,7 @@ export const tenantService = {
         logger.error('Unable to fetch tenant', { id, error })
         return null
       }
-      return data ? (toCamelCase(data) as Tenant) : null
+      return data ? toCamelCaseAs<Tenant>(data) : null
     } catch (error) {
       console.error((error as Error).message)
       return null

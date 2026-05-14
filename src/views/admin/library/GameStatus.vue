@@ -3,7 +3,7 @@ import {
   getStatus,
   getStatusLabel,
   type LibraryGame,
-} from '@/features/library/game.model.ts'
+} from '@/features/library/games/game.model.ts'
 import CBadge from '@/components/CBadge.vue'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/vue'
 import libraryWithdrawService, {

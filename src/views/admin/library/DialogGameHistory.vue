@@ -10,7 +10,7 @@ import logger from '@/lib/logger.ts'
 import { useTimeAgo } from '@vueuse/core'
 import { userService } from '@/features/users/service.ts'
 import WithdrawTimeline from '../../public/WithdrawTimeline.vue'
-import type { LibraryGame } from '@/features/library/game.model.ts'
+import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { IconExternalLink } from '@tabler/icons-vue'
 
