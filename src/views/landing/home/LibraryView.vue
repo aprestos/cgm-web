@@ -33,7 +33,7 @@ function getGameCardClass(index: number): string {
 
 <template>
   <section :id="sectionId" class="relative overflow-hidden py-32">
-    <div class="absolute inset-0 bg-gray-100 dark:bg-gray-950" />
+    <div class="absolute inset-0 0" />
     <div
       class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.1),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15),transparent_50%)]"
     />

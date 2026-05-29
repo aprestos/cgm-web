@@ -15,7 +15,7 @@ defineProps<Props>()
 
 <template>
   <section id="map" class="relative overflow-hidden py-12 sm:py-16 lg:py-28">
-    <div class="absolute inset-0 bg-gray-100 dark:bg-gray-950" />
+    <div class="absolute inset-0" />
 
     <div class="relative z-10 mx-auto max-w-7xl px-4">
       <!-- Section Header -->

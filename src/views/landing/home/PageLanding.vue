@@ -228,7 +228,7 @@ async function loadTrendingGames(): Promise<void> {
   try {
     isLoadingGames.value = true
     const games = await libraryService.get()
-    trendingGames.value = getRandomItems(games, 15)
+    trendingGames.value = getRandomItems(games, 10)
   } catch {
     trendingGames.value = []
   } finally {
