@@ -142,7 +142,7 @@ const stepIndex = computed((): number =>
 )
 
 const subtotal = computed((): number => totalPrice.value)
-const taxes = computed((): number => Number((subtotal.value * 0.23).toFixed(2)))
+const taxes = computed((): number => Math.round(subtotal.value * 0.23))
 const total = computed((): number => subtotal.value + taxes.value)
 
 const orderItems = computed(

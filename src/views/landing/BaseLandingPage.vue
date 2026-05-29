@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { settingsStore } from '@/features/settings/useSettings.store.js'
-import type { Ticket } from '@/features/tickets/ticket.model.js'
-
+import { settingsStore } from '@/features/settings/useSettings.store'
+import type { Ticket } from '@/features/tickets/ticket.model'
 // Components
 import HeaderComponent from './HeaderComponent.vue'
 import CartDrawer from '@/views/landing/CartDrawer.vue'
@@ -34,9 +33,7 @@ const activeTickets = computed(() =>
 
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
-  const sections = []
-
-  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
+  if (isTicketsEnabled.value) {
     sections.push('tickets')
   }
 

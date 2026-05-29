@@ -123,8 +123,6 @@ onMounted(async () => {
           <IconArrowNarrowRight class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
-      <code>{{ normalizeQueryValue(route.query.code) }}</code>
-      <code>{{ route.query.state }}</code>
     </div>
   </div>
 </template>

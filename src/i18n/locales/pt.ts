@@ -163,13 +163,15 @@ const pt = {
     profile: 'Perfil',
   },
   ticketsPage: {
-    unavailableTitle: 'A venda de bilhetes nao esta disponivel de momento',
+  ticketsPage: {
+    unavailableTitle: 'A venda de bilhetes não está disponível de momento',
     unavailableDescription:
       'Volta mais tarde para consultar novas disponibilidades.',
     loading: 'A carregar bilhetes...',
     loadError:
-      'Nao foi possivel carregar os bilhetes agora. Tenta novamente daqui a pouco.',
-    empty: 'Nao existem bilhetes disponiveis neste momento.',
+      'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
+    empty: 'Não existem bilhetes disponíveis neste momento.',
+  }
   },
   withdraw: {
     history: 'Histórico de requisições',
@@ -477,12 +479,12 @@ const pt = {
     },
     account: {
       description:
-        'Usa os teus dados para receber confirmacoes e atualizacoes.',
+        'Usa os teus dados para receber confirmações e atualizações.',
       loading: 'A verificar a tua conta...',
       name: 'Nome completo',
       email: 'Email',
-      terms: 'Concordo com os termos e politica de privacidade.',
-    },
+      terms: 'Concordo com os termos e política de privacidade.',
+    }
     tickets: {
       description: 'Define o nome e o email para cada bilhete no teu carrinho.',
       ticketNumber: 'Bilhete #{number}',

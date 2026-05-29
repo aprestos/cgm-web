@@ -176,10 +176,10 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
-import { useCart } from '@/stores/cart.store.js'
-import { formatPrice } from '@/utils/price.js'
+import { useCart } from '@/stores/cart.store'
+import { formatPrice } from '@/utils/price'
 import { IconTicketFilled } from '@tabler/icons-vue'
-import { formatDateRange, formatWeekday } from '@/utils/date.js'
+import { formatDateRange, formatWeekday } from '@/utils/date'
 import { useI18n } from 'vue-i18n'
 
 const { locale } = useI18n()

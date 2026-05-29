@@ -8,11 +8,11 @@ import {
   IconArrowRight,
 } from '@tabler/icons-vue'
 import { computed } from 'vue'
-import type { Ticket } from '@/features/tickets/ticket.model.js'
+import type { Ticket } from '@/features/tickets/ticket.model'
 import { useI18n } from 'vue-i18n'
-import { formatPrice } from '@/utils/price.js'
+import { formatPrice } from '@/utils/price'
 import { useCart } from '@/stores/cart.store'
-import { formatDateRange, formatWeekday } from '@/utils/date.js'
+import { formatDateRange, formatWeekday } from '@/utils/date'
 import { RouteNames } from '@/router/routeNames.ts'
 
 const { t, locale } = useI18n()
