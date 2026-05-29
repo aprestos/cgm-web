@@ -3,10 +3,10 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { CSSProperties } from 'vue'
 import { IconMenu2, IconShoppingCart, IconX } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { RouteNames } from '@/router/routeNames.js'
-import { useCart } from '@/stores/cart.store.js'
-import { formatPrice } from '@/utils/price.js'
-import { tenantStore } from '@/stores/tenant.js'
+import { RouteNames } from '@/router/routeNames'
+import { useCart } from '@/stores/cart.store'
+import { formatPrice } from '@/utils/price'
+import { tenantStore } from '@/stores/tenant'
 
 interface Props {
   sections?: string[]
