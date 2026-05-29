@@ -13,6 +13,22 @@ interface Props {
 }
 
 defineProps<Props>()
+
+function getGameCardClass(index: number): string {
+  const pattern: string[] = [
+    'row-span-2 lg:col-span-2 lg:row-span-2',
+    'row-span-2',
+    'row-span-1',
+    'row-span-2',
+    'row-span-1 lg:col-span-2',
+    'row-span-2',
+    'row-span-1',
+    'row-span-2',
+    'row-span-1',
+  ]
+
+  return pattern[index % pattern.length] ?? 'row-span-1'
+}
 </script>
 
 <template>
@@ -48,16 +64,19 @@ defineProps<Props>()
 
       <!-- Games Grid -->
       <div
-        class="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+        class="mt-12 grid grid-flow-dense auto-rows-[150px] grid-cols-2 gap-4 sm:auto-rows-[170px] sm:grid-cols-3 sm:gap-5 lg:auto-rows-[180px] lg:grid-cols-5"
       >
         <RouterLink
-          v-for="game in games"
+          v-for="(game, index) in games"
           :key="game.id"
+          :class="[
+            'group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-300 hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl',
+            getGameCardClass(index),
+          ]"
           :to="{ name: RouteNames.public.library }"
-          class="group relative overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-300 hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl"
         >
           <!-- Game Image -->
-          <div class="aspect-3/4 overflow-hidden">
+          <div class="h-full overflow-hidden">
             <img
               v-if="game.game?.image"
               :src="game.game.image"

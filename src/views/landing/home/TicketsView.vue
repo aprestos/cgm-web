@@ -27,11 +27,14 @@ const {
 
 interface Props {
   tickets: Ticket[]
+  showComingSoon?: boolean
 }
 
-defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), {
+  showComingSoon: false,
+})
 
-const hasItems = computed(() => totalItems.value > 0)
+const hasItems = computed(() => !props.showComingSoon && totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
 </script>
 
@@ -60,10 +63,24 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
         </p>
       </div>
 
+      <div
+        v-if="props.showComingSoon"
+        class="mt-16 rounded-3xl bg-white/80 p-10 text-center shadow-lg ring-1 ring-indigo-200 backdrop-blur-sm dark:bg-gray-900/80 dark:ring-white/10"
+      >
+        <p
+          class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+        >
+          Coming soon
+        </p>
+        <p class="mt-3 text-sm text-gray-600 dark:text-white/70">
+          Check back soon to get your tickets.
+        </p>
+      </div>
+
       <!-- Tickets Grid -->
-      <div class="mt-16 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+      <div v-else class="mt-16 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
         <div
-          v-for="ticket in tickets"
+          v-for="ticket in props.tickets"
           :key="ticket.id"
           :class="[
             'relative overflow-hidden rounded-3xl p-8 transition-all duration-300',
@@ -219,7 +236,10 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
         </div>
       </div>
       <!-- Checkout Button -->
-      <div class="mt-12 flex h-14 items-center justify-center">
+      <div
+        v-if="!props.showComingSoon"
+        class="mt-12 flex h-14 items-center justify-center"
+      >
         <Transition
           enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           enter-from-class="opacity-0 scale-75 blur-sm"

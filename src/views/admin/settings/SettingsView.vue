@@ -9,14 +9,13 @@
         class="flex min-w-full flex-none gap-x-6 px-4 text-sm/6 font-semibold text-gray-500 sm:px-6 lg:px-8 dark:text-gray-400"
       >
         <li v-for="item in secondaryNavigation" :key="item.name">
-          <a
-            href="#"
+          <RouterLink
+            :to="{ name: item.routeName }"
             :class="[
-              route.name === item.routeName
+              isActiveRoute(item.routeName)
                 ? 'text-indigo-600 dark:text-indigo-400'
                 : 'hover:text-gray-700 dark:hover:text-gray-300',
             ]"
-            @click.prevent="handleNavigation(item.routeName)"
           >
             <component
               :is="item.icon"
@@ -25,7 +24,7 @@
               aria-hidden="true"
             />
             {{ item.name }}
-          </a>
+          </RouterLink>
         </li>
       </ul>
     </nav>
@@ -33,12 +32,12 @@
 
   <!-- Settings forms -->
   <div class="divide-y divide-gray-200 dark:divide-white/10">
-    <RouterView />
+    <RouterView :key="route.fullPath" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import {
   IconBuilding,
   IconCalendar,
@@ -49,9 +48,14 @@ import {
 import { RouteNames } from '@/router/routeNames'
 
 const route = useRoute()
-const router = useRouter()
 
-const secondaryNavigation = [
+interface SecondaryNavigationItem {
+  name: string
+  routeName: string
+  icon: unknown
+}
+
+const secondaryNavigation: SecondaryNavigationItem[] = [
   {
     name: 'Organization',
     routeName: RouteNames.admin.settingsOrganization,
@@ -79,14 +83,7 @@ const secondaryNavigation = [
   },
 ]
 
-// Handle navigation between tabs
-const handleNavigation = (routeName: string): void => {
-  // If already on this route, do nothing
-  if (route.name === routeName) {
-    return
-  }
-
-  // Navigate directly
-  void router.push({ name: routeName })
+const isActiveRoute = (routeName: string): boolean => {
+  return route.name === routeName
 }
 </script>

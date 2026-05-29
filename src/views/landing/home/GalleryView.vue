@@ -39,45 +39,15 @@ function getImageCardClass(index: number): string {
   const pattern: string[] = [
     'row-span-2 sm:row-span-2 lg:row-span-3',
     'row-span-1 sm:row-span-2',
-    'row-span-2 lg:col-span-2 lg:row-span-2',
-    'row-span-1 lg:row-span-2',
-    'row-span-3 sm:row-span-2',
-    'row-span-1 lg:col-span-2',
-    'row-span-2',
+    'col-span-2 row-span-1 sm:col-span-1 lg:col-span-2 lg:row-span-2',
+    'row-span-2 lg:row-span-2',
+    'row-span-1 sm:row-span-2',
+    'col-span-2 row-span-2 sm:col-span-1 lg:col-span-2 lg:row-span-1',
+    'row-span-2 sm:row-span-2',
     'row-span-1',
   ]
 
   return pattern[index % pattern.length] ?? 'row-span-1'
-}
-
-function getImageOffsetClass(index: number): string {
-  const offsets: string[] = [
-    '',
-    'lg:-translate-y-2',
-    'lg:translate-y-1',
-    'lg:translate-x-1',
-    'lg:-translate-x-1',
-    'sm:translate-y-1 lg:translate-y-2',
-    'sm:-translate-y-1',
-    '',
-  ]
-
-  return offsets[index % offsets.length] ?? ''
-}
-
-function getImageRotationClass(index: number): string {
-  const rotations: string[] = [
-    'lg:rotate-[0.8deg]',
-    'lg:-rotate-[0.6deg]',
-    '',
-    'lg:rotate-[0.4deg]',
-    'lg:-rotate-[0.8deg]',
-    'lg:rotate-[0.5deg]',
-    '',
-    'lg:-rotate-[0.4deg]',
-  ]
-
-  return rotations[index % rotations.length] ?? ''
 }
 
 function setImageElement(
@@ -157,7 +127,7 @@ onBeforeUnmount(() => {
 
     <div class="relative py-8 px-4 sm:px-6 lg:px-8">
       <div
-        class="mx-auto grid max-w-7xl auto-rows-[110px] grid-cols-1 gap-4 sm:auto-rows-[130px] sm:grid-cols-2 sm:gap-6 lg:auto-rows-[150px] lg:grid-cols-5"
+        class="mx-auto grid max-w-7xl auto-rows-[90px] grid-cols-2 gap-3 sm:auto-rows-[120px] sm:grid-cols-3 sm:gap-5 lg:auto-rows-[150px] lg:grid-cols-5 lg:gap-6"
       >
         <div
           v-for="(image, index) in displayImages"
@@ -168,8 +138,6 @@ onBeforeUnmount(() => {
           :class="[
             'gallery-image group relative overflow-hidden rounded-2xl',
             getImageCardClass(index),
-            getImageOffsetClass(index),
-            getImageRotationClass(index),
           ]"
           :style="{ transitionDelay: `${Math.min(index * 80, 500)}ms` }"
         >

@@ -4,6 +4,7 @@ enum Admin {
   events = 'admin.events',
   tournaments = 'admin.tournaments',
   tickets = 'admin.tickets',
+  stripeCallback = 'admin.stripe.callback',
   settings = 'admin.settings',
   settingsOrganization = 'admin.settings.organization',
   settingsEdition = 'admin.settings.edition',

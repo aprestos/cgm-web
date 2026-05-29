@@ -19,6 +19,7 @@ import CountdownView from './CountdownView.vue'
 import LibraryView from './LibraryView.vue'
 import CtaView from './CtaView.vue'
 import FooterView from './FooterView.vue'
+import MapView from '@/views/landing/home/MapView.vue'
 
 const { t } = useI18n()
 
@@ -61,6 +62,32 @@ const activeTickets = computed(() =>
     if (ticket.saleFrom && new Date(ticket.saleFrom) > now) return false
     return !(ticket.saleUntil && new Date(ticket.saleUntil) < now)
   }),
+)
+
+const earliestSaleFrom = computed(() => {
+  let earliest: string | null = null
+
+  for (const ticket of availableTickets.value) {
+    if (!ticket.active || !ticket.saleFrom) continue
+
+    const ticketSaleFrom = new Date(ticket.saleFrom)
+    if (Number.isNaN(ticketSaleFrom.getTime())) continue
+
+    if (!earliest || ticketSaleFrom < new Date(earliest)) {
+      earliest = ticket.saleFrom
+    }
+  }
+
+  return earliest
+})
+
+const isBeforeEarliestSaleFrom = computed(() => {
+  if (!earliestSaleFrom.value) return false
+  return new Date() < new Date(earliestSaleFrom.value)
+})
+
+const shouldShowTicketsSection = computed(
+  () => activeTickets.value.length > 0 || isBeforeEarliestSaleFrom.value,
 )
 
 // Convention status
@@ -147,7 +174,7 @@ const countdown = computed(() => {
 const navigationSections = computed(() => {
   const sections = []
 
-  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
+  if (isTicketsEnabled.value && shouldShowTicketsSection.value) {
     sections.push('tickets')
   }
 
@@ -201,7 +228,7 @@ async function loadTrendingGames(): Promise<void> {
   try {
     isLoadingGames.value = true
     const games = await libraryService.get()
-    trendingGames.value = getRandomItems(games, 6)
+    trendingGames.value = getRandomItems(games, 15)
   } catch {
     trendingGames.value = []
   } finally {
@@ -243,6 +270,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
   >
     <!-- Hero Section -->
     <HeroView
+      class="min-h-screen"
       :convention-status="conventionStatus"
       :countdown="countdown"
       :primary-cta="primaryCTA"
@@ -255,20 +283,31 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     <GalleryView
       v-if="galleryImages.length > 0"
       id="gallery"
+      class="min-h-screen"
       :images="galleryImages"
     />
 
     <!-- Tickets Section (Third) -->
     <TicketsView
-      v-if="isTicketsEnabled && activeTickets.length > 0"
+      v-if="isTicketsEnabled && shouldShowTicketsSection"
+      class="min-h-screen"
       :tickets="activeTickets"
+      :show-coming-soon="isBeforeEarliestSaleFrom"
+      :earliest-sale-from="earliestSaleFrom"
       :is-library-enabled="isLibraryEnabled"
       :is-tournaments-enabled="isTournamentsEnabled"
+    />
+
+    <MapView
+      class="min-h-screen"
+      :location-title="editionStore?.location?.title as string"
+      :map-embed-url="editionStore?.location?.url as string"
     />
 
     <!-- Countdown Section -->
     <CountdownView
       v-if="countdown && conventionStatus === 'upcoming'"
+      class="min-h-screen"
       :countdown="countdown"
       :start-date="edition?.start_date"
     />
@@ -276,12 +315,13 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     <!-- Games Preview Section -->
     <LibraryView
       v-if="isLibraryEnabled && trendingGames.length > 0"
+      class="min-h-screen"
       section-id="library"
       :games="trendingGames"
     />
 
     <!-- Final CTA Section -->
-    <CtaView />
+    <CtaView class="min-h-screen" />
 
     <!-- Footer -->
     <FooterView :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />

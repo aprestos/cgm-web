@@ -88,6 +88,10 @@ const heroOpacity = computed(() => {
   const opacity = 1 - props.scrollY / fadeDistance
   return Math.max(0, Math.min(1, opacity))
 })
+
+function scrollToMap(): void {
+  emit('scrollTo', 'map')
+}
 </script>
 
 <template>
@@ -544,18 +548,19 @@ const heroOpacity = computed(() => {
                 )
               }}</span>
             </div>
-            <a
-              v-if="editionStore?.location?.url"
-              :href="editionStore?.location?.url"
-              target="_blank"
+            <button
+              v-if="editionStore?.location?.title"
+              type="button"
+              class="group inline-flex"
+              @click="scrollToMap"
             >
               <div class="flex items-center gap-2">
                 <IconMapPin
-                  class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                  class="h-5 w-5 text-indigo-600 transition-transform group-hover:-translate-y-0.5 dark:text-indigo-400"
                 />
                 <span>{{ editionStore.location.title }}</span>
               </div>
-            </a>
+            </button>
           </div>
 
           <!-- Poster (mobile/tablet, before CTA) -->
@@ -622,7 +627,7 @@ const heroOpacity = computed(() => {
     <button
       class="absolute bottom-8 left-1/2 hidden -translate-x-1/2 animate-bounce text-gray-400 transition-colors hover:text-gray-900 dark:text-white/60 dark:hover:text-white md:inline-flex"
       aria-label="Scroll down"
-      @click="emit('scrollTo', 'map')"
+      @click="scrollToMap"
     >
       <IconArrowDown class="h-8 w-8" />
     </button>

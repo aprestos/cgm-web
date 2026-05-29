@@ -166,7 +166,7 @@ const router = createRouter({
                 import('../views/admin/settings/tickets/TicketsSettings.vue'),
             },
             {
-              path: 'events-module',
+              path: 'events',
               name: RouteNames.admin.settingsEventsModule,
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/events/EventsModuleSettings.vue'),
@@ -188,6 +188,17 @@ const router = createRouter({
       ],
     },
     {
+      path: '/stripe/callback',
+      name: RouteNames.admin.stripeCallback,
+      component: (): Promise<unknown> =>
+        import('../views/admin/settings/advanced/payments/StripeCallback.vue'),
+      meta: {
+        requiresAuth: true,
+        permission: 'admin',
+        guard: (): Promise<boolean> => hasAnyOfRoles(['admin', 'staff']),
+      },
+    },
+    {
       path: '/users/:id',
       name: RouteNames.public.user,
       component: (): Promise<unknown> =>
@@ -205,7 +216,6 @@ const router = createRouter({
   ],
 })
 
-// Route guard using the Vue 2 style approach
 router.beforeEach(navigationGuard)
 
 export default router
