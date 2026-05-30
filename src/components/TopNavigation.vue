@@ -18,7 +18,9 @@
                 <img
                   v-else
                   class="h-12 w-auto"
-                  :src="tenantStore.logo || '@/assets/logoipsum-381.svg'"
+                  :src="
+                    getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'
+                  "
                   :alt="tenantStore.name + ' logo'"
                 />
               </RouterLink>
@@ -149,11 +151,12 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { authService } from '@/features/auth/service.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { getTenantLogo, tenantStore } from '@/stores/tenant.ts'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { RouteNames } from '@/router/routeNames'
 import type { User } from '@/features/auth/user.model.ts'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
+import { LogoType } from '@/features/tenant/tenant.model.ts'
 
 const { t } = useI18n()
 const user = ref<User | null>(null)

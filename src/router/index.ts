@@ -169,7 +169,7 @@ const router = createRouter({
               path: 'events',
               name: RouteNames.admin.settingsEventsModule,
               component: (): Promise<unknown> =>
-                import('../views/admin/settings/events/EventsModuleSettings.vue'),
+                import('../views/admin/settings/events/EventsSettings.vue'),
             },
             {
               path: 'flea-market',

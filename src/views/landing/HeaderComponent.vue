@@ -6,7 +6,8 @@ import { useI18n } from 'vue-i18n'
 import { RouteNames } from '@/router/routeNames'
 import { useCart } from '@/stores/cart.store'
 import { formatPrice } from '@/utils/price'
-import { tenantStore } from '@/stores/tenant'
+import { getTenantLogo, tenantStore } from '@/stores/tenant'
+import { LogoType } from '@/features/tenant/tenant.model.ts'
 
 interface Props {
   sections?: string[]
@@ -156,7 +157,7 @@ onUnmounted(() => {
           class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl p-2 transition-all duration-300 sm:h-12 sm:w-12 dark:bg-gray-900/90 dark:ring-white/10"
         >
           <img
-            :src="tenantStore?.logo"
+            :src="getTenantLogo(LogoType.long)"
             :alt="tenantStore?.name || t('landing.header.logoAltFallback')"
             class="h-full w-full object-contain"
           />
