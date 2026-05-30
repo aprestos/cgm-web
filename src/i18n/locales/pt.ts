@@ -163,15 +163,13 @@ const pt = {
     profile: 'Perfil',
   },
   ticketsPage: {
-    ticketsPage: {
-      unavailableTitle: 'A venda de bilhetes não está disponível de momento',
-      unavailableDescription:
-        'Volta mais tarde para consultar novas disponibilidades.',
-      loading: 'A carregar bilhetes...',
-      loadError:
-        'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
-      empty: 'Não existem bilhetes disponíveis neste momento.',
-    },
+    unavailableTitle: 'A venda de bilhetes não está disponível de momento',
+    unavailableDescription:
+      'Volta mais tarde para consultar novas disponibilidades.',
+    loading: 'A carregar bilhetes...',
+    loadError:
+      'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
+    empty: 'Não existem bilhetes disponíveis neste momento.',
   },
   withdraw: {
     history: 'Histórico de requisições',

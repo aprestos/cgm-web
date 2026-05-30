@@ -60,13 +60,15 @@ export const stripeService = {
 
   async getConfiguration(
     tenantId: string,
+  async getConfiguration(
+    tenantId: string,
   ): Promise<StripeConfiguration | null> {
     const { data, error } = await supabase
       .schema('payments')
       .from('stripe_accounts')
       .select('account_id,onboarding_status,charges_enabled')
       .eq('tenant_id', tenantId)
-      .single<{
+      .maybeSingle<{
         account_id: string
         onboarding_status: string
         charges_enabled: boolean
@@ -75,6 +77,9 @@ export const stripeService = {
       logger.error('Unable to get stripe configuration', { error })
       throw new Error('Unable to load stripe configuration')
     }
+
+    return data ? toCamelCaseAs<StripeConfiguration>(data) : null
+  },
 
     return data ? toCamelCaseAs<StripeConfiguration>(data) : null
   },
