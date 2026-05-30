@@ -158,8 +158,18 @@ const pt = {
   },
   navigation: {
     library: 'Ludoteca',
+    tickets: 'Bilhetes',
     admin: 'Admin',
     profile: 'Perfil',
+  },
+  ticketsPage: {
+    unavailableTitle: 'A venda de bilhetes não está disponível de momento',
+    unavailableDescription:
+      'Volta mais tarde para consultar novas disponibilidades.',
+    loading: 'A carregar bilhetes...',
+    loadError:
+      'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
+    empty: 'Não existem bilhetes disponíveis neste momento.',
   },
   withdraw: {
     history: 'Histórico de requisições',
@@ -380,7 +390,7 @@ const pt = {
       subtitle: 'Viagem ao passado',
     },
     countdown: {
-      title: 'A contagem decrescente começa',
+      title: 'O evento começa em:',
       days: 'Dias',
       hours: 'Horas',
       minutes: 'Minutos',
@@ -388,6 +398,8 @@ const pt = {
     tickets: {
       sectionTitle: 'Garante o Teu Acesso',
       sectionSubtitle: 'Escolhe o teu bilhete',
+      comingSoonTitle: 'Em breve',
+      comingSoonDescription: 'Volta em breve para garantires os teus bilhetes.',
       popular: 'Popular',
       getTicket: 'Adicionar ao carrinho',
       ticketsLeft: 'Apenas {count} bilhetes restantes!',
@@ -395,6 +407,7 @@ const pt = {
       libraryAccess: 'Acesso completo à ludoteca',
       tournamentAccess: 'Participação em torneios',
       total: 'Total',
+      checkout: 'Finalizar Compra',
     },
     features: {
       sectionTitle: 'A Plataforma',
@@ -444,6 +457,13 @@ const pt = {
       contact: 'Contacto',
       copyright: '© {year} {name}. Todos os direitos reservados.',
     },
+    header: {
+      logoAltFallback: 'Logotipo',
+      primaryNavAriaLabel: 'Navegacao principal',
+      mobileNavAriaLabel: 'Navegacao mobile',
+      openMenu: 'Abrir menu',
+      closeMenu: 'Fechar menu',
+    },
     nav: {
       home: 'Início',
       gallery: 'Galeria',
@@ -451,7 +471,87 @@ const pt = {
       tickets: 'Bilhetes',
       countdown: 'Contagem',
       features: 'Funcionalidades',
-      games: 'Jogos',
+      library: 'Ludoteca',
+    },
+  },
+  checkout: {
+    title: 'Checkout',
+    subtitle: 'Conclui o teu registo em poucos passos seguros.',
+    section: {
+      account: 'Conta',
+      tickets: 'Titulares dos Bilhetes',
+      payment: 'Detalhes de Pagamento',
+      summary: 'Resumo',
+      completed: 'Concluído',
+    },
+    account: {
+      description:
+        'Usa os teus dados para receber confirmações e atualizações.',
+      loading: 'A verificar a tua conta...',
+      name: 'Nome completo',
+      email: 'Email',
+      terms: 'Concordo com os termos e política de privacidade.',
+    },
+    tickets: {
+      description: 'Define o nome e o email para cada bilhete no teu carrinho.',
+      ticketNumber: 'Bilhete #{number}',
+    },
+    payment: {
+      description:
+        'Insere os dados de pagamento e faturacao para concluir a compra.',
+      cardDetails: 'Dados do cartao',
+      cardName: 'Nome no cartao',
+      cardNumber: 'Numero do cartao',
+      expiry: 'Data de validade',
+      cvv: 'CVV',
+      invoiceAddress: 'Morada de faturacao',
+      companyName: 'Empresa (opcional)',
+      vatNumber: 'NIF (opcional)',
+      address: 'Morada',
+      city: 'Cidade',
+      postalCode: 'Codigo postal',
+      country: 'Pais',
+    },
+    summary: {
+      quantity: 'Qtd: {count}',
+      subtotal: 'Subtotal',
+      taxes: 'Impostos',
+      total: 'Total',
+    },
+    completed: {
+      success: 'Pagamento aprovado',
+      title: 'Compra concluida com sucesso',
+      description:
+        'Os teus bilhetes estao confirmados. Enviamos um email com todos os detalhes.',
+      reference: 'Referencia',
+      total: 'Valor pago',
+      attendees: 'Titulares dos bilhetes',
+      backHome: 'Voltar ao inicio',
+      buyMore: 'Comprar mais bilhetes',
+    },
+    emptyCart: {
+      title: 'O teu carrinho esta vazio',
+      description: 'Adiciona pelo menos um bilhete para continuar.',
+      action: 'Voltar aos bilhetes',
+    },
+    actions: {
+      continue: 'Continuar',
+      back: 'Voltar',
+      payNow: 'Pagar agora',
+      processing: 'A processar pagamento...',
+    },
+    validation: {
+      nameRequired: 'Por favor, indica um nome valido.',
+      emailRequired: 'Por favor, indica um email valido.',
+      termsRequired: 'Tens de aceitar os termos para continuar.',
+      cardNameRequired: 'Indica o nome do titular do cartao.',
+      cardNumberRequired: 'Indica um numero de cartao valido.',
+      expiryRequired: 'Indica a data de validade.',
+      cvvRequired: 'Indica um CVV valido.',
+      addressRequired: 'A morada e obrigatoria.',
+      cityRequired: 'A cidade e obrigatoria.',
+      postalCodeRequired: 'O codigo postal e obrigatorio.',
+      countryRequired: 'O pais e obrigatorio.',
     },
   },
 }

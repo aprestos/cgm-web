@@ -7,17 +7,17 @@ import {
   IconBrandTwitter,
 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
-import { RouteNames } from '@/router/routeNames.ts'
+import { RouteNames } from '@/router/routeNames.js'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 </script>
 
 <template>
-  <section class="relative overflow-hidden py-32">
+  <section class="relative overflow-hidden bg-gray-50 py-32 dark:bg-gray-950">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-gradient-to-t from-indigo-100/50 to-white dark:from-indigo-950/50 dark:to-gray-950"
+      class="absolute inset-0 bg-linear-to-b from-gray-50 via-indigo-100/40 to-gray-50 dark:from-gray-950 dark:via-indigo-950/35 dark:to-gray-950"
     />
     <div
       class="absolute bottom-0 left-1/2 h-[600px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-300/30 dark:bg-indigo-600/20 blur-3xl"

@@ -85,7 +85,7 @@
 
 <script setup lang="ts">
 import { ref, nextTick, watch, type Ref } from 'vue'
-import vueFilePond from 'vue-filepond'
+import vueFilePondModule from 'vue-filepond'
 import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
 import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size'
 import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
@@ -98,8 +98,23 @@ import type { FileUploadOptions, FileNamingOptions } from '@/utils/fileUpload'
 import 'filepond/dist/filepond.min.css'
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
 
+interface VueFilePondFactory {
+  (...plugins: unknown[]): unknown
+}
+
+const resolveVueFilePondFactory = (): VueFilePondFactory => {
+  const moduleWithDefault = vueFilePondModule as { default?: unknown }
+  const maybeFactory = moduleWithDefault.default ?? vueFilePondModule
+
+  if (typeof maybeFactory !== 'function') {
+    throw new TypeError('Invalid vue-filepond module export')
+  }
+
+  return maybeFactory as VueFilePondFactory
+}
+
 // Create FilePond component
-const FilePond = vueFilePond(
+const FilePond = resolveVueFilePondFactory()(
   FilePondPluginFileValidateType,
   FilePondPluginFileValidateSize,
   FilePondPluginImagePreview,
@@ -199,8 +214,7 @@ const handleUpload = (): void => {
     return
   }
 
-  const pondInstance = pond.value as unknown as FilePondInstance
-  const files = pondInstance.getFiles().map((fileItem) => fileItem.file)
+  const files = pond.value.getFiles().map((fileItem) => fileItem.file)
   void uploadFiles(files)
 }
 
@@ -291,8 +305,7 @@ const updateFileState = (): void => {
       return
     }
 
-    const pondInstance = pond.value as unknown as FilePondInstance
-    const files = pondInstance.getFiles() || []
+    const files = pond.value.getFiles() || []
     hasFiles.value = files.length > 0
   })
 }
@@ -304,8 +317,7 @@ const resetState = (): void => {
 
   // Clear FilePond
   if (pond.value) {
-    const pondInstance = pond.value as unknown as FilePondInstance
-    pondInstance.removeFiles()
+    pond.value.removeFiles()
   }
 }
 

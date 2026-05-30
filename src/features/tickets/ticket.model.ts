@@ -7,7 +7,6 @@ export interface Ticket {
   id: number
   editionId: number
   tenantId: string
-  name: string
   group: TicketGroup
   price: number
   active: boolean
@@ -17,7 +16,7 @@ export interface Ticket {
   saleFrom?: string
   saleUntil?: string
   createdAt: string
-  isPopularChoice?: boolean
+  isPopular?: boolean
 }
 
 export type CreateTicketInput = Omit<Ticket, 'id' | 'createdAt'>

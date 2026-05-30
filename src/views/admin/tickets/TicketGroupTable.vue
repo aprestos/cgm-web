@@ -7,7 +7,7 @@ import DataTable from '@/components/DataTable.vue'
 import type { DataTableColumn } from '@/components/DataTable.vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { formatPrice } from '@/utils/price.ts'
-import { DateTime } from 'luxon'
+import { formatDateRange } from '@/utils/date.ts'
 
 interface Props {
   tickets: Ticket[]
@@ -25,7 +25,12 @@ const { t, locale } = useI18n()
 
 // Table columns definition
 const tableColumns = computed<DataTableColumn<Ticket>[]>(() => [
-  { key: 'name', label: t('admin.tickets.name'), sortable: true },
+  {
+    key: 'valid_period',
+    label: t('admin.tickets.validPeriod'),
+    sortable: false,
+    breakpoint: 'lg',
+  },
   { key: 'price', label: t('admin.tickets.price'), sortable: true },
   { key: 'quantity', label: t('admin.tickets.quantity'), sortable: true },
   { key: 'status', label: t('admin.tickets.status'), sortable: true },
@@ -35,43 +40,12 @@ const tableColumns = computed<DataTableColumn<Ticket>[]>(() => [
     sortable: false,
     breakpoint: 'lg',
   },
-  {
-    key: 'valid_period',
-    label: t('admin.tickets.validPeriod'),
-    sortable: false,
-    breakpoint: 'lg',
-  },
 ])
 
 const getStatusBadgeVariant = (
   ticket: Ticket,
 ): 'success' | 'warning' | 'danger' => {
   return ticket.active ? 'success' : 'danger'
-}
-
-const formatDate = (dateStr?: string): string => {
-  if (!dateStr) return '-'
-
-  return DateTime.fromISO(dateStr).toLocaleString(
-    { day: 'numeric', weekday: 'long' },
-    { locale: locale.value },
-  )
-}
-
-const formatDateRange = (
-  from: string | undefined,
-  until: string | undefined,
-): string => {
-  if (!from || !until) return '-'
-
-  const fromDate = formatDate(from)
-  const untilDate = formatDate(until)
-
-  if (fromDate === untilDate) {
-    return fromDate
-  } else {
-    return `${formatDate(from)} - ${formatDate(until)}`
-  }
 }
 </script>
 
@@ -100,13 +74,12 @@ const formatDateRange = (
     :columns="tableColumns"
     :items-per-page="10"
   >
-    <!-- Custom cell for name -->
-    <template #cell-name="{ item }">
-      <div class="text-sm font-medium text-gray-900 dark:text-white">
-        {{ item.name }}
+    <!-- Custom cell for valid period -->
+    <template #cell-valid_period="{ item }">
+      <div class="text-sm font-semibold text-gray-900 dark:text-white">
+        {{ formatDateRange(item.validFrom, item.validUntil, locale) }}
       </div>
     </template>
-
     <!-- Custom cell for price -->
     <template #cell-price="{ item }">
       <div class="text-sm font-semibold text-gray-900 dark:text-white">
@@ -133,14 +106,7 @@ const formatDateRange = (
     <!-- Custom cell for sale period -->
     <template #cell-sale_period="{ item }">
       <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ formatDateRange(item.saleFrom, item.saleUntil) }}
-      </div>
-    </template>
-
-    <!-- Custom cell for valid period -->
-    <template #cell-valid_period="{ item }">
-      <div class="text-sm text-gray-500 dark:text-gray-400">
-        {{ formatDateRange(item.validFrom, item.validUntil) }}
+        {{ formatDateRange(item.saleFrom, item.saleUntil, locale) }}
       </div>
     </template>
 

@@ -130,25 +130,82 @@
             market transactions. Configure your preferred payment processor to
             enable online payments.
           </p>
-          <CButton
-            type="button"
-            variant="secondary"
-            class="mt-4"
-            @click="configurePayments"
+          <div
+            class="flex flex-row justify-between items-center mt-3 text-gray-700 dark:text-white/70"
           >
-            Configure Payment Gateway
-          </CButton>
+            <div class="flex flex-row gap-3">
+              <div class="flex flex-row gap-1">
+                <IconBrandStripe />
+                <div class="flex flex-col">
+                  <span>Stripe</span>
+                </div>
+              </div>
+              <CBadge
+                v-if="stripeConfiguration?.onboardingStatus === 'pending'"
+                text="Incomplete"
+                type="yellow"
+                size="sm"
+                >Incomplete</CBadge
+              >
+              <CBadge
+                v-else-if="stripeConfiguration?.onboardingStatus === 'complete'"
+                size="sm"
+                type="green"
+                ><IconCircleCheck class="mr-2" size="14" />Active</CBadge
+              >
+              <CBadge v-else type="gray">Not started</CBadge>
+            </div>
+            <CButton
+              v-if="stripeConfiguration?.onboardingStatus !== 'complete'"
+              type="button"
+              size="sm"
+              variant="secondary"
+              @click="() => openDialog('connect-stripe')"
+              >Connect</CButton
+            >
+            <CButton
+              v-else
+              type="button"
+              size="sm"
+              variant="secondary"
+              @click="() => openDialog('disconnect-stripe')"
+              >Disconnect</CButton
+            >
+          </div>
         </div>
       </div>
     </div>
+    <ConfirmationDialog
+      :open="shownDialog === 'connect-stripe'"
+      title="Connect Stripe account"
+      message="You will be redirected to Stripe to connect your account. Do you want to continue?"
+      confirm-text="Continue"
+      cancel-text="Cancel"
+      :loading="isLoadingStripeConnect"
+      @confirm="connectStripe"
+      @close="closeDialog"
+    />
+
+    <ConfirmationDialog
+      :open="shownDialog === 'disconnect-stripe'"
+      title="Disconnect Stripe account"
+      message="Your Stripe account will be disconnected and you no longer will be able to receive payments using stripe. Do you want to continue?"
+      confirm-text="Continue"
+      cancel-text="Cancel"
+      :loading="isLoadingStripeConnect"
+      @confirm="disconnectStripe"
+      @close="closeDialog"
+    />
   </SettingsSection>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
+<script async setup lang="ts">
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import {
+  IconCircleCheck,
   IconBrandGoogle,
+  IconBrandStripe,
   IconMail,
   IconCreditCard,
   IconCheck,
@@ -156,8 +213,13 @@ import {
 } from '@tabler/icons-vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
+import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import logger from '@/lib/logger.ts'
+import { stripeService } from '@/features/settings/stripe.service.ts'
+import { tenantStore } from '@/stores/tenant.ts'
+import CBadge from '@/components/CBadge.vue'
+import type { StripeConfiguration } from '@/features/settings/stripe.model.ts'
 
 // Email configuration
 const emailConfig = ref({
@@ -173,9 +235,37 @@ const saveEmailConfig = (): void => {
   toast.success('Email configuration saved!')
 }
 
+const stripeConfiguration = ref<StripeConfiguration | null>(null)
+onMounted(async () => {
+  // subscribe to service updates
+  stripeConfiguration.value = await stripeService.getConfiguration(
+    tenantStore.value?.id as string,
+  )
+})
+
+const isLoadingStripeConnect = ref(false)
+
 // Configure payment gateway
-const configurePayments = (): void => {
-  // TODO: Open payment configuration modal/page
-  toast.info('Payment gateway configuration coming soon!')
+const connectStripe = async (): Promise<void> => {
+  isLoadingStripeConnect.value = true
+  const res = await stripeService.connect(
+    tenantStore.value?.id as string,
+    window.location.origin,
+  )
+  if (res) window.location.assign(res)
+}
+
+const disconnectStripe = (): void => {
+  closeDialog()
+}
+
+const shownDialog = ref<'connect-stripe' | 'disconnect-stripe' | null>(null)
+
+const openDialog = (dialog: 'connect-stripe' | 'disconnect-stripe'): void => {
+  shownDialog.value = dialog
+}
+
+const closeDialog = (): void => {
+  shownDialog.value = null
 }
 </script>

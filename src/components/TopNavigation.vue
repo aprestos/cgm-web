@@ -8,7 +8,7 @@
           <div class="flex h-16 items-center justify-between">
             <!-- Logo -->
             <div class="flex flex-1">
-              <RouterLink :to="{ name: RouteNames.public.home }">
+              <RouterLink :to="{ name: RouteNames.landing.home }">
                 <span class="sr-only">{{
                   tenantStore?.name || 'Your Company'
                 }}</span>

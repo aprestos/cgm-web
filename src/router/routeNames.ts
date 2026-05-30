@@ -4,6 +4,7 @@ enum Admin {
   events = 'admin.events',
   tournaments = 'admin.tournaments',
   tickets = 'admin.tickets',
+  stripeCallback = 'admin.stripe.callback',
   settings = 'admin.settings',
   settingsOrganization = 'admin.settings.organization',
   settingsEdition = 'admin.settings.edition',
@@ -19,11 +20,18 @@ enum Admin {
 enum Public {
   root = 'root',
   home = 'public.home',
+  tickets = 'public.tickets',
   library = 'public.library',
   tournaments = 'public.tournaments',
   prototypes = 'public.prototypes',
   fleaMarket = 'public.flea-market',
   user = 'public.user',
+  checkout = 'public.checkout',
+}
+
+enum Landing {
+  home = 'landing.home',
+  checkout = 'landing.checkout',
 }
 
 enum Auth {
@@ -40,6 +48,7 @@ enum ErrorRoutes {
 export const RouteNames = {
   admin: Admin,
   public: Public,
+  landing: Landing,
   auth: Auth,
   error: ErrorRoutes,
 }

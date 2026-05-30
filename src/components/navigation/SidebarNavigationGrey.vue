@@ -53,7 +53,7 @@ const handleSignOut = async (): Promise<void> => {
     <div
       class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-50 px-6 ring-1 ring-gray-200 dark:bg-black/20 dark:ring-white/5"
     >
-      <router-link :to="{ name: RouteNames.public.home }">
+      <router-link :to="{ name: RouteNames.landing.home }">
         <div class="flex h-16 shrink-0 items-center">
           <!-- Logo SkeletonLoader -->
           <!--        <SkeletonLoader v-if="!tenantStore?.logo" width="128px" height="32px" />-->

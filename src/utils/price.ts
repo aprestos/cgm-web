@@ -13,6 +13,6 @@ export const formatPrice = (price: number, locale?: string): string => {
     ? new Intl.NumberFormat(resolvedLocale, {
         style: 'currency',
         currency,
-      }).format(price)
+      }).format(price / 100)
     : '-'
 }

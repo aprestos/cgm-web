@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { editionStore } from '@/stores/edition.ts'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { editionStore } from '@/stores/edition.js'
+import { settingsStore } from '@/features/settings/useSettings.store.js'
 import { IconBooks, IconUsers, IconTicket } from '@tabler/icons-vue'
-import { RouteNames } from '@/router/routeNames.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { RouteNames } from '@/router/routeNames.js'
+import { tenantStore } from '@/stores/tenant.js'
 import { useI18n } from 'vue-i18n'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
@@ -12,16 +12,14 @@ import type { Ticket } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
 
 // Components
-import LandingNavDots from './landing/LandingNavDots.vue'
-import LandingHeader from './landing/LandingHeader.vue'
-import LandingHero from './landing/LandingHero.vue'
-import LandingGallery from './landing/LandingGallery.vue'
-import LandingTickets from './landing/LandingTickets.vue'
-import LandingCountdown from './landing/LandingCountdown.vue'
-import LandingGames from './landing/LandingGames.vue'
-import LandingMap from './landing/LandingMap.vue'
-import LandingCta from './landing/LandingCta.vue'
-import LandingFooter from './landing/LandingFooter.vue'
+import HeroView from './HeroView.vue'
+import GalleryView from './GalleryView.vue'
+import TicketsView from './TicketsView.vue'
+import CountdownView from './CountdownView.vue'
+import LibraryView from './LibraryView.vue'
+import CtaView from './CtaView.vue'
+import FooterView from './FooterView.vue'
+import MapView from '@/views/landing/home/MapView.vue'
 
 const { t } = useI18n()
 
@@ -64,6 +62,32 @@ const activeTickets = computed(() =>
     if (ticket.saleFrom && new Date(ticket.saleFrom) > now) return false
     return !(ticket.saleUntil && new Date(ticket.saleUntil) < now)
   }),
+)
+
+const earliestSaleFrom = computed(() => {
+  let earliest: string | null = null
+
+  for (const ticket of availableTickets.value) {
+    if (!ticket.active || !ticket.saleFrom) continue
+
+    const ticketSaleFrom = new Date(ticket.saleFrom)
+    if (Number.isNaN(ticketSaleFrom.getTime())) continue
+
+    if (!earliest || ticketSaleFrom < new Date(earliest)) {
+      earliest = ticket.saleFrom
+    }
+  }
+
+  return earliest
+})
+
+const isBeforeEarliestSaleFrom = computed(() => {
+  if (!earliestSaleFrom.value) return false
+  return new Date() < new Date(earliestSaleFrom.value)
+})
+
+const shouldShowTicketsSection = computed(
+  () => activeTickets.value.length > 0 || isBeforeEarliestSaleFrom.value,
 )
 
 // Convention status
@@ -146,38 +170,16 @@ const countdown = computed(() => {
   return { days, hours, minutes }
 })
 
-// Location map URL
-const mapEmbedUrl = computed(() => {
-  const location = edition.value?.location?.title
-  if (!location) return null
-  return `https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${encodeURIComponent(location)}`
-})
-
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
-  const sections = ['hero']
+  const sections = []
 
-  // Gallery after hero
-  if (galleryImages.value.length > 0) {
-    sections.push('gallery')
-  }
-
-  // Map/Location is second
-  if (edition.value?.location?.title) {
-    sections.push('map')
-  }
-
-  // Tickets is third
-  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
+  if (isTicketsEnabled.value && shouldShowTicketsSection.value) {
     sections.push('tickets')
   }
 
-  if (countdown.value && conventionStatus.value === 'upcoming') {
-    sections.push('countdown')
-  }
-
-  if (isLibraryEnabled.value && trendingGames.value.length > 0) {
-    sections.push('games')
+  if (isLibraryEnabled.value) {
+    sections.push('library')
   }
 
   return sections
@@ -226,7 +228,7 @@ async function loadTrendingGames(): Promise<void> {
   try {
     isLoadingGames.value = true
     const games = await libraryService.get()
-    trendingGames.value = getRandomItems(games, 6)
+    trendingGames.value = getRandomItems(games, 10)
   } catch {
     trendingGames.value = []
   } finally {
@@ -266,22 +268,9 @@ function getRandomItems<T>(items: T[], count: number): T[] {
   <div
     class="relative bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white overflow-x-hidden"
   >
-    <!-- Fixed Header with Logo -->
-    <LandingHeader
-      :tenant-logo="tenant?.logo"
-      :tenant-name="tenant?.name"
-      :edition-name="edition?.name"
-    />
-
-    <!-- Fixed Navigation Dots -->
-    <LandingNavDots
-      :sections="navigationSections"
-      :active-section="activeSection"
-      @scroll-to="scrollToSection"
-    />
-
     <!-- Hero Section -->
-    <LandingHero
+    <HeroView
+      class="min-h-screen"
       :convention-status="conventionStatus"
       :countdown="countdown"
       :primary-cta="primaryCTA"
@@ -291,47 +280,50 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     />
 
     <!-- Gallery Section - Convention Photos -->
-    <LandingGallery
+    <GalleryView
       v-if="galleryImages.length > 0"
       id="gallery"
+      class="min-h-screen"
       :images="galleryImages"
     />
 
-    <!-- Map Section (Second) -->
-    <LandingMap
-      v-if="edition?.location?.title"
-      :location-title="edition.location.title"
-      :location-url="edition.location.url"
-      :start-date="edition.start_date"
-      :end-date="edition.end_date"
-      :map-embed-url="mapEmbedUrl"
-    />
-
     <!-- Tickets Section (Third) -->
-    <LandingTickets
-      v-if="isTicketsEnabled && activeTickets.length > 0"
+    <TicketsView
+      v-if="isTicketsEnabled && shouldShowTicketsSection"
+      class="min-h-screen"
       :tickets="activeTickets"
+      :show-coming-soon="isBeforeEarliestSaleFrom"
+      :earliest-sale-from="earliestSaleFrom"
       :is-library-enabled="isLibraryEnabled"
       :is-tournaments-enabled="isTournamentsEnabled"
     />
 
+    <MapView
+      class="min-h-screen"
+      :location-title="editionStore?.location?.title as string"
+      :map-embed-url="editionStore?.location?.url as string"
+    />
+
     <!-- Countdown Section -->
-    <LandingCountdown
+    <CountdownView
       v-if="countdown && conventionStatus === 'upcoming'"
+      class="min-h-screen"
       :countdown="countdown"
       :start-date="edition?.start_date"
     />
 
     <!-- Games Preview Section -->
-    <LandingGames
+    <LibraryView
       v-if="isLibraryEnabled && trendingGames.length > 0"
+      class="min-h-screen"
+      section-id="library"
       :games="trendingGames"
     />
 
     <!-- Final CTA Section -->
-    <LandingCta />
+    <CtaView class="min-h-screen" />
 
     <!-- Footer -->
-    <LandingFooter :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
+    <FooterView :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
   </div>
 </template>

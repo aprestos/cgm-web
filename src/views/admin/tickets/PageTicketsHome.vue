@@ -341,9 +341,7 @@ onMounted(async () => {
     @close="cancelDelete"
   >
     <p class="text-sm text-gray-600 dark:text-gray-300">
-      {{
-        t('admin.tickets.deleteConfirmMessage', { name: ticketToDelete?.name })
-      }}
+      {{ t('admin.tickets.deleteConfirmMessage') }}
     </p>
     <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
       {{ t('admin.tickets.deleteConfirmWarning') }}

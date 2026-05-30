@@ -1,4 +1,4 @@
-import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
+import type { NavigationGuardReturn, RouteLocationNormalized } from 'vue-router'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames'
 import logger from '@/lib/logger'
@@ -34,9 +34,7 @@ export const hasAnyOfRoles = async (roles: string[]): Promise<boolean> => {
 // Main navigation guard handler (Vue 2 style)
 export const navigationGuard = async (
   to: RouteLocationNormalized,
-  from: RouteLocationNormalized,
-  next: NavigationGuardNext,
-): Promise<void> => {
+): Promise<NavigationGuardReturn> => {
   try {
     // Check custom guard function
     if (to.meta.guard) {
@@ -45,11 +43,10 @@ export const navigationGuard = async (
       logger.debug('hasPermission', { hasPermission })
 
       if (hasPermission) {
-        next()
+        return
       } else {
-        next({ name: RouteNames.error.notFound })
+        return { name: RouteNames.error.notFound }
       }
-      return
     }
 
     // Check authentication requirement
@@ -57,17 +54,16 @@ export const navigationGuard = async (
       const isAuthenticated = await requiresAuth()
 
       if (isAuthenticated) {
-        next()
+        return
       } else {
-        next({ name: RouteNames.auth.signIn })
+        return { name: RouteNames.auth.signIn }
       }
-      return
     }
 
     // No guards required, proceed
-    next()
+    return
   } catch (error) {
     console.error('Navigation guard error:', error)
-    next({ name: RouteNames.error.notFound })
+    return { name: RouteNames.error.notFound }
   }
 }

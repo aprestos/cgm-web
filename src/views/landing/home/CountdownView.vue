@@ -24,7 +24,7 @@ function formatDate(dateString: string | undefined): string {
 <template>
   <section
     id="countdown"
-    class="relative min-h-[60vh] flex items-center justify-center overflow-hidden bg-gradient-to-b from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-900 dark:to-gray-900"
+    class="relative flex min-h-[60vh] items-center justify-center overflow-hidden bg-linear-to-b from-gray-50 via-indigo-50/25 to-gray-50 dark:from-gray-950 dark:via-indigo-950/25 dark:to-gray-950"
   >
     <div
       class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.1),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15),transparent_70%)]"
