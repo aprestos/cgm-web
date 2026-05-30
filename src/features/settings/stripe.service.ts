@@ -60,8 +60,6 @@ export const stripeService = {
 
   async getConfiguration(
     tenantId: string,
-  async getConfiguration(
-    tenantId: string,
   ): Promise<StripeConfiguration | null> {
     const { data, error } = await supabase
       .schema('payments')
@@ -77,9 +75,6 @@ export const stripeService = {
       logger.error('Unable to get stripe configuration', { error })
       throw new Error('Unable to load stripe configuration')
     }
-
-    return data ? toCamelCaseAs<StripeConfiguration>(data) : null
-  },
 
     return data ? toCamelCaseAs<StripeConfiguration>(data) : null
   },
