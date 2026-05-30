@@ -38,11 +38,23 @@ const hasItems = computed(() => !props.showComingSoon && totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
 
 const isAvailableToBuy = (ticket: Ticket): boolean => {
-  if (!ticket.saleFrom) return true
+  if (!ticket.active) return false
 
-  const time = new Date(ticket.saleFrom).getTime()
-  if (Number.isNaN(time)) return false
-  return time <= Date.now()
+  const now = Date.now()
+
+  if (ticket.saleFrom) {
+    const saleFrom = new Date(ticket.saleFrom).getTime()
+    if (Number.isNaN(saleFrom)) return false
+    if (saleFrom > now) return false
+  }
+
+  if (ticket.saleUntil) {
+    const saleUntil = new Date(ticket.saleUntil).getTime()
+    if (Number.isNaN(saleUntil)) return false
+    if (saleUntil < now) return false
+  }
+
+  return true
 }
 </script>
 
