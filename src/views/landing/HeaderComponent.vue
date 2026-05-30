@@ -153,7 +153,7 @@ onUnmounted(() => {
         class="group flex min-w-0 items-center gap-3"
       >
         <div
-          class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl p-2 transition-all duration-300 sm:h-12 sm:w-12 dark:bg-gray-900/90 dark:ring-white/10"
+          class="flex h-18 shrink-0 items-center justify-center overflow-hidden rounded-xl p-0 transition-all duration-300 dark:bg-gray-900/90 dark:ring-white/10"
         >
           <img
             :src="getTenantLogo(LogoType.long)"
@@ -246,15 +246,7 @@ onUnmounted(() => {
                 v-for="section in props.sections"
                 :key="section"
                 type="button"
-                class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors"
-                :class="
-                  props.activeSection === section
-                    ? 'bg-primary text-white'
-                    : 'text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10'
-                "
-                :aria-current="
-                  props.activeSection === section ? 'page' : undefined
-                "
+                class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10"
                 @click="handleNavigationClick(section)"
               >
                 {{ getSectionLabel(section) }}

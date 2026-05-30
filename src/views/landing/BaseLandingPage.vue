@@ -1,16 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { settingsStore } from '@/features/settings/useSettings.store'
-import type { Ticket } from '@/features/tickets/ticket.model'
 // Components
 import HeaderComponent from './HeaderComponent.vue'
 import CartDrawer from '@/views/landing/CartDrawer.vue'
+import { editionStore } from '@/stores/edition.ts'
 
 // Stores
 const settings = computed(() => settingsStore.value)
 
 // Data
-const availableTickets = ref<Ticket[]>([])
 const scrollY = ref<number>(0)
 const activeSection = ref<string>('hero')
 
@@ -18,29 +17,17 @@ const activeSection = ref<string>('hero')
 const isTicketsEnabled = computed(
   () => settings.value?.tickets?.enabled ?? false,
 )
-const isLibraryEnabled = computed(
-  () => settings.value?.library?.enabled ?? false,
-)
-
-const activeTickets = computed(() =>
-  availableTickets.value.filter((ticket) => {
-    if (!ticket.active) return false
-    const now = new Date()
-    if (ticket.saleFrom && new Date(ticket.saleFrom) > now) return false
-    return !(ticket.saleUntil && new Date(ticket.saleUntil) < now)
-  }),
-)
 
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
   const sections = []
 
-  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
+  if (isTicketsEnabled.value) {
     sections.push('tickets')
   }
 
-  if (isLibraryEnabled.value) {
-    sections.push('library')
+  if (editionStore.value?.location?.url) {
+    sections.push('location')
   }
 
   return sections
