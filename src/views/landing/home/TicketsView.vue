@@ -36,6 +36,26 @@ const props = withDefaults(defineProps<Props>(), {
 
 const hasItems = computed(() => !props.showComingSoon && totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
+
+const isAvailableToBuy = (ticket: Ticket): boolean => {
+  if (!ticket.active) return false
+
+  const now = Date.now()
+
+  if (ticket.saleFrom) {
+    const saleFrom = new Date(ticket.saleFrom).getTime()
+    if (Number.isNaN(saleFrom)) return false
+    if (saleFrom > now) return false
+  }
+
+  if (ticket.saleUntil) {
+    const saleUntil = new Date(ticket.saleUntil).getTime()
+    if (Number.isNaN(saleUntil)) return false
+    if (saleUntil < now) return false
+  }
+
+  return true
+}
 </script>
 
 <template>
@@ -66,22 +86,8 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
         </p>
       </div>
 
-      <div
-        v-if="props.showComingSoon"
-        class="mt-16 rounded-3xl bg-white/80 p-10 text-center shadow-lg ring-1 ring-indigo-200 backdrop-blur-sm dark:bg-gray-900/80 dark:ring-white/10"
-      >
-        <p
-          class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
-        >
-          {{ t('landing.tickets.comingSoonTitle') }}
-        </p>
-        <p class="mt-3 text-sm text-gray-600 dark:text-white/70">
-          {{ t('landing.tickets.comingSoonDescription') }}
-        </p>
-      </div>
-
       <!-- Tickets Grid -->
-      <div v-else class="mt-16 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+      <div class="mt-16 grid gap-8 sm:grid-cols-2 md:grid-cols-3">
         <div
           v-for="ticket in props.tickets"
           :key="ticket.id"
@@ -143,7 +149,7 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
               </span>
             </div>
             <!-- Action area: add-to-cart button ↔ quantity selector -->
-            <div class="mt-8">
+            <div v-if="isAvailableToBuy(ticket)" class="mt-8">
               <Transition
                 mode="out-in"
                 enter-active-class="transition-all duration-300 ease-out motion-reduce:transition-none"
@@ -221,6 +227,12 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
                   </button>
                 </div>
               </Transition>
+            </div>
+            <div
+              v-else
+              class="mt-8 rounded-xl border border-gray-300/70 bg-gray-100/70 px-3 py-2 text-center text-xs font-medium text-gray-900 dark:border-gray-500/40 dark:bg-gray-500/10 dark:text-gray-200"
+            >
+              {{ t('landing.tickets.comingSoonTitle') }}
             </div>
           </div>
 
