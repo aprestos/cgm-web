@@ -37,7 +37,7 @@ function getGameCardClass(index: number): string {
     class="relative overflow-hidden bg-gray-50 py-32 dark:bg-gray-950"
   >
     <div class="absolute inset-0" />
-    <section :id="sectionId" class="relative overflow-hidden py-32">
+    <div class="relative overflow-hidden py-32">
       <div class="absolute inset-0" />
       <div
         class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.1),transparent_50%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(139,92,246,0.15),transparent_50%)]"
@@ -139,6 +139,6 @@ function getGameCardClass(index: number): string {
           </RouterLink>
         </div>
       </div>
-    </section>
+    </div>
   </section>
 </template>

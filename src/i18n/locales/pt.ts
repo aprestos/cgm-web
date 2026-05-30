@@ -459,6 +459,13 @@ const pt = {
       contact: 'Contacto',
       copyright: '© {year} {name}. Todos os direitos reservados.',
     },
+    header: {
+      logoAltFallback: 'Logotipo',
+      primaryNavAriaLabel: 'Navegacao principal',
+      mobileNavAriaLabel: 'Navegacao mobile',
+      openMenu: 'Abrir menu',
+      closeMenu: 'Fechar menu',
+    },
     nav: {
       home: 'Início',
       gallery: 'Galeria',

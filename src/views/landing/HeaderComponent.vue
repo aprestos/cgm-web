@@ -52,6 +52,11 @@ const headerBlurStyle = computed<CSSProperties>(() => {
     WebkitBackdropFilter: `blur(${blur}px)`,
   }
 })
+const mobileMenuAriaLabel = computed<string>(() =>
+  isMobileMenuOpen.value
+    ? t('landing.header.closeMenu')
+    : t('landing.header.openMenu'),
+)
 
 function getSectionLabel(section: string): string {
   return t(`landing.nav.${section}`)
@@ -152,7 +157,7 @@ onUnmounted(() => {
         >
           <img
             :src="tenantStore?.logo"
-            :alt="tenantStore?.name || 'Logo'"
+            :alt="tenantStore?.name || t('landing.header.logoAltFallback')"
             class="h-full w-full object-contain"
           />
         </div>
@@ -160,7 +165,7 @@ onUnmounted(() => {
 
       <nav
         class="hidden items-center justify-center gap-5 lg:flex"
-        :aria-label="t('landing.nav.home')"
+        :aria-label="t('landing.header.primaryNavAriaLabel')"
       >
         <button
           v-for="section in desktopSections"
@@ -212,9 +217,7 @@ onUnmounted(() => {
           type="button"
           class="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100/90 text-gray-800 transition-colors hover:text-primary lg:hidden dark:bg-gray-900/80 dark:text-white"
           :aria-expanded="isMobileMenuOpen"
-          :aria-label="
-            isMobileMenuOpen ? t('landing.nav.home') : t('landing.nav.home')
-          "
+          :aria-label="mobileMenuAriaLabel"
           aria-controls="landing-mobile-menu"
           @click="toggleMobileMenu"
         >
@@ -237,7 +240,7 @@ onUnmounted(() => {
           >
             <nav
               class="flex flex-col gap-1"
-              :aria-label="t('landing.nav.home')"
+              :aria-label="t('landing.header.mobileNavAriaLabel')"
             >
               <button
                 v-for="section in props.sections"

@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
     class="relative overflow-hidden bg-gray-50 dark:bg-gray-950"
   >
     <!-- Section Header (optional) -->
-    <div v-if="displayTitle" class="relative z-10 pt-16 pb-8 text-center px-4">
+    <div class="relative z-10 pt-16 pb-8 text-center px-4">
       <h2
         class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
       >

@@ -456,6 +456,13 @@ const en = {
       contact: 'Contact',
       copyright: '© {year} {name}. All rights reserved.',
     },
+    header: {
+      logoAltFallback: 'Logo',
+      primaryNavAriaLabel: 'Primary navigation',
+      mobileNavAriaLabel: 'Mobile navigation',
+      openMenu: 'Open menu',
+      closeMenu: 'Close menu',
+    },
     nav: {
       home: 'Home',
       gallery: 'Gallery',
