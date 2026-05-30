@@ -11,5 +11,6 @@ export interface Edition {
   }
   timezone?: string
   poster_url?: string
+  schedule_images?: string[]
   currency?: string
 }
