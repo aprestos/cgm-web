@@ -321,7 +321,7 @@ const submit = async (): Promise<void> => {
       saleUntil: formData.value.saleUntil || undefined,
       validFrom: validFrom.toISO() as string,
       validUntil: validUntil.toISO() as string,
-      isPopular: formData.value.isPopular || false,
+      isPopular: formData.value.isPopular,
     })
 
     toast.success(t('admin.tickets.createSuccess'))
