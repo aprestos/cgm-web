@@ -20,6 +20,7 @@ import LibraryView from './LibraryView.vue'
 import CtaView from './CtaView.vue'
 import FooterView from './FooterView.vue'
 import MapView from '@/views/landing/home/MapView.vue'
+import ScheduleView from './ScheduleView.vue'
 
 const { t } = useI18n()
 
@@ -36,6 +37,9 @@ const galleryImages = computed(() => {
   }
   return []
 })
+const scheduleImages = computed<string[]>(
+  () => edition.value?.schedule_images ?? [],
+)
 
 // Data
 const trendingGames = ref<LibraryGame[]>([])
@@ -138,6 +142,10 @@ const countdown = computed(() => {
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
   const sections = []
+
+  if (scheduleImages.value.length > 0) {
+    sections.push('schedule')
+  }
 
   if (isTicketsEnabled.value) {
     sections.push('tickets')
@@ -250,6 +258,12 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       id="gallery"
       class="min-h-screen"
       :images="galleryImages"
+    />
+
+    <ScheduleView
+      v-if="scheduleImages.length > 0"
+      class="min-h-screen"
+      :images="scheduleImages"
     />
 
     <!-- Tickets Section (Third) -->

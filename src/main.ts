@@ -35,7 +35,7 @@ async function loadTenant(): Promise<Tenant | null> {
 
 async function loadEdition(tenantId: string): Promise<Edition | null> {
   if (tenantId) {
-    editionStore.value = await editionService.getCurrentEvent(tenantId)
+    editionStore.value = await editionService.getCurrentEdition(tenantId)
     return editionStore?.value || null
   }
   return null

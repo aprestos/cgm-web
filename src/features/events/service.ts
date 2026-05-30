@@ -11,7 +11,7 @@ export const editionService = {
     if (error) throw error
     return data
   },
-  async getCurrentEvent(tenantId: string): Promise<Edition | null> {
+  async getCurrentEdition(tenantId: string): Promise<Edition | null> {
     const { data, error } = await supabase
       .from('editions')
       .select('*')

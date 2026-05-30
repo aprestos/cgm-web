@@ -17,10 +17,17 @@ const activeSection = ref<string>('hero')
 const isTicketsEnabled = computed(
   () => settings.value?.tickets?.enabled ?? false,
 )
+const hasScheduleImages = computed(
+  () => (editionStore.value?.schedule_images?.length ?? 0) > 0,
+)
 
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
   const sections = []
+
+  if (hasScheduleImages.value) {
+    sections.push('schedule')
+  }
 
   if (isTicketsEnabled.value) {
     sections.push('tickets')

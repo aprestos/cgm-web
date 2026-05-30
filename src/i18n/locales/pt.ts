@@ -443,6 +443,11 @@ const pt = {
       getDirections: 'Obter Direções',
       until: 'Até {date}',
     },
+    schedule: {
+      sectionTitle: 'Programa',
+      sectionSubtitle: 'Planeia os teus dias no evento',
+      imageAlt: 'Imagem do programa {index}',
+    },
     cta: {
       badge: 'Junta-te à comunidade',
       title: 'Pronto para uma',
@@ -468,6 +473,7 @@ const pt = {
       home: 'Início',
       gallery: 'Galeria',
       location: 'Localização',
+      schedule: 'Programa',
       tickets: 'Bilhetes',
       countdown: 'Contagem',
       features: 'Funcionalidades',

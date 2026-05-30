@@ -442,6 +442,11 @@ const en = {
       getDirections: 'Get Directions',
       until: 'Until {date}',
     },
+    schedule: {
+      sectionTitle: 'Schedule',
+      sectionSubtitle: 'Plan your days at the event',
+      imageAlt: 'Schedule image {index}',
+    },
     cta: {
       badge: 'Join the community',
       title: 'Ready for an',
@@ -467,6 +472,7 @@ const en = {
       home: 'Home',
       gallery: 'Gallery',
       location: 'Location',
+      schedule: 'Schedule',
       tickets: 'Tickets',
       countdown: 'Countdown',
       features: 'Features',
