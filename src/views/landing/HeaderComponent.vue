@@ -153,7 +153,6 @@ onUnmounted(() => {
         class="group flex min-w-0 items-center gap-3"
       >
         <div
-          v-if="tenantStore?.logo"
           class="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl p-2 transition-all duration-300 sm:h-12 sm:w-12 dark:bg-gray-900/90 dark:ring-white/10"
         >
           <img
