@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { tenantStore } from '@/stores/tenant.ts'
+import { getTenantLogo, tenantStore } from '@/stores/tenant.ts'
 import { useRoute, useRouter } from 'vue-router'
 import type { User } from '@/features/auth/user.model.ts'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
@@ -10,6 +10,7 @@ import { authService } from '@/features/auth/service'
 import { RouteNames } from '@/router/routeNames'
 import { useI18n } from 'vue-i18n'
 import type { NavigationItem } from '@/navigation/navigation.model.ts'
+import { LogoType } from '@/features/tenant/tenant.model.ts'
 const { t } = useI18n()
 
 interface PublicPage {
@@ -60,7 +61,7 @@ const handleSignOut = async (): Promise<void> => {
           <!-- Actual Logo -->
           <img
             class="h-10 w-auto"
-            :src="tenantStore?.logo || '@/assets/logoipsum-381.svg'"
+            :src="getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'"
             :alt="tenantStore?.name + ' logo'"
           />
         </div>
