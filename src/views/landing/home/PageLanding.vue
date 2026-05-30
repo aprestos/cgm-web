@@ -55,41 +55,6 @@ const isTournamentsEnabled = computed(
   () => settings.value?.tournaments?.enabled ?? false,
 )
 
-const activeTickets = computed(() =>
-  availableTickets.value.filter((ticket) => {
-    if (!ticket.active) return false
-    const now = new Date()
-    if (ticket.saleFrom && new Date(ticket.saleFrom) > now) return false
-    return !(ticket.saleUntil && new Date(ticket.saleUntil) < now)
-  }),
-)
-
-const earliestSaleFrom = computed(() => {
-  let earliest: string | null = null
-
-  for (const ticket of availableTickets.value) {
-    if (!ticket.active || !ticket.saleFrom) continue
-
-    const ticketSaleFrom = new Date(ticket.saleFrom)
-    if (Number.isNaN(ticketSaleFrom.getTime())) continue
-
-    if (!earliest || ticketSaleFrom < new Date(earliest)) {
-      earliest = ticket.saleFrom
-    }
-  }
-
-  return earliest
-})
-
-const isBeforeEarliestSaleFrom = computed(() => {
-  if (!earliestSaleFrom.value) return false
-  return new Date() < new Date(earliestSaleFrom.value)
-})
-
-const shouldShowTicketsSection = computed(
-  () => activeTickets.value.length > 0 || isBeforeEarliestSaleFrom.value,
-)
-
 // Convention status
 const conventionStatus = computed((): 'happening' | 'upcoming' | 'ended' => {
   const now = new Date()
@@ -125,7 +90,7 @@ const primaryCTA = computed(() => {
     }
   }
 
-  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
+  if (isTicketsEnabled.value && availableTickets.value.length > 0) {
     return {
       text: t('landing.hero.getTickets'),
       href: '#tickets',
@@ -174,7 +139,7 @@ const countdown = computed(() => {
 const navigationSections = computed(() => {
   const sections = []
 
-  if (isTicketsEnabled.value && shouldShowTicketsSection.value) {
+  if (isTicketsEnabled.value) {
     sections.push('tickets')
   }
 
@@ -289,11 +254,9 @@ function getRandomItems<T>(items: T[], count: number): T[] {
 
     <!-- Tickets Section (Third) -->
     <TicketsView
-      v-if="isTicketsEnabled && shouldShowTicketsSection"
+      v-if="isTicketsEnabled"
       class="min-h-screen"
-      :tickets="activeTickets"
-      :show-coming-soon="isBeforeEarliestSaleFrom"
-      :earliest-sale-from="earliestSaleFrom"
+      :tickets="availableTickets"
       :is-library-enabled="isLibraryEnabled"
       :is-tournaments-enabled="isTournamentsEnabled"
     />
