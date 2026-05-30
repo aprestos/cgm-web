@@ -397,6 +397,8 @@ const en = {
     tickets: {
       sectionTitle: 'Get Your Access',
       sectionSubtitle: 'Choose your ticket',
+      comingSoonTitle: 'Coming Soon',
+      comingSoonDescription: 'Check back soon to get your tickets.',
       popular: 'Popular',
       getTicket: 'Get This Ticket',
       total: 'Total',

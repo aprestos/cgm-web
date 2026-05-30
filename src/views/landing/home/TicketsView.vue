@@ -39,10 +39,13 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
 </script>
 
 <template>
-  <section id="tickets" class="relative overflow-hidden py-32">
+  <section
+    id="tickets"
+    class="relative overflow-hidden bg-gray-50 py-32 dark:bg-gray-950"
+  >
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-linear-to-b from-white via-indigo-50/50 to-white dark:from-gray-950 dark:via-indigo-950/30 dark:to-gray-950"
+      class="absolute inset-0 bg-linear-to-b from-gray-50 via-indigo-100/40 to-gray-50 dark:from-gray-950 dark:via-indigo-950/35 dark:to-gray-950"
     />
     <div
       class="absolute left-0 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-600/30 blur-3xl"
@@ -70,10 +73,10 @@ const formattedTotal = computed(() => formatPrice(totalPrice.value))
         <p
           class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
         >
-          Coming soon
+          {{ t('landing.tickets.comingSoonTitle') }}
         </p>
         <p class="mt-3 text-sm text-gray-600 dark:text-white/70">
-          Check back soon to get your tickets.
+          {{ t('landing.tickets.comingSoonDescription') }}
         </p>
       </div>
 

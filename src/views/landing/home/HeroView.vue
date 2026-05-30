@@ -97,7 +97,7 @@ function scrollToMap(): void {
 <template>
   <section
     id="hero"
-    class="relative flex min-h-svh items-center justify-center overflow-hidden px-0 pb-16 pt-28 sm:pb-20 sm:pt-32"
+    class="relative flex min-h-svh items-center justify-center overflow-hidden bg-gray-50 px-0 pb-16 pt-28 dark:bg-gray-950 sm:pb-20 sm:pt-32"
   >
     <!-- Animated Background -->
     <div class="absolute inset-0">

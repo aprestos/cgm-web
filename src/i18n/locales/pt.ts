@@ -163,15 +163,15 @@ const pt = {
     profile: 'Perfil',
   },
   ticketsPage: {
-  ticketsPage: {
-    unavailableTitle: 'A venda de bilhetes não está disponível de momento',
-    unavailableDescription:
-      'Volta mais tarde para consultar novas disponibilidades.',
-    loading: 'A carregar bilhetes...',
-    loadError:
-      'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
-    empty: 'Não existem bilhetes disponíveis neste momento.',
-  }
+    ticketsPage: {
+      unavailableTitle: 'A venda de bilhetes não está disponível de momento',
+      unavailableDescription:
+        'Volta mais tarde para consultar novas disponibilidades.',
+      loading: 'A carregar bilhetes...',
+      loadError:
+        'Não foi possível carregar os bilhetes agora. Tenta novamente daqui a pouco.',
+      empty: 'Não existem bilhetes disponíveis neste momento.',
+    },
   },
   withdraw: {
     history: 'Histórico de requisições',
@@ -400,6 +400,8 @@ const pt = {
     tickets: {
       sectionTitle: 'Garante o Teu Acesso',
       sectionSubtitle: 'Escolhe o teu bilhete',
+      comingSoonTitle: 'Em breve',
+      comingSoonDescription: 'Volta em breve para garantires os teus bilhetes.',
       popular: 'Popular',
       getTicket: 'Adicionar ao carrinho',
       ticketsLeft: 'Apenas {count} bilhetes restantes!',
@@ -484,7 +486,7 @@ const pt = {
       name: 'Nome completo',
       email: 'Email',
       terms: 'Concordo com os termos e política de privacidade.',
-    }
+    },
     tickets: {
       description: 'Define o nome e o email para cada bilhete no teu carrinho.',
       ticketNumber: 'Bilhete #{number}',

@@ -313,7 +313,7 @@ const submit = async (): Promise<void> => {
     await ticketService.create({
       tenantId: tenantStore.value.id,
       editionId: editionStore.value.id,
-      price: parseInt(formData.value.price),
+      price: parseFloat(formData.value.price) * 100, // save value in cents
       group: props.group as TicketGroup,
       quantity: parseInt(formData.value.quantity, 10),
       active: true,

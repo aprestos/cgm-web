@@ -35,6 +35,7 @@
 
 ## i18n and theming
 - i18n auto-loads locale files from `src/i18n/locales/*.ts`; add a new file there and update `LOCALE_NAMES` in `src/i18n/index.ts`.
+- Whenever you add a new UI label/text key, add translations for all supported locales in `src/i18n/locales/*` in the same change.
 - Tailwind is the primary styling path; dark mode is used widely. Prefer existing component patterns over custom CSS.
 
 ## Verified workflows

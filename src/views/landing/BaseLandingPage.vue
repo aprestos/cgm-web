@@ -33,7 +33,9 @@ const activeTickets = computed(() =>
 
 // Navigation sections (dynamic based on enabled features)
 const navigationSections = computed(() => {
-  if (isTicketsEnabled.value) {
+  const sections = []
+
+  if (isTicketsEnabled.value && activeTickets.value.length > 0) {
     sections.push('tickets')
   }
 

@@ -13,7 +13,7 @@ defineProps<Props>()
 
 <template>
   <footer
-    class="border-t border-gray-200 dark:border-white/10 bg-white dark:bg-gray-950 py-12"
+    class="border-t border-gray-200 bg-gray-50 py-12 dark:border-white/10 dark:bg-gray-950"
   >
     <div class="mx-auto max-w-7xl px-4">
       <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
