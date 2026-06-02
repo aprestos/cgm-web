@@ -256,27 +256,20 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     <GalleryView
       v-if="galleryImages.length > 0"
       id="gallery"
-      class="min-h-screen"
       :images="galleryImages"
     />
 
-    <ScheduleView
-      v-if="scheduleImages.length > 0"
-      class="min-h-screen"
-      :images="scheduleImages"
-    />
+    <ScheduleView v-if="scheduleImages.length > 0" :images="scheduleImages" />
 
     <!-- Tickets Section (Third) -->
     <TicketsView
       v-if="isTicketsEnabled"
-      class="min-h-screen"
       :tickets="availableTickets"
       :is-library-enabled="isLibraryEnabled"
       :is-tournaments-enabled="isTournamentsEnabled"
     />
 
     <MapView
-      class="min-h-screen"
       :location-title="editionStore?.location?.title as string"
       :map-embed-url="editionStore?.location?.url as string"
     />
@@ -284,7 +277,6 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     <!-- Countdown Section -->
     <CountdownView
       v-if="countdown && conventionStatus === 'upcoming'"
-      class="min-h-screen"
       :countdown="countdown"
       :start-date="edition?.start_date"
     />
@@ -298,7 +290,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     />
 
     <!-- Final CTA Section -->
-    <CtaView class="min-h-screen" />
+    <CtaView />
 
     <!-- Footer -->
     <FooterView :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />

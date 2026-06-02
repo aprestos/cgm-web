@@ -16,7 +16,7 @@ defineProps<Props>()
 <template>
   <section
     id="location"
-    class="relative overflow-hidden bg-gray-50 py-12 dark:bg-gray-950 sm:py-16 lg:py-28"
+    class="relative overflow-hidden bg-gray-50 py-8 dark:bg-gray-950 sm:py-16 lg:py-28"
   >
     <div class="relative z-10 mx-auto max-w-7xl px-4">
       <!-- Section Header -->
@@ -39,7 +39,7 @@ defineProps<Props>()
       >
         <div class="grid lg:grid-cols-1">
           <!-- Map -->
-          <div class="min-h-[420px] sm:min-h-[520px] lg:min-h-[620px]">
+          <div class="min-h-130 sm:min-h-130 lg:min-h-155">
             <iframe
               v-if="mapEmbedUrl"
               :src="mapEmbedUrl"
