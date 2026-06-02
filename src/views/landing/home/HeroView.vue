@@ -517,17 +517,17 @@ function scrollToMap(): void {
             {{ editionStore?.name || t('landing.hero.defaultTitle') }}
           </h1>
 
-          <!-- Subtitle / Description -->
-          <p
-            v-if="!useLogo"
-            class="mx-auto mt-5 max-w-2xl text-base text-gray-600 dark:text-gray-400 sm:mt-6 sm:text-xl lg:text-2xl"
-            :class="{ 'lg:mx-0': posterUrl }"
-          >
-            {{
-              tenantStore?.shortDescription ||
-              t('landing.hero.defaultDescription')
-            }}
-          </p>
+          <!--          &lt;!&ndash; Subtitle / Description &ndash;&gt;-->
+          <!--          <p-->
+          <!--            v-if="!useLogo"-->
+          <!--            class="mx-auto mt-5 max-w-2xl text-base text-gray-600 dark:text-gray-400 sm:mt-6 sm:text-xl lg:text-2xl"-->
+          <!--            :class="{ 'lg:mx-0': posterUrl }"-->
+          <!--          >-->
+          <!--            {{-->
+          <!--              tenantStore?.shortDescription ||-->
+          <!--              t('landing.hero.defaultDescription')-->
+          <!--            }}-->
+          <!--          </p>-->
 
           <!-- Event Date & Location -->
           <div
