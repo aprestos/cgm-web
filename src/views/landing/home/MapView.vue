@@ -39,7 +39,7 @@ defineProps<Props>()
       >
         <div class="grid lg:grid-cols-1">
           <!-- Map -->
-          <div class="min-h-130 sm:min-h-130 lg:min-h-155">
+          <div class="min-h-130 lg:min-h-155">
             <iframe
               v-if="mapEmbedUrl"
               :src="mapEmbedUrl"
