@@ -34,8 +34,9 @@
                   >
                     <div class="flex-1 overflow-y-auto px-4 py-6 sm:px-6">
                       <div class="flex items-start justify-between">
-                        <DialogTitle class="text-lg font-medium text-gray-900"
-                          >Shopping cart</DialogTitle
+                        <DialogTitle
+                          class="text-lg font-medium text-gray-900"
+                          >{{ t('landing.cart.title') }}</DialogTitle
                         >
                         <div class="ml-3 flex h-7 items-center">
                           <button
@@ -44,7 +45,9 @@
                             @click="open = false"
                           >
                             <span class="absolute -inset-0.5"></span>
-                            <span class="sr-only">Close panel</span>
+                            <span class="sr-only">{{
+                              t('landing.cart.closePanel')
+                            }}</span>
                             <XMarkIcon class="size-6" aria-hidden="true" />
                           </button>
                         </div>
@@ -103,7 +106,11 @@
                                   class="flex flex-1 items-end justify-between text-sm"
                                 >
                                   <p class="text-gray-500">
-                                    Qty {{ item.quantity }}
+                                    {{
+                                      t('landing.cart.qty', {
+                                        count: item.quantity,
+                                      })
+                                    }}
                                   </p>
 
                                   <div class="flex">
@@ -112,7 +119,7 @@
                                       class="font-medium text-indigo-600 hover:text-indigo-500"
                                       @click="removeFromCart(item.ticket.id)"
                                     >
-                                      Remove
+                                      {{ t('landing.cart.remove') }}
                                     </button>
                                   </div>
                                 </div>
@@ -127,30 +134,27 @@
                       <div
                         class="flex justify-between text-base font-medium text-gray-900"
                       >
-                        <p>Subtotal</p>
+                        <p>{{ t('landing.cart.subtotal') }}</p>
                         <p>{{ formatPrice(totalPrice) }}</p>
                       </div>
-                      <p class="mt-0.5 text-sm text-gray-500">
-                        Shipping and taxes calculated at checkout.
-                      </p>
                       <div class="mt-6">
-                        <a
-                          href="#"
+                        <RouterLink
+                          :to="{ name: RouteNames.landing.checkout }"
                           class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-indigo-700"
-                          >Checkout</a
+                          >{{ t('landing.cart.checkout') }}</RouterLink
                         >
                       </div>
                       <div
                         class="mt-6 flex justify-center text-center text-sm text-gray-500"
                       >
                         <p>
-                          or{{ ' ' }}
+                          {{ t('landing.cart.or') }}{{ ' ' }}
                           <button
                             type="button"
                             class="font-medium text-indigo-600 hover:text-indigo-500"
                             @click="open = false"
                           >
-                            Continue Shopping
+                            {{ t('landing.cart.continueShopping') }}
                             <span aria-hidden="true"> &rarr;</span>
                           </button>
                         </p>
@@ -181,8 +185,9 @@ import { formatPrice } from '@/utils/price'
 import { IconTicketFilled } from '@tabler/icons-vue'
 import { formatDateRange, formatWeekday } from '@/utils/date'
 import { useI18n } from 'vue-i18n'
+import { RouteNames } from '@/router/routeNames.ts'
 
-const { locale } = useI18n()
+const { locale, t } = useI18n()
 
 const open = defineModel<boolean>('open', { default: false })
 

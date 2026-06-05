@@ -186,7 +186,7 @@ const router = createRouter({
           ],
         },
         {
-          path: '/stripe/callback',
+          path: 'stripe/callback',
           name: RouteNames.admin.stripeCallback,
           component: (): Promise<unknown> =>
             import('../views/admin/settings/advanced/payments/StripeCallback.vue'),

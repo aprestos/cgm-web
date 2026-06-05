@@ -1,13 +1,21 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
 import type { CSSProperties } from 'vue'
-import { IconMenu2, IconShoppingCart, IconX } from '@tabler/icons-vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
+import {
+  IconMenu2,
+  IconShoppingCart,
+  IconUserCircle,
+  IconX,
+} from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
+import { useRouter } from 'vue-router'
 import { RouteNames } from '@/router/routeNames'
 import { useCart } from '@/stores/cart.store'
 import { formatPrice } from '@/utils/price'
 import { getTenantLogo, tenantStore } from '@/stores/tenant'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
+import { authService } from '@/features/auth/service'
+import type { User } from '@/features/auth/user.model'
 
 interface Props {
   sections?: string[]
@@ -25,10 +33,13 @@ const props = withDefaults(defineProps<Props>(), {
 })
 const emit = defineEmits<Emits>()
 const { t } = useI18n()
+const router = useRouter()
 
 const { totalItems, totalPrice } = useCart()
 const isMobileMenuOpen = ref<boolean>(false)
+const isAccountMenuOpen = ref<boolean>(false)
 const scrollY = ref<number>(0)
+const user = ref<User | null>(null)
 const DEFAULT_HERO_FADE_DISTANCE = 420
 const MIN_HERO_FADE_DISTANCE = 240
 const MAX_HEADER_OPACITY = 0.85
@@ -37,6 +48,10 @@ const heroFadeDistance = ref<number>(DEFAULT_HERO_FADE_DISTANCE)
 const heroResizeObserver = ref<ResizeObserver | null>(null)
 
 const hasItems = computed(() => totalItems.value > 0)
+const isAuthenticated = computed<boolean>(() => user.value !== null)
+const displayName = computed<string>(
+  () => user.value?.name || t('landing.header.accountFallbackName'),
+)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
 const desktopSections = computed(() => props.sections.slice(0, 5))
 const headerProgress = computed<number>(() => {
@@ -58,6 +73,11 @@ const mobileMenuAriaLabel = computed<string>(() =>
     ? t('landing.header.closeMenu')
     : t('landing.header.openMenu'),
 )
+const accountButtonAriaLabel = computed<string>(() =>
+  isAuthenticated.value
+    ? t('landing.header.accountMenu')
+    : t('landing.header.signInToViewAccount'),
+)
 
 function getSectionLabel(section: string): string {
   return t(`landing.nav.${section}`)
@@ -75,14 +95,30 @@ function handleNavigationClick(section: string): void {
 
 function toggleMobileMenu(): void {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+  isAccountMenuOpen.value = false
 }
 
 function handleCartClick(): void {
   emit('cart-click')
+  isAccountMenuOpen.value = false
+}
+
+async function handleAccountClick(): Promise<void> {
+  if (!isAuthenticated.value) {
+    await router.push({ name: RouteNames.auth.signIn })
+    return
+  }
+
+  isAccountMenuOpen.value = !isAccountMenuOpen.value
+  isMobileMenuOpen.value = false
 }
 
 function handleScroll(): void {
   scrollY.value = window.scrollY
+}
+
+async function loadUser(): Promise<void> {
+  user.value = await authService.getUser()
 }
 
 function getHeroFadeDistance(): number {
@@ -115,6 +151,7 @@ function observeHeroSection(): void {
 }
 
 onMounted(() => {
+  void loadUser()
   updateHeroFadeDistance()
   observeHeroSection()
   handleScroll()
@@ -152,13 +189,11 @@ onUnmounted(() => {
         :to="{ name: RouteNames.landing.home }"
         class="group flex min-w-0 items-center gap-3"
       >
-        <div
-          class="flex h-18 shrink-0 items-center justify-center overflow-hidden rounded-xl p-0 transition-all duration-300"
-        >
+        <div class="flex shrink-0 items-center overflow-hidden">
           <img
             :src="getTenantLogo(LogoType.long)"
             :alt="tenantStore?.name || t('landing.header.logoAltFallback')"
-            class="h-full w-full object-contain"
+            class="h-10 w-auto max-w-40 object-contain"
           />
         </div>
       </RouterLink>
@@ -212,6 +247,47 @@ onUnmounted(() => {
             </span>
           </button>
         </Transition>
+
+        <div class="relative">
+          <button
+            type="button"
+            class="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 hover:scale-105"
+            :aria-label="accountButtonAriaLabel"
+            :aria-expanded="isAuthenticated ? isAccountMenuOpen : undefined"
+            aria-controls="landing-account-menu"
+            @click="handleAccountClick"
+          >
+            <IconUserCircle
+              class="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110"
+              :stroke-width="2"
+              aria-hidden="true"
+            />
+          </button>
+
+          <Transition
+            enter-active-class="transition duration-200 ease-out"
+            enter-from-class="translate-y-2 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition duration-150 ease-in"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="translate-y-2 opacity-0"
+          >
+            <div
+              v-if="isAuthenticated && isAccountMenuOpen"
+              id="landing-account-menu"
+              class="absolute right-0 top-full mt-3 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl bg-gray-50/95 p-4 text-left shadow-2xl ring-1 ring-gray-200/70 backdrop-blur-sm dark:bg-gray-900/95 dark:ring-white/10"
+            >
+              <p
+                class="truncate text-sm font-semibold text-gray-900 dark:text-white"
+              >
+                {{ displayName }}
+              </p>
+              <p class="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
+                {{ user?.email }}
+              </p>
+            </div>
+          </Transition>
+        </div>
 
         <button
           type="button"

@@ -3,14 +3,18 @@
     <div class="px-6 py-12 lg:px-8">
       <div class="">
         <img
-          class="dark:hidden mx-auto h-10 w-auto"
-          src="@/assets/logo-horizontal-color.svg"
-          alt="congrem.io"
+          class="dark:hidden mx-auto h-16 w-auto"
+          :src="
+            tenantStore?.logos?.['long'] || '@/assets/logo-horizontal-color.svg'
+          "
+          :alt="tenantStore?.name || 'congrem.io'"
         />
         <img
-          class="hidden dark:block mx-auto h-10 w-auto"
-          src="@/assets/logo-horizontal-white.svg"
-          alt="congrem.io"
+          class="hidden dark:block mx-auto h-16 w-auto"
+          :src="
+            tenantStore?.logos?.['long'] || '@/assets/logo-horizontal-white.svg'
+          "
+          :alt="tenantStore?.name || 'congrem.io'"
         />
       </div>
     </div>
@@ -30,4 +34,5 @@
 
 <script lang="ts" setup>
 // Auth template component - provides common layout structure for all auth pages
+import { tenantStore } from '@/stores/tenant.ts'
 </script>

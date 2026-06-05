@@ -6,16 +6,21 @@ import {
   IconShoppingBagPlus,
   IconShoppingBag,
   IconArrowRight,
+  IconLock,
 } from '@tabler/icons-vue'
-import { computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { useI18n } from 'vue-i18n'
 import { formatPrice } from '@/utils/price'
 import { useCart } from '@/stores/cart.store'
 import { formatDateRange, formatWeekday } from '@/utils/date'
 import { RouteNames } from '@/router/routeNames.ts'
+import { authService } from '@/features/auth/service'
+import type { User } from '@/features/auth/user.model'
+import { useRouter } from 'vue-router'
 
 const { t, locale } = useI18n()
+const router = useRouter()
 const {
   getQuantity,
   addToCart,
@@ -24,6 +29,17 @@ const {
   totalItems,
   totalPrice,
 } = useCart()
+
+const user = ref<User | null>(null)
+const isAuthenticated = computed<boolean>(() => user.value !== null)
+
+onMounted(async () => {
+  user.value = await authService.getUser()
+})
+
+async function goToSignIn(): Promise<void> {
+  await router.push({ name: RouteNames.auth.signIn })
+}
 
 interface Props {
   tickets: Ticket[]
@@ -148,9 +164,55 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
                 {{ formatPrice(ticket.price) }}
               </span>
             </div>
-            <!-- Action area: add-to-cart button ↔ quantity selector -->
+            <!-- Action area -->
             <div v-if="isAvailableToBuy(ticket)" class="mt-8">
+              <!-- Not authenticated: sign-in prompt -->
+              <div
+                v-if="!isAuthenticated"
+                :class="[
+                  'flex flex-col items-center gap-2 rounded-xl p-3 text-center',
+                  ticket.isPopular
+                    ? 'bg-white/15'
+                    : 'bg-gray-100 dark:bg-white/5',
+                ]"
+              >
+                <div class="flex items-center gap-1.5">
+                  <IconLock
+                    :class="[
+                      'h-3.5 w-3.5 shrink-0',
+                      ticket.isPopular
+                        ? 'text-white/70'
+                        : 'text-gray-500 dark:text-gray-400',
+                    ]"
+                  />
+                  <span
+                    :class="[
+                      'text-xs',
+                      ticket.isPopular
+                        ? 'text-white/70'
+                        : 'text-gray-500 dark:text-gray-400',
+                    ]"
+                  >
+                    {{ t('landing.tickets.signInRequired') }}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  :class="[
+                    'w-full cursor-pointer rounded-lg py-2 text-xs font-semibold transition-all duration-200',
+                    ticket.isPopular
+                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-500',
+                  ]"
+                  @click="goToSignIn"
+                >
+                  {{ t('landing.tickets.signIn') }}
+                </button>
+              </div>
+
+              <!-- Authenticated: add-to-cart / quantity controls -->
               <Transition
+                v-else
                 mode="out-in"
                 enter-active-class="transition-all duration-300 ease-out motion-reduce:transition-none"
                 leave-active-class="transition-all duration-200 ease-in motion-reduce:transition-none"
@@ -162,7 +224,7 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
                   key="add-btn"
                   type="button"
                   :class="[
-                    'flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300 cursor-pointer',
+                    'flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300',
                     ticket.isPopular
                       ? 'bg-white text-indigo-600 hover:bg-indigo-50'
                       : 'bg-gray-100 text-black hover:bg-gray-300 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
@@ -186,12 +248,7 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
                 >
                   <button
                     type="button"
-                    :class="[
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
-                      ticket.isPopular
-                        ? 'text-white hover:bg-white/20'
-                        : 'text-white hover:bg-white/20',
-                    ]"
+                    class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white transition-all duration-200 hover:bg-white/20"
                     @click="decreaseQuantity(ticket.id)"
                   >
                     <IconMinus class="h-4 w-4" />
@@ -215,12 +272,7 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
 
                   <button
                     type="button"
-                    :class="[
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-200 cursor-pointer',
-                      ticket.isPopular
-                        ? 'text-white hover:bg-white/20'
-                        : 'text-white hover:bg-white/20',
-                    ]"
+                    class="flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-white transition-all duration-200 hover:bg-white/20"
                     @click="increaseQuantity(ticket.id)"
                   >
                     <IconPlus class="h-4 w-4" />
@@ -228,6 +280,8 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
                 </div>
               </Transition>
             </div>
+
+            <!-- Not for sale yet -->
             <div
               v-else
               class="mt-8 rounded-xl border border-gray-300/70 bg-gray-100/70 px-3 py-2 text-center text-xs font-medium text-gray-900 dark:border-gray-500/40 dark:bg-gray-500/10 dark:text-gray-200"
