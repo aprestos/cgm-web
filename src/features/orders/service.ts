@@ -19,7 +19,7 @@ export const orderService = {
    */
   async pollUntilPaid(
     sessionId: string,
-    intervalMs = 10_000,
+    intervalMs = 2_000,
     timeoutMs = 90_000,
   ): Promise<Order> {
     const deadline = Date.now() + timeoutMs
@@ -47,11 +47,27 @@ export const orderService = {
             .eq('order_id', data.id),
         ])
 
-        const order: Order = data as unknown as Order
+        const order: Order = {
+          id: data.id,
+          status: data.status as Order['status'],
+          total: data.total,
+          items: items.data ?? [],
+          issuances: issuances.data ?? [],
+        }
 
-        if (!items.error && items.data) order.items = items.data
+        if (items.error) {
+          logger.error('Error loading order items', {
+            orderId: data.id,
+            error: items.error,
+          })
+        }
 
-        if (!issuances.error && issuances.data) order.issuances = issuances.data
+        if (issuances.error) {
+          logger.error('Error loading order issuances', {
+            orderId: data.id,
+            error: issuances.error,
+          })
+        }
 
         return order
       }

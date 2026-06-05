@@ -14,17 +14,23 @@ export const paymentsService = {
       recipientEmail: string
     }>,
   ): Promise<{ url: string; sessionId: string }> {
+    const tenantId = tenantStore.value?.id
+    const editionId = editionStore.value?.id
+
+    if (!tenantId || !editionId) {
+      throw new Error('Missing tenant or edition')
+    }
+
     const { data, error } = await supabase.functions.invoke<{
       url: string
       session_id: string
-    }>(`stripe/checkout`, {
+    }>('stripe/checkout', {
       method: 'POST',
       headers: {
-        'tenant-id': tenantStore.value?.id as string,
-        'edition-id': String(editionStore.value?.id),
+        'Tenant-Id': tenantId,
+        'Edition-Id': String(editionId),
       },
       body: {
-        order_id: 'order-id', //TODO: remove this
         items: items.map(toSnakeCase),
         issuances: issuances.map(toSnakeCase),
         domain: window.location.origin,
@@ -32,8 +38,8 @@ export const paymentsService = {
     })
 
     if (error || !data) {
-      logger.error('Failed to create order', { error })
-      throw new Error('Unable to create order')
+      logger.error('Failed to create Stripe checkout session', { error })
+      throw new Error('Unable to create Stripe checkout session')
     }
 
     return { url: data.url, sessionId: data.session_id }

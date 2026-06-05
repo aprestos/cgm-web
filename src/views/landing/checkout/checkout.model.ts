@@ -14,7 +14,7 @@ export interface CheckoutProgressStep {
 }
 
 export interface TicketAttendee {
-  key?: string
+  key: string
   ticketId: number
   ticketName: string
   price?: number

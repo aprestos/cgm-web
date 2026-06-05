@@ -53,7 +53,7 @@ const { t } = useI18n()
           <img
             :src="imageUrl"
             :alt="t('landing.schedule.imageAlt', { index: index + 1 })"
-            class="object-cover"
+            class="h-full w-full object-cover"
             loading="lazy"
           />
         </article>
