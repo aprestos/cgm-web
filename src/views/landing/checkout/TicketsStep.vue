@@ -34,7 +34,6 @@ async function handleContinue(): Promise<void> {
   if (formRules.valid) {
     emit('continue')
   }
-  }
 }
 </script>
 
