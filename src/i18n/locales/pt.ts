@@ -481,12 +481,12 @@ const pt = {
     },
   },
   checkout: {
-    title: 'Checkout',
-    subtitle: 'Conclui o teu registo em poucos passos seguros.',
+    title: 'Finalizar compra',
+    subtitle: 'Conclui a tua compra em poucos passos.',
     section: {
       account: 'Conta',
       tickets: 'Titulares dos Bilhetes',
-      payment: 'Detalhes de Pagamento',
+      payment: 'Pagamento',
       summary: 'Resumo',
       completed: 'Concluído',
     },
@@ -504,19 +504,17 @@ const pt = {
     },
     payment: {
       description:
-        'Insere os dados de pagamento e faturacao para concluir a compra.',
-      cardDetails: 'Dados do cartao',
-      cardName: 'Nome no cartao',
-      cardNumber: 'Numero do cartao',
-      expiry: 'Data de validade',
-      cvv: 'CVV',
-      invoiceAddress: 'Morada de faturacao',
-      companyName: 'Empresa (opcional)',
-      vatNumber: 'NIF (opcional)',
-      address: 'Morada',
-      city: 'Cidade',
-      postalCode: 'Codigo postal',
-      country: 'Pais',
+        'O processamento do pagamento é feito através da plataforma Stripe. ' +
+        'Os teus dados de pagamento e não serão armazenados por nós.',
+      cancelled: 'O pagamento foi cancelado. Os teus dados foram guardados.',
+      failed:
+        'Não foi possível processar o pagamento. Tenta novamente mais tarde.',
+      confirmationTimeout:
+        'Não foi possível confirmar o pagamento. Tenta novamente mais tarde.',
+    },
+    confirming: {
+      title: 'A confirmar o pagamento…',
+      description: 'Pode demorar alguns segundos.',
     },
     summary: {
       quantity: 'Qtd: {count}',
@@ -526,17 +524,17 @@ const pt = {
     },
     completed: {
       success: 'Pagamento aprovado',
-      title: 'Compra concluida com sucesso',
+      title: 'Compra concluída com sucesso',
       description:
-        'Os teus bilhetes estao confirmados. Enviamos um email com todos os detalhes.',
-      reference: 'Referencia',
+        'Os teus bilhetes estão confirmados. Mais tarde receberás um email com os detalhes do teu pedido.',
+      reference: 'Referência',
       total: 'Valor pago',
       attendees: 'Titulares dos bilhetes',
-      backHome: 'Voltar ao inicio',
+      backHome: 'Voltar ao início',
       buyMore: 'Comprar mais bilhetes',
     },
     emptyCart: {
-      title: 'O teu carrinho esta vazio',
+      title: 'O teu carrinho está vazio',
       description: 'Adiciona pelo menos um bilhete para continuar.',
       action: 'Voltar aos bilhetes',
     },
@@ -544,20 +542,7 @@ const pt = {
       continue: 'Continuar',
       back: 'Voltar',
       payNow: 'Pagar agora',
-      processing: 'A processar pagamento...',
-    },
-    validation: {
-      nameRequired: 'Por favor, indica um nome valido.',
-      emailRequired: 'Por favor, indica um email valido.',
-      termsRequired: 'Tens de aceitar os termos para continuar.',
-      cardNameRequired: 'Indica o nome do titular do cartao.',
-      cardNumberRequired: 'Indica um numero de cartao valido.',
-      expiryRequired: 'Indica a data de validade.',
-      cvvRequired: 'Indica um CVV valido.',
-      addressRequired: 'A morada e obrigatoria.',
-      cityRequired: 'A cidade e obrigatoria.',
-      postalCodeRequired: 'O codigo postal e obrigatorio.',
-      countryRequired: 'O pais e obrigatorio.',
+      processing: 'A redirecionar...',
     },
   },
 }

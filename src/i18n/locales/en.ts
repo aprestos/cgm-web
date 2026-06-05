@@ -481,11 +481,11 @@ const en = {
   },
   checkout: {
     title: 'Checkout',
-    subtitle: 'Complete your registration in a few secure steps.',
+    subtitle: 'Complete your purchase in a few steps.',
     section: {
       account: 'Account',
       tickets: 'Ticket Holders',
-      payment: 'Payment Details',
+      payment: 'Payment',
       summary: 'Summary',
       completed: 'Completed',
     },
@@ -515,6 +515,17 @@ const en = {
       city: 'City',
       postalCode: 'Postal code',
       country: 'Country',
+      cancelled:
+        'Payment was cancelled. Your details are saved — you can try again.',
+      failed:
+        'We could not process your payment. Your details are saved — please try again.',
+      confirmationTimeout:
+        'We could not confirm your payment in time. Please contact support if you were charged.',
+    },
+    confirming: {
+      title: 'Confirming your payment…',
+      description:
+        'This may take a few seconds. Please do not close this page.',
     },
     summary: {
       quantity: 'Qty: {count}',

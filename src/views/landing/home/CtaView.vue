@@ -9,6 +9,7 @@ import {
 import { RouterLink } from 'vue-router'
 import { RouteNames } from '@/router/routeNames.js'
 import { useI18n } from 'vue-i18n'
+import { tenantStore } from '@/stores/tenant.ts'
 
 const { t } = useI18n()
 </script>
@@ -63,21 +64,27 @@ const { t } = useI18n()
       <!-- Social Links -->
       <div class="mt-16 flex items-center justify-center gap-6">
         <a
-          href="#"
+          v-if="tenantStore?.socialNetworks?.instagram"
+          target="_blank"
+          :href="tenantStore.socialNetworks.instagram"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Instagram"
         >
           <IconBrandInstagram class="h-6 w-6" />
         </a>
         <a
-          href="#"
+          v-if="tenantStore?.socialNetworks?.facebook"
+          target="_blank"
+          :href="tenantStore?.socialNetworks?.facebook"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Facebook"
         >
           <IconBrandFacebook class="h-6 w-6" />
         </a>
         <a
-          href="#"
+          v-if="tenantStore?.socialNetworks?.x"
+          target="_blank"
+          :href="tenantStore?.socialNetworks?.x"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Twitter"
         >

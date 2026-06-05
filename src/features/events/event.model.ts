@@ -13,4 +13,10 @@ export interface Edition {
   poster_url?: string
   schedule_images?: string[]
   currency?: string
+  schedule?: Schedule
+}
+
+export interface Schedule {
+  desktop?: string[]
+  smartphone?: string[]
 }

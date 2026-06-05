@@ -18,4 +18,9 @@ export interface Tenant {
   email?: string
   images?: string[]
   shortDescription?: string
+  socialNetworks?: {
+    facebook?: string
+    instagram?: string
+    x?: string
+  }
 }

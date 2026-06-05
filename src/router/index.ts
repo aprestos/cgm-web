@@ -1,8 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import {
+  hasAnyOfRoles,
   navigationGuard,
   type RouteGuard,
-  hasAnyOfRoles,
 } from '@/router/guards'
 import { RouteNames } from '@/router/routeNames.ts'
 
@@ -185,19 +185,15 @@ const router = createRouter({
             },
           ],
         },
+        {
+          path: '/stripe/callback',
+          name: RouteNames.admin.stripeCallback,
+          component: (): Promise<unknown> =>
+            import('../views/admin/settings/advanced/payments/StripeCallback.vue'),
+        },
       ],
     },
-    {
-      path: '/stripe/callback',
-      name: RouteNames.admin.stripeCallback,
-      component: (): Promise<unknown> =>
-        import('../views/admin/settings/advanced/payments/StripeCallback.vue'),
-      meta: {
-        requiresAuth: true,
-        permission: 'admin',
-        guard: (): Promise<boolean> => hasAnyOfRoles(['admin', 'staff']),
-      },
-    },
+
     {
       path: '/users/:id',
       name: RouteNames.public.user,
