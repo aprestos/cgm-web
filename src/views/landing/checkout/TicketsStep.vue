@@ -31,10 +31,9 @@ const { t } = useI18n()
 
 async function handleContinue(): Promise<void> {
   const formRules = await r$.$validate()
-  console.log(formRules)
   if (formRules.valid) {
-    console.log('would continue')
     emit('continue')
+  }
   }
 }
 </script>

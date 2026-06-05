@@ -220,7 +220,8 @@ function handleStripeReturn(): void {
       })
       .catch((error: unknown): void => {
         logger.error('Payment confirmation timed out', {
-          checkoutSessionId,
+          sessionId,
+          checkoutSessionId: checkoutSessionId.value,
           error,
         })
         paymentError.value = t('checkout.payment.confirmationTimeout')
@@ -362,8 +363,8 @@ async function handlePaymentSubmit(): Promise<void> {
   } catch (error) {
     logger.error('Stripe checkout error', { error })
     isProcessingPayment.value = false
-    toast.error(t('checkout.payment.stripeError'))
-  }
+    paymentError.value = t('checkout.payment.failed')
+    toast.error(paymentError.value)
 
   //await new Promise<void>((resolve) => {
   //  setTimeout(() => resolve(), 1200)

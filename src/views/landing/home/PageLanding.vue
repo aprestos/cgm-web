@@ -143,8 +143,8 @@ const navigationSections = computed(() => {
   const sections = []
 
   if (
-    scheduleImages.value &&
-    (scheduleImages.value?.desktop || scheduleImages.value?.smartphone)
+    (scheduleImages.value.desktop?.length ?? 0) > 0 ||
+    (scheduleImages.value.smartphone?.length ?? 0) > 0
   ) {
     sections.push('schedule')
   }
@@ -262,7 +262,10 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     />
 
     <ScheduleView
-      v-if="scheduleImages && scheduleImages"
+      v-if="
+        (scheduleImages.desktop?.length ?? 0) > 0 ||
+        (scheduleImages.smartphone?.length ?? 0) > 0
+      "
       :images="scheduleImages"
     />
 
