@@ -256,7 +256,7 @@ function finalizeOrder(order: Order): void {
 function syncTicketAttendees(items: CartItem[]): void {
   const previous = new Map<string, TicketAttendee>()
   for (const attendee of ticketAttendees.value) {
-    previous.set(attendee.key as string, attendee)
+    previous.set(attendee.key, attendee)
   }
 
   const nextAttendees: TicketAttendee[] = []
@@ -363,12 +363,7 @@ async function handlePaymentSubmit(): Promise<void> {
     isProcessingPayment.value = false
     paymentError.value = t('checkout.payment.failed')
     toast.error(paymentError.value)
-
-  //await new Promise<void>((resolve) => {
-  //  setTimeout(() => resolve(), 1200)
-  //})
-
-  //finalizeOrder(orderReference.value ?? `CG-${Date.now().toString().slice(-8)}`)
+  }
 }
 </script>
 
