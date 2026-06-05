@@ -200,15 +200,15 @@ const router = createRouter({
       component: (): Promise<unknown> =>
         import('../views/public/PageUserProfile.vue'),
     },
-    {
-      path: '/not-found',
-      name: RouteNames.error.notFound,
-      component: (): Promise<unknown> => import('../views/NotFoundView.vue'),
-    },
-    {
-      path: '/:pathMatch(.*)*',
-      redirect: '/not-found',
-    },
+    // {
+    //   path: '/not-found',
+    //   name: RouteNames.error.notFound,
+    //   component: (): Promise<unknown> => import('../views/NotFoundView.vue'),
+    // },
+    // {
+    //   path: '/:pathMatch(.*)*',
+    //   redirect: '/not-found',
+    // },
   ],
 })
 

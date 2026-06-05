@@ -520,7 +520,7 @@ const pt = {
     payment: {
       description:
         'O processamento do pagamento é feito através da plataforma Stripe. ' +
-        'Os teus dados de pagamento e não serão armazenados por nós.',
+        'Os teus dados de pagamento não serão armazenados por nós.',
       cancelled: 'O pagamento foi cancelado. Os teus dados foram guardados.',
       failed:
         'Não foi possível processar o pagamento. Tenta novamente mais tarde.',

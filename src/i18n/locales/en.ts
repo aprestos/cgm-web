@@ -517,7 +517,7 @@ const en = {
     },
     payment: {
       description:
-        'Enter payment and invoicing details to complete your order.',
+        'The payment processing is done securely by Stripe. We do not store your payment details.',
       cardDetails: 'Card details',
       cardName: 'Name on card',
       cardNumber: 'Card number',
@@ -553,7 +553,7 @@ const en = {
       title: 'Order completed successfully',
       description:
         'Your tickets are confirmed. We sent a confirmation email with all details.',
-      reference: 'Reference',
+      reference: 'Referenc',
       total: 'Paid amount',
       attendees: 'Ticket holders',
       backHome: 'Back to home',
@@ -569,19 +569,6 @@ const en = {
       back: 'Back',
       payNow: 'Pay now',
       processing: 'Processing payment...',
-    },
-    validation: {
-      nameRequired: 'Please provide a valid name.',
-      emailRequired: 'Please provide a valid email.',
-      termsRequired: 'You must accept the terms to continue.',
-      cardNameRequired: 'Enter the cardholder name.',
-      cardNumberRequired: 'Enter a valid card number.',
-      expiryRequired: 'Enter the expiry date.',
-      cvvRequired: 'Enter a valid CVV.',
-      addressRequired: 'Address is required.',
-      cityRequired: 'City is required.',
-      postalCodeRequired: 'Postal code is required.',
-      countryRequired: 'Country is required.',
     },
   },
 }

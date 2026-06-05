@@ -156,21 +156,20 @@
               <CBadge v-else type="gray">Not started</CBadge>
             </div>
             <CButton
-              v-if="stripeConfiguration?.onboardingStatus !== 'complete'"
               type="button"
               size="sm"
               variant="secondary"
               @click="() => openDialog('connect-stripe')"
               >Connect</CButton
             >
-            <CButton
-              v-else
-              type="button"
-              size="sm"
-              variant="secondary"
-              @click="() => openDialog('disconnect-stripe')"
-              >Disconnect</CButton
-            >
+            <!--            <CButton-->
+            <!--              v-else-->
+            <!--              type="button"-->
+            <!--              size="sm"-->
+            <!--              variant="secondary"-->
+            <!--              @click="() => openDialog('disconnect-stripe')"-->
+            <!--              >Disconnect</CButton-->
+            <!--            >-->
           </div>
         </div>
       </div>

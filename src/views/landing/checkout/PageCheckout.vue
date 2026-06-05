@@ -57,7 +57,6 @@ const checkoutSessionId = ref<string | null>(null)
 const paymentError = ref<string | null>(null)
 
 const accountErrors = ref<Record<string, string>>({})
-const paymentErrors = ref<Record<string, string>>({})
 
 const isAuthenticated = computed((): boolean => user.value !== null)
 const isCartEmpty = computed((): boolean => totalItems.value === 0)
@@ -240,7 +239,6 @@ function handleStripeReturn(): void {
  * then clears the cart and persisted draft and advances to the completed step.
  */
 function finalizeOrder(order: Order): void {
-  console.log('Finalizing order', { order })
   completedOrder.value = {
     id: order.id,
     items: orderItems.value,
@@ -435,7 +433,6 @@ async function handlePaymentSubmit(): Promise<void> {
 
           <PaymentStep
             v-else-if="currentStep === 'payment'"
-            :errors="paymentErrors"
             :is-processing="isProcessingPayment"
             :is-confirming="isConfirmingPayment"
             :payment-error="paymentError"
