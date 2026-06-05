@@ -2,7 +2,7 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { editionStore } from '@/stores/edition.js'
 import { settingsStore } from '@/features/settings/useSettings.store.js'
-import { IconBooks, IconUsers, IconTicket } from '@tabler/icons-vue'
+import { IconBooks, IconTicket, IconUsers } from '@tabler/icons-vue'
 import { RouteNames } from '@/router/routeNames.js'
 import { tenantStore } from '@/stores/tenant.js'
 import { useI18n } from 'vue-i18n'
@@ -21,6 +21,7 @@ import CtaView from './CtaView.vue'
 import FooterView from './FooterView.vue'
 import MapView from '@/views/landing/home/MapView.vue'
 import ScheduleView from './ScheduleView.vue'
+import type { Schedule } from '@/features/events/event.model.ts'
 
 const { t } = useI18n()
 
@@ -37,9 +38,7 @@ const galleryImages = computed(() => {
   }
   return []
 })
-const scheduleImages = computed<string[]>(
-  () => edition.value?.schedule_images ?? [],
-)
+const scheduleImages = computed<Schedule>(() => edition.value?.schedule ?? {})
 
 // Data
 const trendingGames = ref<LibraryGame[]>([])
@@ -143,7 +142,10 @@ const countdown = computed(() => {
 const navigationSections = computed(() => {
   const sections = []
 
-  if (scheduleImages.value.length > 0) {
+  if (
+    (scheduleImages.value.desktop?.length ?? 0) > 0 ||
+    (scheduleImages.value.smartphone?.length ?? 0) > 0
+  ) {
     sections.push('schedule')
   }
 
@@ -259,7 +261,13 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       :images="galleryImages"
     />
 
-    <ScheduleView v-if="scheduleImages.length > 0" :images="scheduleImages" />
+    <ScheduleView
+      v-if="
+        (scheduleImages.desktop?.length ?? 0) > 0 ||
+        (scheduleImages.smartphone?.length ?? 0) > 0
+      "
+      :images="scheduleImages"
+    />
 
     <!-- Tickets Section (Third) -->
     <TicketsView

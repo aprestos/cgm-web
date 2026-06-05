@@ -404,6 +404,8 @@ const en = {
       total: 'Total',
       checkout: 'Proceed to Checkout',
       ticketsLeft: 'Only {count} tickets left!',
+      signInRequired: 'Sign in to purchase tickets',
+      signIn: 'Sign in',
       validPeriod: 'Valid: {from} - {until}',
       libraryAccess: 'Full library access',
       tournamentAccess: 'Tournament participation',
@@ -467,6 +469,19 @@ const en = {
       mobileNavAriaLabel: 'Mobile navigation',
       openMenu: 'Open menu',
       closeMenu: 'Close menu',
+      accountMenu: 'Account menu',
+      signInToViewAccount: 'Sign in to view your account',
+      accountFallbackName: 'Account',
+    },
+    cart: {
+      title: 'Shopping cart',
+      closePanel: 'Close panel',
+      qty: 'Qty {count}',
+      remove: 'Remove',
+      subtotal: 'Subtotal',
+      checkout: 'Checkout',
+      or: 'or',
+      continueShopping: 'Continue Shopping',
     },
     nav: {
       home: 'Home',
@@ -481,11 +496,11 @@ const en = {
   },
   checkout: {
     title: 'Checkout',
-    subtitle: 'Complete your registration in a few secure steps.',
+    subtitle: 'Complete your purchase in a few steps.',
     section: {
       account: 'Account',
       tickets: 'Ticket Holders',
-      payment: 'Payment Details',
+      payment: 'Payment',
       summary: 'Summary',
       completed: 'Completed',
     },
@@ -502,7 +517,7 @@ const en = {
     },
     payment: {
       description:
-        'Enter payment and invoicing details to complete your order.',
+        'The payment processing is done securely by Stripe. We do not store your payment details.',
       cardDetails: 'Card details',
       cardName: 'Name on card',
       cardNumber: 'Card number',
@@ -515,6 +530,17 @@ const en = {
       city: 'City',
       postalCode: 'Postal code',
       country: 'Country',
+      cancelled:
+        'Payment was cancelled. Your details are saved — you can try again.',
+      failed:
+        'We could not process your payment. Your details are saved — please try again.',
+      confirmationTimeout:
+        'We could not confirm your payment in time. Please contact support if you were charged.',
+    },
+    confirming: {
+      title: 'Confirming your payment…',
+      description:
+        'This may take a few seconds. Please do not close this page.',
     },
     summary: {
       quantity: 'Qty: {count}',
@@ -527,7 +553,7 @@ const en = {
       title: 'Order completed successfully',
       description:
         'Your tickets are confirmed. We sent a confirmation email with all details.',
-      reference: 'Reference',
+      reference: 'Referenc',
       total: 'Paid amount',
       attendees: 'Ticket holders',
       backHome: 'Back to home',
@@ -543,19 +569,6 @@ const en = {
       back: 'Back',
       payNow: 'Pay now',
       processing: 'Processing payment...',
-    },
-    validation: {
-      nameRequired: 'Please provide a valid name.',
-      emailRequired: 'Please provide a valid email.',
-      termsRequired: 'You must accept the terms to continue.',
-      cardNameRequired: 'Enter the cardholder name.',
-      cardNumberRequired: 'Enter a valid card number.',
-      expiryRequired: 'Enter the expiry date.',
-      cvvRequired: 'Enter a valid CVV.',
-      addressRequired: 'Address is required.',
-      cityRequired: 'City is required.',
-      postalCodeRequired: 'Postal code is required.',
-      countryRequired: 'Country is required.',
     },
   },
 }

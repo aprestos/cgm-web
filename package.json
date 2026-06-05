@@ -39,6 +39,7 @@
     "luxon": "^3.7.2",
     "pinia": "^3.0.4",
     "tailwind-merge": "^3.6.0",
+    "uuid": "^14.0.0",
     "vue": "^3.5.34",
     "vue-eslint-parser": "^10.4.0",
     "vue-filepond": "^7.0.4",

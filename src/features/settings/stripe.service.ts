@@ -10,13 +10,13 @@ export const stripeService = {
   ): Promise<string | undefined> {
     try {
       const result = await supabase.functions.invoke<{ url: string }>(
-        'payments/stripe/connect',
+        'admin/payments/stripe/connect',
         {
           method: 'POST',
           body: {
             action: 'initiate',
             tenant_id: tenantId,
-            redirect_uri: `${originUri}/stripe/callback`,
+            redirect_uri: `${originUri}/admin/stripe/callback`,
           },
         },
       )
@@ -37,7 +37,7 @@ export const stripeService = {
   ): Promise<string | undefined> {
     try {
       const result = await supabase.functions.invoke<{ url: string }>(
-        'payments/stripe/connect',
+        'admin/payments/stripe/connect',
         {
           method: 'POST',
           body: {
