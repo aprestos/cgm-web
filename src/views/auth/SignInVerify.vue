@@ -125,7 +125,11 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowLeftIcon, InboxIcon, LockClosedIcon, } from '@heroicons/vue/24/outline'
+import {
+  ArrowLeftIcon,
+  InboxIcon,
+  LockClosedIcon,
+} from '@heroicons/vue/24/outline'
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { authService } from '@/features/auth/service.ts'

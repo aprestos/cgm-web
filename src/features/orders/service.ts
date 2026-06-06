@@ -49,7 +49,7 @@ export const orderService = {
 
         const order: Order = {
           id: data.id,
-          status: data.status,
+          status: 'paid',
           total: data.total,
           items: items.data ?? [],
           issuances: issuances.data ?? [],

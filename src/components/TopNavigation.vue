@@ -14,7 +14,7 @@
                 }}</span>
                 <!-- Logo SkeletonLoader -->
                 <SkeletonLoader
-                  v-if="!tenantStore?.logos"
+                  v-if="!getTenantLogo(LogoType.long)"
                   class="h-12 w-auto"
                 />
                 <!-- Actual Logo -->
