@@ -13,7 +13,10 @@
                   tenantStore?.name || 'Your Company'
                 }}</span>
                 <!-- Logo SkeletonLoader -->
-                <SkeletonLoader v-if="!tenantStore?.logo" class="h-12 w-auto" />
+                <SkeletonLoader
+                  v-if="!tenantStore?.logos"
+                  class="h-12 w-auto"
+                />
                 <!-- Actual Logo -->
                 <img
                   v-else
@@ -125,7 +128,10 @@
               <!-- Show sign in button when not authenticated -->
               <RouterLink
                 v-else
-                :to="{ name: RouteNames.auth.signIn }"
+                :to="{
+                  name: RouteNames.auth.signIn,
+                  query: { redirect: $route.fullPath },
+                }"
                 class="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
               >
                 {{ t('auth.signIn') }}
