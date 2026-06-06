@@ -24,7 +24,7 @@
                   :src="
                     getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'
                   "
-                  :alt="tenantStore.name + ' logo'"
+                  :alt="tenantStore?.name + ' logo'"
                 />
               </RouterLink>
             </div>
@@ -152,7 +152,7 @@ import {
   MenuItems,
   PopoverGroup,
 } from '@headlessui/vue'
-import { IconSettings, IconUser, IconLogout } from '@tabler/icons-vue'
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-vue'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
