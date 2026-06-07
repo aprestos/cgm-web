@@ -8,7 +8,7 @@ import {
   IconX,
 } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { RouteNames } from '@/router/routeNames'
 import { useCart } from '@/stores/cart.store'
 import { formatPrice } from '@/utils/price'
@@ -34,6 +34,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 const { t } = useI18n()
 const router = useRouter()
+const route = useRoute()
 
 const { totalItems, totalPrice } = useCart()
 const isMobileMenuOpen = ref<boolean>(false)
@@ -105,7 +106,10 @@ function handleCartClick(): void {
 
 async function handleAccountClick(): Promise<void> {
   if (!isAuthenticated.value) {
-    await router.push({ name: RouteNames.auth.signIn })
+    await router.push({
+      name: RouteNames.auth.signIn,
+      query: { redirect: route.fullPath },
+    })
     return
   }
 

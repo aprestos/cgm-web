@@ -14,15 +14,15 @@ export const orderService = {
    * reaches the 'paid' status or the timeout elapses.
    *
    * @param sessionId
-   * @param intervalMs  - How often to check (default 2 s).
-   * @param timeoutMs   - Give up after this many milliseconds (default 90 s).
+   * @param interval
+   * @param timeout
    */
   async pollUntilPaid(
     sessionId: string,
-    intervalMs = 2_000,
-    timeoutMs = 90_000,
+    interval = 2,
+    timeout = 90,
   ): Promise<Order> {
-    const deadline = Date.now() + timeoutMs
+    const deadline = Date.now() + timeout * 1000
 
     while (Date.now() < deadline) {
       const { data, error } = await commerceClient
@@ -49,7 +49,7 @@ export const orderService = {
 
         const order: Order = {
           id: data.id,
-          status: data.status as Order['status'],
+          status: 'paid',
           total: data.total,
           items: items.data ?? [],
           issuances: issuances.data ?? [],
@@ -76,7 +76,7 @@ export const orderService = {
       const remaining = deadline - Date.now()
       if (remaining <= 0) break
       await new Promise<void>((resolve) =>
-        setTimeout(resolve, Math.min(intervalMs, remaining)),
+        setTimeout(resolve, Math.min(interval * 1000, remaining)),
       )
     }
 

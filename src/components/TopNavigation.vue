@@ -13,7 +13,10 @@
                   tenantStore?.name || 'Your Company'
                 }}</span>
                 <!-- Logo SkeletonLoader -->
-                <SkeletonLoader v-if="!tenantStore?.logo" class="h-12 w-auto" />
+                <SkeletonLoader
+                  v-if="!getTenantLogo(LogoType.long)"
+                  class="h-12 w-auto"
+                />
                 <!-- Actual Logo -->
                 <img
                   v-else
@@ -21,7 +24,7 @@
                   :src="
                     getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'
                   "
-                  :alt="tenantStore.name + ' logo'"
+                  :alt="tenantStore?.name + ' logo'"
                 />
               </RouterLink>
             </div>
@@ -125,7 +128,10 @@
               <!-- Show sign in button when not authenticated -->
               <RouterLink
                 v-else
-                :to="{ name: RouteNames.auth.signIn }"
+                :to="{
+                  name: RouteNames.auth.signIn,
+                  query: { redirect: $route.fullPath },
+                }"
                 class="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
               >
                 {{ t('auth.signIn') }}
@@ -146,7 +152,7 @@ import {
   MenuItems,
   PopoverGroup,
 } from '@headlessui/vue'
-import { IconSettings, IconUser, IconLogout } from '@tabler/icons-vue'
+import { IconLogout, IconSettings, IconUser } from '@tabler/icons-vue'
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 

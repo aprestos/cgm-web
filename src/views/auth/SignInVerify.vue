@@ -130,12 +130,13 @@ import {
   InboxIcon,
   LockClosedIcon,
 } from '@heroicons/vue/24/outline'
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { authService } from '@/features/auth/service.ts'
 import router from '@/router'
 import { RouteNames } from '@/router/routeNames.ts'
 import { toast } from 'vue-sonner'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -154,6 +155,7 @@ const OTP_LENGTH = 6
 const otpDigits = ref<string[]>(Array.from({ length: OTP_LENGTH }, () => ''))
 const inputRefs = ref<HTMLInputElement[]>([])
 const isLoading = ref(false)
+const route = useRoute()
 
 const isOtpComplete = computed<boolean>(() => {
   return otpDigits.value.every((digit) => digit !== '')
@@ -221,7 +223,10 @@ const handleSubmit = async (): Promise<void> => {
     const otp = otpDigits.value.join('')
     try {
       await authService.validateOTP(props.email, otp)
-      void router.push({ name: RouteNames.auth.confirm })
+      void router.push({
+        name: RouteNames.auth.confirm,
+        query: { redirect: route.query.redirect },
+      })
     } catch (error) {
       console.error('OTP verification error:', error)
       toast.error('Unable to verify OTP. Please try again.')

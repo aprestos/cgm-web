@@ -62,3 +62,4 @@ Desktop.ini
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+/pnpm-workspace.yaml

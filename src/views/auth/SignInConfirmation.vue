@@ -16,6 +16,7 @@ import router from '@/router'
 import { RouteNames } from '@/router/routeNames.ts'
 import CInput from '@/components/CInput.vue'
 import logger from '@/lib/logger.ts'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 
@@ -27,6 +28,7 @@ const errorMessage = ref('')
 const countdown = ref(5)
 const displayName = ref('')
 const displayNameErrors = ref<string[]>([])
+const route = useRoute()
 
 onMounted(async () => {
   try {
@@ -121,7 +123,10 @@ const startCountdown = (): void => {
 }
 
 const redirectToHome = async (): Promise<void> => {
-  await router.push({ name: RouteNames.public.library })
+  const redirect = route.query.redirect
+
+  await router.replace(typeof redirect === 'string' ? redirect : '/')
+  //await router.push({ name: RouteNames.public.library })
 }
 
 const backToSignIn = async (): Promise<void> => {

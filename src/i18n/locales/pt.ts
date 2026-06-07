@@ -559,6 +559,11 @@ const pt = {
       payNow: 'Pagar agora',
       processing: 'A redirecionar...',
     },
+    validation: {
+      nameRequired: 'Este campo é obrigatório',
+      emailRequired: 'Este campo é obrigatório',
+      emailInvalid: 'Por favor, insere um endereço de email válido',
+    },
   },
 }
 

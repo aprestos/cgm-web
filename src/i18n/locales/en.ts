@@ -570,6 +570,11 @@ const en = {
       payNow: 'Pay now',
       processing: 'Processing payment...',
     },
+    validation: {
+      nameRequired: 'This field is required',
+      emailRequired: 'This field is required',
+      emailInvalid: 'The email is invalid',
+    },
   },
 }
 
