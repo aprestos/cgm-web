@@ -6,6 +6,11 @@ import logger from '@/lib/logger.ts'
 import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order } from '@/features/orders/order.model.ts'
 
+export interface OrdersOverTimeEntry {
+  date: string // YYYY-MM-DD
+  count: number
+}
+
 const commerceClient = supabase.schema('commerce')
 
 export const orderService = {
@@ -83,6 +88,64 @@ export const orderService = {
     throw new Error(
       `No order with stripe_session_id '${sessionId}' reached 'paid' status within the allowed time.`,
     )
+  },
+
+  async getOrdersOverTime(
+    tenantId: string,
+    editionId: number,
+    from?: string,
+    to?: string,
+  ): Promise<OrdersOverTimeEntry[]> {
+    let query = commerceClient
+      .from('orders')
+      .select('created_at')
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .eq('status', 'paid')
+      .order('created_at', { ascending: true })
+
+    if (from) query = query.gte('created_at', from)
+    if (to) query = query.lte('created_at', to)
+
+    const { data, error } = await query
+    if (error) throw error
+
+    const counts = new Map<string, number>()
+    for (const row of data ?? []) {
+      const date = (row.created_at as string).slice(0, 10)
+      counts.set(date, (counts.get(date) ?? 0) + 1)
+    }
+
+    return Array.from(counts.entries()).map(([date, count]) => ({
+      date,
+      count,
+    }))
+  },
+
+  async getTotalItemsSold(
+    tenantId: string,
+    editionId: number,
+  ): Promise<number> {
+    const { data: orders, error: ordersError } = await commerceClient
+      .from('order_items')
+      .select('ticket_id')
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .eq('status', 'paid')
+
+    if (ordersError) throw ordersError
+
+    const orderIds = (orders ?? []).map((o) => o.ticket_id)
+    if (orderIds.length === 0) return 0
+
+    const { data: items, error: itemsError } = await commerceClient
+      .from('order_items')
+      .select('quantity')
+      .in('order_id', orderIds)
+
+    if (itemsError) throw itemsError
+
+    return (items ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)
   },
 
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {
