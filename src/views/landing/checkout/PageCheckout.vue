@@ -213,7 +213,7 @@ function handleStripeReturn(): void {
     currentStep.value = 'payment'
 
     orderService
-      .pollUntilPaid(sessionId, 10, 300)
+      .pollUntilPaid(sessionId, 10, 600)
       .then((order): void => {
         finalizeOrder(order)
       })
