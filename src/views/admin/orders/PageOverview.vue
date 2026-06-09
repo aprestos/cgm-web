@@ -212,7 +212,7 @@ onMounted(loadStats)
       />
       <StatisticCard
         :label="t('admin.orders.avgOrderValue')"
-        :value="formatPrice(Math.round(ordersRevenue / ordersCount))"
+        :value="formatPrice(ordersCount ? Math.round(ordersRevenue / ordersCount) : 0)"
         :icon="IconTrendingUp"
         icon-color="text-amber-600 dark:text-amber-400"
         :subtitle="t('admin.orders.avgOrderValueSubtitle')"

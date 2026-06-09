@@ -206,11 +206,11 @@ export const orderService = {
       .select('count:id.count(), revenue:total.sum()')
       .eq('tenant_id', tenantId)
       .eq('status', 'paid')
-      .single<{ count: number; revenue: number }>()
+      .single<{ count: number; revenue: number | null }>()
 
     if (error) throw error
 
-    return { count: data.count, revenue: data.revenue }
+    return { count: data.count, revenue: data.revenue ?? 0 }
   },
 
   async getOrderItemsCount(tenantId: string): Promise<number> {
@@ -222,7 +222,7 @@ export const orderService = {
 
     if (error) throw error
 
-    return data?.count
+    return data?.count ?? 0
   },
 
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {
