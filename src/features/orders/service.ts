@@ -7,8 +7,78 @@ import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order } from '@/features/orders/order.model.ts'
 
 export interface OrdersOverTimeEntry {
-  date: string // YYYY-MM-DD
+  date: string // ISO string — YYYY-MM-DD for daily, YYYY-MM-DDTHH:mm:ss.sssZ for sub-day
   count: number
+}
+
+export type ChartGranularity =
+  | '10min'
+  | '30min'
+  | '1h'
+  | '2h'
+  | '6h'
+  | '12h'
+  | '1d'
+
+function bucketTimestamp(
+  isoString: string,
+  granularity: ChartGranularity,
+): string {
+  const d = new Date(isoString)
+  if (granularity === '10min') {
+    d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 10) * 10, 0, 0)
+    return d.toISOString()
+  }
+  if (granularity === '30min') {
+    d.setUTCMinutes(Math.floor(d.getUTCMinutes() / 30) * 30, 0, 0)
+    return d.toISOString()
+  }
+  if (granularity === '1h') {
+    d.setUTCHours(d.getUTCHours(), 0, 0, 0)
+    return d.toISOString()
+  }
+  if (granularity === '2h') {
+    d.setUTCHours(Math.floor(d.getUTCHours() / 2) * 2, 0, 0, 0)
+    return d.toISOString()
+  }
+  if (granularity === '6h') {
+    d.setUTCHours(Math.floor(d.getUTCHours() / 6) * 6, 0, 0, 0)
+    return d.toISOString()
+  }
+  if (granularity === '12h') {
+    d.setUTCHours(Math.floor(d.getUTCHours() / 12) * 12, 0, 0, 0)
+    return d.toISOString()
+  }
+  return d.toISOString().slice(0, 10)
+}
+
+function advanceBucket(d: Date, granularity: ChartGranularity): void {
+  if (granularity === '10min') d.setUTCMinutes(d.getUTCMinutes() + 10)
+  else if (granularity === '30min') d.setUTCMinutes(d.getUTCMinutes() + 30)
+  else if (granularity === '1h') d.setUTCHours(d.getUTCHours() + 1)
+  else if (granularity === '2h') d.setUTCHours(d.getUTCHours() + 2)
+  else if (granularity === '6h') d.setUTCHours(d.getUTCHours() + 6)
+  else if (granularity === '12h') d.setUTCHours(d.getUTCHours() + 12)
+  else d.setUTCDate(d.getUTCDate() + 1)
+}
+
+function generateBuckets(
+  from: string,
+  to: string,
+  granularity: ChartGranularity,
+): string[] {
+  const buckets: string[] = []
+  const end = new Date(to)
+  const current = new Date(bucketTimestamp(from, granularity))
+  while (current <= end) {
+    buckets.push(
+      granularity === '1d'
+        ? current.toISOString().slice(0, 10)
+        : current.toISOString(),
+    )
+    advanceBucket(current, granularity)
+  }
+  return buckets
 }
 
 const commerceClient = supabase.schema('commerce')
@@ -95,12 +165,12 @@ export const orderService = {
     editionId: number,
     from?: string,
     to?: string,
+    granularity: ChartGranularity = '1d',
   ): Promise<OrdersOverTimeEntry[]> {
     let query = commerceClient
       .from('orders')
       .select('created_at')
       .eq('tenant_id', tenantId)
-      .eq('edition_id', editionId)
       .eq('status', 'paid')
       .order('created_at', { ascending: true })
 
@@ -112,40 +182,47 @@ export const orderService = {
 
     const counts = new Map<string, number>()
     for (const row of data ?? []) {
-      const date = (row.created_at as string).slice(0, 10)
-      counts.set(date, (counts.get(date) ?? 0) + 1)
+      const bucket = bucketTimestamp(row.created_at as string, granularity)
+      counts.set(bucket, (counts.get(bucket) ?? 0) + 1)
     }
 
-    return Array.from(counts.entries()).map(([date, count]) => ({
-      date,
-      count,
-    }))
+    if (from && to) {
+      return generateBuckets(from, to, granularity).map((date) => ({
+        date,
+        count: counts.get(date) ?? 0,
+      }))
+    }
+
+    return Array.from(counts.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, count]) => ({ date, count }))
   },
 
-  async getTotalItemsSold(
+  async getOrdersCount(
     tenantId: string,
-    editionId: number,
-  ): Promise<number> {
-    const { data: orders, error: ordersError } = await commerceClient
-      .from('order_items')
-      .select('ticket_id')
+  ): Promise<{ count: number; revenue: number }> {
+    const { data, error } = await commerceClient
+      .from('orders')
+      .select('count:id.count(), revenue:total.sum()')
       .eq('tenant_id', tenantId)
-      .eq('edition_id', editionId)
       .eq('status', 'paid')
+      .single<{ count: number; revenue: number }>()
 
-    if (ordersError) throw ordersError
+    if (error) throw error
 
-    const orderIds = (orders ?? []).map((o) => o.ticket_id)
-    if (orderIds.length === 0) return 0
+    return { count: data.count, revenue: data.revenue }
+  },
 
-    const { data: items, error: itemsError } = await commerceClient
+  async getOrderItemsCount(tenantId: string): Promise<number> {
+    const { data, error } = await commerceClient
       .from('order_items')
-      .select('quantity')
-      .in('order_id', orderIds)
+      .select('count:id.count()')
+      .eq('tenant_id', tenantId)
+      .single<{ count: number }>()
 
-    if (itemsError) throw itemsError
+    if (error) throw error
 
-    return (items ?? []).reduce((sum, item) => sum + (item.quantity ?? 0), 0)
+    return data?.count
   },
 
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {
