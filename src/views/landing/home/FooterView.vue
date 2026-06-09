@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { getTenantLogo, tenantStore } from '@/stores/tenant.ts'
+import { getTenantEmail, getTenantLogo, tenantStore } from '@/stores/tenant.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 
 const { t } = useI18n()
@@ -44,7 +44,7 @@ const { t } = useI18n()
           >
           <a
             v-if="tenantStore?.email"
-            :href="`mailto:${tenantStore?.email}`"
+            :href="`mailto:${getTenantEmail()}`"
             class="transition-colors hover:text-gray-900 dark:hover:text-white"
             >{{ t('landing.footer.contact') }}</a
           >

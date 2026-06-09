@@ -535,7 +535,7 @@ const en = {
       failed:
         'We could not process your payment. Your details are saved — please try again.',
       confirmationTimeout:
-        'We could not confirm your payment in time. Sometimes the validation may take longer than expected, you can refresh the page to check again. If you have any doubts contact us at {email}',
+        'We could not confirm your payment in time... Sometimes the validation may take longer than expected. Try refreshing the page to check again. If you have any doubts contact us at {email}',
     },
     confirming: {
       title: 'Confirming your payment…',
