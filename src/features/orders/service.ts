@@ -32,7 +32,7 @@ export const orderService = {
         .maybeSingle<{ id: string; total: number; status: string }>()
 
       if (error) {
-        logger.info('Unable to find order. Retrying...', { sessionId, error })
+        logger.error('Error polling order status', { sessionId, error })
       } else if (data?.status === 'paid') {
         const [items, issuances] = await Promise.all([
           supabase
