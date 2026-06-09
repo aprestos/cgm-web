@@ -30,18 +30,7 @@ const { t } = useI18n()
         </div>
 
         <div class="flex items-center gap-6 text-sm text-gray-500">
-          <a
-            v-if="false"
-            href="#"
-            class="transition-colors hover:text-gray-900 dark:hover:text-white"
-            >{{ t('landing.footer.privacy') }}</a
-          >
-          <a
-            v-if="false"
-            href="#"
-            class="transition-colors hover:text-gray-900 dark:hover:text-white"
-            >{{ t('landing.footer.terms') }}</a
-          >
+          <!-- Privacy/Terms links intentionally omitted until URLs are available -->
           <a
             v-if="tenantStore?.email"
             :href="`mailto:${getTenantEmail()}`"
