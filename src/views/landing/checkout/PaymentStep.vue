@@ -2,9 +2,12 @@
 import { useI18n } from 'vue-i18n'
 
 interface Props {
-  isProcessing: boolean
-  isConfirming?: boolean
-  paymentError?: string | null
+  isWaitingForPaymentSession?: boolean
+  isWaitingForPaymentConfirmation?: boolean
+  paymentIssue?: {
+    type: 'warning' | 'error'
+    description: string
+  } | null
 }
 
 interface Emits {
@@ -13,8 +16,9 @@ interface Emits {
 }
 
 withDefaults(defineProps<Props>(), {
-  isConfirming: false,
-  paymentError: null,
+  isWaitingForPaymentSession: false,
+  isWaitingForPaymentConfirmation: false,
+  paymentIssue: null,
 })
 const emit = defineEmits<Emits>()
 
@@ -24,7 +28,7 @@ const { t } = useI18n()
 <template>
   <!-- Payment confirmation polling screen -->
   <div
-    v-if="isConfirming"
+    v-if="isWaitingForPaymentConfirmation"
     class="flex flex-col items-center justify-center gap-6 py-16 text-center"
   >
     <svg
@@ -70,10 +74,17 @@ const { t } = useI18n()
     </div>
 
     <div
-      v-if="paymentError"
+      v-if="paymentIssue?.type === 'error'"
       class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-300"
     >
-      {{ paymentError }}
+      {{ paymentIssue?.description }}
+    </div>
+
+    <div
+      v-else-if="paymentIssue?.type === 'warning'"
+      class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300"
+    >
+      {{ paymentIssue.description }}
     </div>
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -87,11 +98,11 @@ const { t } = useI18n()
       <button
         type="button"
         class="rounded-xl cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
-        :disabled="isProcessing"
+        :disabled="isWaitingForPaymentSession"
         @click="emit('submit')"
       >
         {{
-          isProcessing
+          isWaitingForPaymentSession
             ? t('checkout.actions.processing')
             : t('checkout.actions.payNow')
         }}
