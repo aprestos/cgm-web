@@ -29,3 +29,13 @@ export function getTenantLogo(logoType: LogoType): string | undefined {
 
   return tenant.logo
 }
+
+export function getTenantEmail(): string | undefined {
+  const tenant = tenantStore.value
+
+  if (!tenant || !tenant.email) {
+    return 'info@congrem.io'
+  }
+
+  return tenant.email
+}

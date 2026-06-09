@@ -301,6 +301,6 @@ function getRandomItems<T>(items: T[], count: number): T[] {
     <CtaView />
 
     <!-- Footer -->
-    <FooterView :tenant-logo="tenant?.logo" :tenant-name="tenant?.name" />
+    <FooterView />
   </div>
 </template>

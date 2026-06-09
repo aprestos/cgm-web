@@ -550,7 +550,7 @@ const pt = {
       failed:
         'Não foi possível processar o pagamento. Tenta novamente mais tarde.',
       confirmationTimeout:
-        'Não foi possível confirmar o pagamento. Tenta novamente mais tarde.',
+        'Não foi possível confirmar o pagamento. Por vezes a confirmação pode demorar mais do que o esperado. Podes atualizar a página para tentar novamente. Em caso de dúvidas, por favor contacta-nos pelo email {email}.',
     },
     confirming: {
       title: 'A confirmar o pagamento…',
