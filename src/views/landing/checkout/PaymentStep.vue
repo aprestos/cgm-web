@@ -81,10 +81,11 @@ const { t } = useI18n()
     </div>
 
     <div
+    <div
       v-else-if="paymentIssue?.type === 'warning'"
       class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300"
     >
-      {{ paymentIssue.description }}
+      {{ paymentIssue?.description }}
     </div>
 
     <div class="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
