@@ -91,12 +91,6 @@ const router = createRouter({
       },
       children: [
         {
-          path: '',
-          name: RouteNames.admin.dashboard,
-          component: (): Promise<unknown> =>
-            import('../views/admin/dashboard/DashboardHome.vue'),
-        },
-        {
           path: 'library',
           name: RouteNames.admin.library,
           component: (): Promise<unknown> =>
@@ -119,6 +113,12 @@ const router = createRouter({
           name: RouteNames.admin.tickets,
           component: (): Promise<unknown> =>
             import('../views/admin/tickets/PageTicketsHome.vue'),
+        },
+        {
+          path: 'orders',
+          name: RouteNames.admin.orders,
+          component: (): Promise<unknown> =>
+            import('../views/admin/orders/PageOverview.vue'),
         },
         {
           path: 'settings',
@@ -200,15 +200,15 @@ const router = createRouter({
       component: (): Promise<unknown> =>
         import('../views/public/PageUserProfile.vue'),
     },
-    // {
-    //   path: '/not-found',
-    //   name: RouteNames.error.notFound,
-    //   component: (): Promise<unknown> => import('../views/NotFoundView.vue'),
-    // },
-    // {
-    //   path: '/:pathMatch(.*)*',
-    //   redirect: '/not-found',
-    // },
+    {
+      path: '/not-found',
+      name: RouteNames.error.notFound,
+      component: (): Promise<unknown> => import('../views/NotFoundView.vue'),
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/not-found',
+    },
   ],
 })
 

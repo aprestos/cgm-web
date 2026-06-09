@@ -29,9 +29,10 @@ import { settingsStore } from '@/features/settings/useSettings.store.ts'
 import {
   IconBooks,
   IconHome,
-  IconTrophy,
   IconSettings,
+  IconShoppingBag,
   IconTicket,
+  IconTrophy,
 } from '@tabler/icons-vue'
 import type { User } from '@/features/auth/user.model.ts'
 
@@ -45,19 +46,19 @@ const enabledNavigation = computed(() => {
 const navigation = ref([
   {
     id: 'dashboard',
-    routeName: RouteNames.admin.dashboard as string,
+    routeName: RouteNames.admin.dashboard,
     icon: IconHome,
     enabled: false,
   },
   {
     id: 'library',
-    routeName: RouteNames.admin.library as string,
+    routeName: RouteNames.admin.library,
     icon: IconBooks,
     enabled: settingsStore?.value?.library?.enabled ?? false,
   },
   {
     id: 'events',
-    routeName: RouteNames.admin.events as string,
+    routeName: RouteNames.admin.events,
     icon: CalendarDaysIcon,
     enabled: settingsStore?.value?.events?.enabled ?? false,
   },
@@ -73,12 +74,18 @@ const navigation = ref([
     icon: IconTicket,
     enabled: settingsStore?.value?.tickets?.enabled ?? false,
   },
+  {
+    id: 'orders',
+    routeName: RouteNames.admin.orders,
+    icon: IconShoppingBag,
+    enabled: settingsStore?.value?.tickets?.enabled ?? false,
+  },
 ])
 
 const bottomNavigation = ref([
   {
     id: 'settings',
-    routeName: RouteNames.admin.settingsOrganization as string,
+    routeName: RouteNames.admin.settingsOrganization,
     icon: IconSettings,
     enabled: false, // Will be set in onMounted
   },
