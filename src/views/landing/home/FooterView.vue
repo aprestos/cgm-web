@@ -1,14 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { getTenantEmail, getTenantLogo, tenantStore } from '@/stores/tenant.ts'
+import { LogoType } from '@/features/tenant/tenant.model.ts'
 
 const { t } = useI18n()
-
-interface Props {
-  tenantLogo?: string
-  tenantName?: string
-}
-
-defineProps<Props>()
 </script>
 
 <template>
@@ -19,34 +14,26 @@ defineProps<Props>()
       <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
         <div class="flex items-center gap-3">
           <img
-            v-if="tenantLogo"
-            :src="tenantLogo"
-            :alt="tenantName"
+            v-if="getTenantLogo(LogoType.long)"
+            :src="getTenantLogo(LogoType.long)"
+            :alt="tenantStore?.name"
             class="h-8 w-auto"
           />
           <span class="text-sm text-gray-500">
             {{
               t('landing.footer.copyright', {
                 year: new Date().getFullYear(),
-                name: tenantName,
+                name: tenantStore?.name,
               })
             }}
           </span>
         </div>
 
         <div class="flex items-center gap-6 text-sm text-gray-500">
+          <!-- Privacy/Terms links intentionally omitted until URLs are available -->
           <a
-            href="#"
-            class="transition-colors hover:text-gray-900 dark:hover:text-white"
-            >{{ t('landing.footer.privacy') }}</a
-          >
-          <a
-            href="#"
-            class="transition-colors hover:text-gray-900 dark:hover:text-white"
-            >{{ t('landing.footer.terms') }}</a
-          >
-          <a
-            href="#"
+            v-if="tenantStore?.email"
+            :href="`mailto:${getTenantEmail()}`"
             class="transition-colors hover:text-gray-900 dark:hover:text-white"
             >{{ t('landing.footer.contact') }}</a
           >

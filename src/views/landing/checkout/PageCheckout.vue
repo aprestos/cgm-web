@@ -32,6 +32,7 @@ import paymentsService from '@/features/payments/service.ts'
 import { toast } from 'vue-sonner'
 import logger from '@/lib/logger.ts'
 import type { Order } from '@/features/orders/order.model.ts'
+import { getTenantEmail } from '@/stores/tenant.ts'
 
 const { t, locale } = useI18n()
 
@@ -54,7 +55,11 @@ const accountForm = ref<AccountForm>({
 const ticketAttendees = ref<TicketAttendee[]>([])
 const completedOrder = ref<CompletedOrder | null>(null)
 const checkoutSessionId = ref<string | null>(null)
-const paymentError = ref<string | null>(null)
+
+const paymentIssue = ref<{
+  type: 'warning' | 'error'
+  description: string
+} | null>(null)
 
 const accountErrors = ref<Record<string, string>>({})
 
@@ -213,7 +218,7 @@ function handleStripeReturn(): void {
     currentStep.value = 'payment'
 
     orderService
-      .pollUntilPaid(sessionId, 10, 600)
+      .pollUntilPaid(sessionId, 10, 300)
       .then((order): void => {
         finalizeOrder(order)
       })
@@ -223,15 +228,23 @@ function handleStripeReturn(): void {
           checkoutSessionId: checkoutSessionId.value,
           error,
         })
-        paymentError.value = t('checkout.payment.confirmationTimeout')
+        paymentIssue.value = {
+          type: 'warning',
+          description: t('checkout.payment.confirmationTimeout', {
+            email: getTenantEmail(),
+          }),
+        }
         isConfirmingPayment.value = false
       })
   } else {
     currentStep.value = 'payment'
-    paymentError.value =
-      status === 'cancelled'
-        ? t('checkout.payment.cancelled')
-        : t('checkout.payment.failed')
+    paymentIssue.value = {
+      type: 'error',
+      description:
+        status === 'cancelled'
+          ? t('checkout.payment.cancelled')
+          : t('checkout.payment.failed'),
+    }
   }
 }
 
@@ -333,7 +346,7 @@ function handleTicketsContinue(): void {
 }
 
 async function handlePaymentSubmit(): Promise<void> {
-  paymentError.value = null
+  paymentIssue.value = null
   isProcessingPayment.value = true
 
   try {
@@ -361,8 +374,11 @@ async function handlePaymentSubmit(): Promise<void> {
   } catch (error) {
     logger.error('Stripe checkout error', { error })
     isProcessingPayment.value = false
-    paymentError.value = t('checkout.payment.failed')
-    toast.error(paymentError.value)
+    paymentIssue.value = {
+      type: 'error',
+      description: t('checkout.payment.failed'),
+    }
+    toast.error(paymentIssue.value.description)
   }
 }
 </script>
@@ -429,9 +445,9 @@ async function handlePaymentSubmit(): Promise<void> {
 
           <PaymentStep
             v-else-if="currentStep === 'payment'"
-            :is-processing="isProcessingPayment"
-            :is-confirming="isConfirmingPayment"
-            :payment-error="paymentError"
+            :is-waiting-for-payment-session="isProcessingPayment"
+            :is-waiting-for-payment-confirmation="isConfirmingPayment"
+            :payment-issue="paymentIssue"
             @back="goToPreviousStep"
             @submit="handlePaymentSubmit"
           />
