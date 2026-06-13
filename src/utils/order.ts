@@ -1,7 +1,5 @@
-export const shortId = (uuid: string) => {
+export function shortId(uuid: string): string {
   if (!uuid) return ''
 
-  const parts: string[] = uuid.split('-')
-
-  return parts?.[0]?.toUpperCase()
+  return uuid.split('-')[0]?.toUpperCase() ?? ''
 }

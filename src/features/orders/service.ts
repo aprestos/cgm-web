@@ -241,11 +241,12 @@ export const orderService = {
     // When filtering by email, resolve matching profile IDs first
     let customerIds: string[] | undefined
     if (email) {
-      const { data: matchedProfiles } = await supabase
+      const { data: matchedProfiles, error: matchedProfilesError } = await supabase
         .from('profiles')
         .select('id')
         .ilike('email', `%${email}%`)
 
+      if (matchedProfilesError) throw matchedProfilesError
       customerIds = ((matchedProfiles ?? []) as { id: string }[]).map(
         (p) => p.id,
       )
@@ -273,11 +274,12 @@ export const orderService = {
       ),
     ]
 
-    const { data: profileRows } = await supabase
+    const { data: profileRows, error: profileRowsError } = await supabase
       .from('profiles')
       .select('id,email')
       .in('id', allCustomerIds)
 
+    if (profileRowsError) throw profileRowsError
     const profileMap = new Map(
       ((profileRows ?? []) as { id: string; email: string }[]).map((p) => [
         p.id,
@@ -285,16 +287,19 @@ export const orderService = {
       ]),
     )
 
-    return orders.map((o) => ({
-      id: o.id as string,
-      customer_id: o.customer_id as string | null,
-      status: o.status as string,
-      total: o.total as number,
-      created_at: o.created_at as string,
-      profiles: o.customer_id
-        ? { email: profileMap.get(o.customer_id as string) ?? '' }
-        : null,
-    }))
+    return orders.map((o) => {
+      const customerId = o.customer_id as string | null
+      const email = customerId ? profileMap.get(customerId) : undefined
+
+      return {
+        id: o.id as string,
+        customer_id: customerId,
+        status: o.status as string,
+        total: o.total as number,
+        created_at: o.created_at as string,
+        profiles: email ? { email } : null,
+      }
+    })
   },
 
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {

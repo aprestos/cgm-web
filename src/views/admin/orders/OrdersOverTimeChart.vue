@@ -57,7 +57,7 @@ function getDateRange(period: Period): { from?: string; to?: string } {
   return { from: from.toISOString(), to: now.toISOString() }
 }
 
-function getGranularity(period: Period): ChartGranularity {
+function getGranularity(period: Period): PeriodParams['granularity'] {
   if (period === '1d') return '30min'
   if (period === '1w') return '6h'
   return '1d'
