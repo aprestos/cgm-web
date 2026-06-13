@@ -8,14 +8,17 @@ import { useHead } from '@unhead/vue'
 import { tenantStore } from './stores/tenant'
 import { useFavicon } from '@vueuse/core'
 import { editionStore } from '@/stores/edition.ts'
+import { ref } from 'vue'
 
 if (tenantStore?.value?.logo) {
   const icon = useFavicon()
   icon.value = tenantStore?.value?.logo
 }
 
+const editionName = ref<string>(editionStore.value?.name ?? 'congrem')
+
 useHead({
-  title: editionStore.value?.name || 'congrem.io',
+  title: editionName,
 })
 </script>
 
