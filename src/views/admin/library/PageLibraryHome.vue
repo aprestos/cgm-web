@@ -1,8 +1,9 @@
 <template>
-  <div class="flex flex-col min-h-screen space-y-6 p-6">
+  <div class="flex flex-col min-h-screen space-y-6 p-0 sm:p-6">
     <!-- Page Header -->
-    <div class="p-6 sm:p-0">
+    <div class="hidden lg:block p-6 sm:p-0">
       <PageHeader
+        class="hidden lg:block"
         :title="t('admin.library.title')"
         :description="
           t(
@@ -20,7 +21,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 sm:gap-4 gap-0 mb-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 sm:gap-4 mb-4">
       <!-- Loading skeletons -->
       <template v-if="loading">
         <div

@@ -1,6 +1,6 @@
 <template>
-  <div class="min-h-screen px-6 py-12 lg:px-8">
-    <div class="px-6 py-12 lg:px-8">
+  <div class="min-h-screen flex flex-col justify-center px-6 py-8 lg:px-8">
+    <div class="px-6 pb-6 lg:px-8">
       <div class="">
         <img
           class="dark:hidden mx-auto h-16 w-auto"

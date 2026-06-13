@@ -26,7 +26,7 @@ const avgOrderValue = computed(() =>
 </script>
 
 <template>
-  <div class="grid grid-cols-2 md:grid-cols-4 sm:gap-6">
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 sm:gap-6">
     <StatisticCard
       :label="t('admin.orders.totalOrders')"
       :value="ordersCount"

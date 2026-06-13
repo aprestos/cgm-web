@@ -19,5 +19,10 @@
   <body class="font-inter">
     <div id="app" class="w-full"></div>
     <script type="module" src="/src/main.ts"></script>
+    <script>
+      document.addEventListener('touchmove', function (e) {
+        if (e.touches.length > 1) e.preventDefault()
+      }, { passive: false })
+    </script>
   </body>
 </html>

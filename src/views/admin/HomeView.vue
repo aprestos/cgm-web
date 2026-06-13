@@ -14,14 +14,11 @@
     </div>
   </div>
   <!-- component -->
-
-  <BottomNavBar :navigation="enabledNavigation" />
 </template>
 
 <script setup lang="ts">
 import { CalendarDaysIcon } from '@heroicons/vue/24/outline'
 import { computed, onMounted, ref } from 'vue'
-import BottomNavBar from '@/components/navigation/BottomNavBar.vue'
 import SidebarNavigationGrey from '@/components/navigation/SidebarNavigationGrey.vue'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames.ts'
