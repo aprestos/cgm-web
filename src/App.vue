@@ -7,6 +7,7 @@ import 'vue-sonner/style.css'
 import { useHead } from '@unhead/vue'
 import { tenantStore } from './stores/tenant'
 import { useFavicon } from '@vueuse/core'
+import { editionStore } from '@/stores/edition.ts'
 
 if (tenantStore?.value?.logo) {
   const icon = useFavicon()
@@ -14,7 +15,7 @@ if (tenantStore?.value?.logo) {
 }
 
 useHead({
-  title: tenantStore.value?.name || 'congrem.io',
+  title: editionStore.value?.name || 'congrem.io',
 })
 </script>
 

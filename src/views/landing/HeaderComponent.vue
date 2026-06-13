@@ -2,6 +2,7 @@
 import type { CSSProperties } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import {
+  IconLogout,
   IconMenu2,
   IconShoppingCart,
   IconUserCircle,
@@ -115,6 +116,12 @@ async function handleAccountClick(): Promise<void> {
 
   isAccountMenuOpen.value = !isAccountMenuOpen.value
   isMobileMenuOpen.value = false
+}
+
+async function handleSignOut(): Promise<void> {
+  await authService.signOut()
+  user.value = null
+  isAccountMenuOpen.value = false
 }
 
 function handleScroll(): void {
@@ -279,16 +286,34 @@ onUnmounted(() => {
             <div
               v-if="isAuthenticated && isAccountMenuOpen"
               id="landing-account-menu"
-              class="absolute right-0 top-full mt-3 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl bg-gray-50/95 p-4 text-left shadow-2xl ring-1 ring-gray-200/70 backdrop-blur-sm dark:bg-gray-900/95 dark:ring-white/10"
+              class="absolute right-0 top-full mt-3 w-[min(18rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl bg-gray-50/95 text-left shadow-2xl ring-1 ring-gray-200/70 backdrop-blur-sm dark:bg-gray-900/95 dark:ring-white/10"
             >
-              <p
-                class="truncate text-sm font-semibold text-gray-900 dark:text-white"
-              >
-                {{ displayName }}
-              </p>
-              <p class="mt-1 truncate text-sm text-gray-600 dark:text-gray-300">
-                {{ user?.email }}
-              </p>
+              <!-- Account details -->
+              <div class="flex items-center gap-3 p-4">
+                <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
+                  {{ displayName[0]?.toUpperCase() }}
+                </div>
+                <div class="min-w-0">
+                  <p class="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                    {{ displayName }}
+                  </p>
+                  <p class="truncate text-xs text-gray-500 dark:text-gray-400">
+                    {{ user?.email }}
+                  </p>
+                </div>
+              </div>
+
+              <!-- Sign out -->
+              <div class="border-t border-gray-200/70 dark:border-white/10 p-2">
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-gray-300 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                  @click="handleSignOut"
+                >
+                  <IconLogout class="h-4 w-4" aria-hidden="true" />
+                  {{ t('auth.signOut') }}
+                </button>
+              </div>
             </div>
           </Transition>
         </div>

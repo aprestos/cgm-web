@@ -88,38 +88,58 @@
                     leave-to-class="transform opacity-0 scale-95"
                   >
                     <MenuItems
-                      class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white dark:bg-gray-800 py-1 shadow-lg ring-1 ring-black/10 ring-opacity-5 focus:outline-none"
+                      class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/10 ring-opacity-5 focus:outline-none overflow-hidden"
                     >
-                      <MenuItem v-slot="{ active }">
-                        <RouterLink
-                          :to="{
-                            name: RouteNames.public.user,
-                            params: { id: user?.id },
-                          }"
-                        >
+                      <!-- Account details header -->
+                      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                        <div class="flex items-center gap-3">
+                          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold">
+                            {{ user?.name ? user.name[0].toUpperCase() : 'U' }}
+                          </div>
+                          <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ user?.name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user?.email }}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Menu items -->
+                      <div class="py-1">
+                        <MenuItem v-slot="{ active }">
+                          <RouterLink
+                            :to="{
+                              name: RouteNames.public.user,
+                              params: { id: user?.id },
+                            }"
+                          >
+                            <button
+                              :class="[
+                                active ? 'bg-gray-100 dark:bg-gray-700' : '',
+                                'cursor-pointer flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300',
+                              ]"
+                            >
+                              <IconUser class="h-4 w-4" aria-hidden="true" />
+                              {{ t('navigation.profile') }}
+                            </button>
+                          </RouterLink>
+                        </MenuItem>
+                      </div>
+
+                      <!-- Sign out -->
+                      <div class="border-t border-gray-100 dark:border-gray-700 py-1">
+                        <MenuItem v-slot="{ active }">
                           <button
                             :class="[
-                              active ? 'bg-gray-100 dark:bg-gray-700' : '',
-                              'cursor-pointer flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300',
+                              active ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300',
+                              'flex items-center gap-2 w-full text-left px-4 py-2 text-sm',
                             ]"
+                            @click="handleSignOut"
                           >
-                            <IconUser class="h-4 w-4" aria-hidden="true" />
-                            {{ t('navigation.profile') }}
+                            <IconLogout class="h-4 w-4" aria-hidden="true" />
+                            {{ t('auth.signOut') }}
                           </button>
-                        </RouterLink>
-                      </MenuItem>
-                      <MenuItem v-slot="{ active }" class="cursor-pointer">
-                        <button
-                          :class="[
-                            active ? 'bg-gray-100 dark:bg-gray-700' : '',
-                            'flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300',
-                          ]"
-                          @click="handleSignOut"
-                        >
-                          <IconLogout class="h-4 w-4" aria-hidden="true" />
-                          {{ t('auth.signOut') }}
-                        </button>
-                      </MenuItem>
+                        </MenuItem>
+                      </div>
                     </MenuItems>
                   </transition>
                 </Menu>

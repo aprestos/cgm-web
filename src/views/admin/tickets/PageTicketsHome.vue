@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import {
-  IconPlus,
-  IconTicket,
-  IconCurrencyEuro,
-  IconUsers,
   IconCalendar,
   IconChevronDown,
+  IconCurrencyEuro,
+  IconPlus,
+  IconTicket,
+  IconUsers,
 } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -189,18 +189,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex flex-col space-y-6 p-6">
+  <div class="flex flex-col space-y-6 p-0 sm:p-6">
     <!-- Page Header -->
     <PageHeader
       :title="t('admin.tickets.title')"
       :description="t('admin.tickets.description')"
-      class="p-6 sm:p-0"
+      class="p-6 sm:p-0 hidden lg:block"
       @action="handleAdd"
     >
     </PageHeader>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-2 md:grid-cols-4 sm:gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 sm:gap-6">
       <StatisticCard
         :label="t('admin.tickets.totalTickets')"
         :value="statistics.total"

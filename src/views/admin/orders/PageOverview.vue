@@ -74,11 +74,11 @@ onMounted(() => void loadRecentOrders())
 </script>
 
 <template>
-  <div class="flex flex-col space-y-6 p-6">
+  <div class="flex flex-col space-y-6 p-0 sm:p-6">
     <PageHeader
       :title="t('admin.orders.title')"
       :description="t('admin.orders.description')"
-      class="p-6 sm:p-0"
+      class="hidden lg:block p-6 sm:p-0"
     />
 
     <OrdersStatsGrid
