@@ -225,6 +225,78 @@ export const orderService = {
     return data?.count ?? 0
   },
 
+  async getOrders(
+    tenantId: string,
+    email?: string,
+  ): Promise<
+    {
+      id: string
+      customer_id: string | null
+      status: string
+      total: number
+      created_at: string
+      profiles: { email: string } | null
+    }[]
+  > {
+    // When filtering by email, resolve matching profile IDs first
+    let customerIds: string[] | undefined
+    if (email) {
+      const { data: matchedProfiles } = await supabase
+        .from('profiles')
+        .select('id')
+        .ilike('email', `%${email}%`)
+
+      customerIds = ((matchedProfiles ?? []) as { id: string }[]).map(
+        (p) => p.id,
+      )
+      if (!customerIds.length) return []
+    }
+
+    let query = commerceClient
+      .from('orders')
+      .select('id,customer_id,status,total,created_at')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    if (customerIds) query = query.in('customer_id', customerIds)
+
+    const { data: orders, error } = await query
+    if (error) throw error
+    if (!orders?.length) return []
+
+    const allCustomerIds = [
+      ...new Set(
+        orders
+          .map((o) => o.customer_id as string | null)
+          .filter((id): id is string => id !== null),
+      ),
+    ]
+
+    const { data: profileRows } = await supabase
+      .from('profiles')
+      .select('id,email')
+      .in('id', allCustomerIds)
+
+    const profileMap = new Map(
+      ((profileRows ?? []) as { id: string; email: string }[]).map((p) => [
+        p.id,
+        p.email,
+      ]),
+    )
+
+    return orders.map((o) => ({
+      id: o.id as string,
+      customer_id: o.customer_id as string | null,
+      status: o.status as string,
+      total: o.total as number,
+      created_at: o.created_at as string,
+      profiles: o.customer_id
+        ? { email: profileMap.get(o.customer_id as string) ?? '' }
+        : null,
+    }))
+  },
+
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {
     const body = toSnakeCaseAs<Record<string, unknown>>(
       order as unknown as Record<string, unknown>,
