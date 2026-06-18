@@ -1,41 +1,105 @@
 <script setup lang="ts">
 import type { Component } from 'vue'
+import { computed } from 'vue'
+import BaseCard from '@/components/BaseCard.vue'
+
+type Color =
+  | 'slate'
+  | 'gray'
+  | 'red'
+  | 'orange'
+  | 'amber'
+  | 'yellow'
+  | 'lime'
+  | 'green'
+  | 'emerald'
+  | 'teal'
+  | 'cyan'
+  | 'sky'
+  | 'blue'
+  | 'indigo'
+  | 'violet'
+  | 'purple'
+  | 'fuchsia'
+  | 'pink'
+  | 'rose'
 
 interface Props {
   label: string
   value: string | number
   icon: Component
-  iconColor?: string
-  valueColor?: string
+  color?: Color
   subtitle?: string
+  loading?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
-  iconColor: 'text-gray-900 dark:text-gray-400',
-  valueColor: 'text-gray-900 dark:text-white',
+const props = withDefaults(defineProps<Props>(), {
+  color: 'amber',
   subtitle: '',
+  loading: false,
 })
+
+const COLOR_ICON_CLASSES: Partial<Record<Color, { text: string; bg: string }>> = {
+  amber: { text: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  blue: { text: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  emerald: {
+    text: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+  },
+  fuchsia: {
+    text: 'text-fuchsia-600',
+    bg: 'bg-fuchsia-50 dark:bg-fuchsia-900/20',
+  },
+  green: { text: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+  purple: {
+    text: 'text-purple-600',
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+  },
+  sky: { text: 'text-sky-600', bg: 'bg-sky-50 dark:bg-sky-900/20' },
+}
+
+const iconClasses = computed(() =>
+  COLOR_ICON_CLASSES[props.color] ?? (COLOR_ICON_CLASSES.amber as { text: string; bg: string }),
+)
 </script>
 
 <template>
-  <div
-    class="bg-white dark:bg-gray-800 ring-1 ring-gray-200 dark:ring-gray-700 px-4 py-3 sm:rounded-lg sm:shadow-sm sm:p-6"
-  >
-    <!-- Mobile: single line -->
-    <div class="flex items-center gap-3 sm:hidden">
-      <component :is="icon" class="size-5 shrink-0" :class="iconColor" />
-      <span class="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">{{ label }}</span>
-      <span class="ml-auto text-sm font-bold shrink-0" :class="valueColor">{{ value }}</span>
+  <BaseCard>
+    <div v-if="loading" class="flex flex-col justify-between animate-pulse">
+      <div class="flex flex-row items-center">
+        <div class="rounded-md w-8 h-8 bg-gray-200 dark:bg-gray-700" />
+        <div class="ml-2 h-3 w-24 rounded bg-gray-200 dark:bg-gray-700" />
+      </div>
+      <div class="flex justify-end mt-2">
+        <div class="h-8 w-16 rounded bg-gray-200 dark:bg-gray-700" />
+      </div>
     </div>
 
-    <!-- Desktop: original stacked layout -->
-    <div class="hidden sm:flex items-center justify-between">
-      <div class="flex-1">
-        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">{{ label }}</p>
-        <p class="mt-2 text-2xl font-bold" :class="valueColor">{{ value }}</p>
-        <p v-if="subtitle" class="mt-2 text-xs text-gray-600 dark:text-gray-400">{{ subtitle }}</p>
+    <div v-else class="flex flex-col justify-between">
+      <div class="flex flex-row items-center">
+        <div
+          class="flex items-center justify-center rounded-md w-8 h-8"
+          :class="iconClasses.bg"
+        >
+          <component :is="icon" class="size-4" :class="iconClasses.text" />
+        </div>
+        <span
+          class="font-display text-sm font-medium text-slate-500 ml-2 dark:text-slate-400"
+        >
+          {{ label }}
+        </span>
       </div>
-      <component :is="icon" class="size-8" :class="iconColor" />
+      <p
+        class="flex mt-2 text-2xl font-bold dark:text-white text-black font-display"
+      >
+        {{ value }}
+      </p>
+      <p
+        v-if="subtitle"
+        class="hidden mt-2 text-xs text-gray-600 dark:text-gray-400"
+      >
+        {{ subtitle }}
+      </p>
     </div>
-  </div>
+  </BaseCard>
 </template>

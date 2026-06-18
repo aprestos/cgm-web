@@ -51,7 +51,7 @@
           :label="t('admin.library.stats.available', 'Available')"
           :value="statistics.available"
           :icon="IconCircleCheck"
-          icon-color="text-green-500"
+          color="green"
           value-color="text-green-600 dark:text-green-400"
         />
 
@@ -59,7 +59,7 @@
           :label="t('admin.library.stats.withdrawn', 'Withdrawn')"
           :value="statistics.withdrawn"
           :icon="IconHandGrab"
-          icon-color="text-amber-500"
+          color="amber"
           value-color="text-amber-600 dark:text-amber-400"
         />
 
@@ -67,15 +67,13 @@
           :label="t('admin.library.stats.reserved', 'Reserved')"
           :value="statistics.reserved"
           :icon="IconBookmark"
-          icon-color="text-blue-500"
+          color="blue"
           value-color="text-blue-600 dark:text-blue-400"
         />
       </template>
     </div>
 
-    <div
-      class="sm:bg-white dark:bg-gray-800 rounded-0 sm:rounded-xl shadow-sm sm:border sm:border-gray-200 dark:border-gray-700"
-    >
+    <BaseCard no-padding>
       <DataTable
         :items="filteredGames"
         :columns="tableColumns"
@@ -203,7 +201,13 @@
           />
         </template>
       </DataTable>
-    </div>
+    </BaseCard>
+    <SettingsBottomBar>
+      <CButton size="xl" @click="() => openDialog(Dialog.add)">
+        <slot name="action-icon" />
+        <IconPlus /> {{ t('admin.library.addGame') }}
+      </CButton></SettingsBottomBar
+    >
   </div>
 
   <!-- Dialogs -->
@@ -290,6 +294,9 @@ import DialogGameHistory from '@/views/admin/library/DialogGameHistory.vue'
 import DialogEditGame from '@/views/admin/library/DialogEditGame.vue'
 import libraryService from '@/features/library/games/service.ts'
 import PageHeader from '@/components/PageHeader.vue'
+import BaseCard from '@/components/BaseCard.vue'
+import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
+import CButton from '@/components/CButton.vue'
 
 const { t } = useI18n()
 

@@ -1,5 +1,5 @@
 <template>
-  <SidebarNavigationGrey
+  <DashboardNavigation
     :sidebar-open="sidebarOpen"
     :top-navigation="navigation"
     :bottom-navigation="bottomNavigation"
@@ -18,8 +18,8 @@
 
 <script setup lang="ts">
 import { CalendarDaysIcon } from '@heroicons/vue/24/outline'
-import { computed, onMounted, ref } from 'vue'
-import SidebarNavigationGrey from '@/components/navigation/SidebarNavigationGrey.vue'
+import { onMounted, ref } from 'vue'
+import DashboardNavigation from '@/components/navigation/DashboardNavigation.vue'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { settingsStore } from '@/features/settings/useSettings.store.ts'
@@ -35,10 +35,6 @@ import type { User } from '@/features/auth/user.model.ts'
 
 const userEmail = ref<string | null>(null)
 const user = ref<User | null>(null)
-
-const enabledNavigation = computed(() => {
-  return navigation.value.filter((item) => item.enabled)
-})
 
 const navigation = ref([
   {
@@ -73,7 +69,7 @@ const navigation = ref([
   },
   {
     id: 'orders',
-    routeName: RouteNames.admin.orders,
+    routeName: RouteNames.admin.ordersRoot,
     icon: IconShoppingBag,
     enabled: settingsStore?.value?.tickets?.enabled ?? false,
   },
@@ -82,7 +78,7 @@ const navigation = ref([
 const bottomNavigation = ref([
   {
     id: 'settings',
-    routeName: RouteNames.admin.settingsOrganization,
+    routeName: RouteNames.admin.settings,
     icon: IconSettings,
     enabled: false, // Will be set in onMounted
   },

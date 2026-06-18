@@ -95,7 +95,6 @@
                 :column="column"
                 :index="rowIndex"
               >
-                <!-- Default cell content -->
                 {{ getNestedValue(item, column.key) }}
               </slot>
             </td>
@@ -128,12 +127,12 @@
 
 <script setup lang="ts" generic="T">
 import {
-  ref,
   computed,
-  type PropType,
-  watch,
   onMounted,
   onUnmounted,
+  type PropType,
+  ref,
+  watch,
 } from 'vue'
 import {
   IconArrowsSort,
@@ -254,10 +253,7 @@ const getRowKey = (item: T, index: number): string | number => {
   if (typeof props.rowKey === 'function') {
     return props.rowKey(item, index)
   }
-  return (
-    ((item as { [props.rowKey]: string })[props.rowKey] as string | number) ||
-    index
-  )
+  return (item as { [props.rowKey]: string })[props.rowKey] || index
 }
 
 const getNestedValue = (obj: T, path: string): unknown => {

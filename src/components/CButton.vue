@@ -5,7 +5,7 @@
     :class="buttonClasses"
     @click="$emit('click', $event)"
   >
-    <span v-if="loading" class="flex items-center gap-2">
+    <span v-if="loading" class="flex items-center gap-2.5">
       <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
         <circle
           class="opacity-25"
@@ -23,7 +23,7 @@
       </svg>
       {{ loadingText || 'Loading...' }}
     </span>
-    <span v-else class="flex items-center gap-2">
+    <span v-else class="flex items-center gap-2.5">
       <slot name="icon-left" />
       <slot />
       <slot name="icon-right" />
@@ -72,22 +72,24 @@ const buttonClasses = computed(() => {
     'items-center',
     'justify-center',
     'font-semibold',
-    'transition-colors',
-    'duration-200',
+    'transition-all',
+    'duration-300',
+    'hover:scale-105',
     'focus-visible:outline',
     'focus-visible:outline-2',
     'focus-visible:outline-offset-2',
     'cursor-pointer',
     'disabled:opacity-50',
     'disabled:cursor-not-allowed',
+    'disabled:hover:scale-100',
   ]
 
   // Size classes
   const sizeClasses = {
-    sm: ['px-2.5', 'py-1.5', 'text-xs'],
-    md: ['px-3', 'py-2', 'text-sm'],
-    lg: ['px-4', 'py-2.5', 'text-base'],
-    xl: ['px-5', 'py-3', 'text-base'],
+    sm: ['px-3', 'py-1.5', 'text-xs', 'gap-1.5'],
+    md: ['px-4', 'py-2', 'text-sm', 'gap-2'],
+    lg: ['px-6', 'py-2.5', 'text-sm', 'gap-2.5'],
+    xl: ['px-8', 'py-3.5', 'text-sm', 'gap-3'],
   }
 
   // Variant classes
@@ -95,34 +97,41 @@ const buttonClasses = computed(() => {
     primary: [
       'bg-indigo-600',
       'text-white',
-      'shadow-xs',
-      'hover:bg-indigo-700',
+      'shadow-lg',
+      'shadow-indigo-500/30',
+      'hover:bg-indigo-500',
+      'hover:shadow-md',
+      'hover:shadow-indigo-500/40',
       'focus-visible:outline-indigo-600',
       'dark:bg-indigo-500',
-      'dark:shadow-none',
+      'dark:shadow-indigo-700/30',
       'dark:hover:bg-indigo-400',
       'dark:focus-visible:outline-indigo-500',
     ],
     secondary: [
       'bg-white',
       'text-gray-900',
-      'shadow-xs',
+      'shadow-md',
+      'shadow-gray-200/80',
       'ring-1',
       'ring-inset',
       'ring-gray-300',
       'hover:bg-gray-50',
+      'hover:shadow-lg',
       'focus-visible:outline-indigo-600',
       'dark:bg-white/10',
       'dark:text-white',
       'dark:shadow-none',
-      'dark:ring-white/5',
+      'dark:ring-white/10',
       'dark:hover:bg-white/20',
       'dark:focus-visible:outline-indigo-500',
     ],
     tertiary: [
       'bg-gray-100',
       'text-gray-900',
+      'shadow-md',
       'hover:bg-gray-200',
+      'hover:shadow-md',
       'focus-visible:outline-gray-500',
       'dark:bg-gray-700',
       'dark:text-white',
@@ -132,40 +141,44 @@ const buttonClasses = computed(() => {
     yellow: [
       'bg-amber-500',
       'text-white',
-      'shadow-xs',
+      'shadow-md',
+      'shadow-amber-500/30',
       'hover:bg-amber-400',
+      'hover:shadow-xl',
+      'hover:shadow-amber-500/40',
       'focus-visible:outline-amber-500',
-      'dark:bg-amber-500',
-      'dark:shadow-none',
+      'dark:shadow-amber-700/30',
       'dark:hover:bg-amber-400',
       'dark:focus-visible:outline-amber-500',
     ],
     danger: [
       'bg-red-600',
       'text-white',
-      'shadow-xs',
-      'hover:bg-red-700',
+      'shadow-md',
+      'shadow-red-500/30',
+      'hover:bg-red-500',
+      'hover:shadow-lg',
       'focus-visible:outline-red-600',
       'dark:bg-red-500',
-      'dark:shadow-none',
+      'dark:shadow-red-700/30',
       'dark:hover:bg-red-400',
       'dark:focus-visible:outline-red-500',
     ],
     transparent: [
       'bg-transparent',
       'text-gray-700',
-      'hover:bg-gray-200',
-      'active:bg-gray-300',
+      'hover:bg-gray-100',
+      'active:bg-gray-200',
       'focus-visible:outline-gray-500',
       'dark:text-gray-300',
-      'dark:hover:bg-gray-700',
-      'dark:active:bg-gray-600',
+      'dark:hover:bg-gray-800',
+      'dark:active:bg-gray-700',
       'dark:focus-visible:outline-gray-400',
     ],
   }
 
   // Border radius classes
-  const roundedClasses = props.rounded ? ['rounded-full'] : ['rounded-md']
+  const roundedClasses = props.rounded ? ['rounded-full'] : ['rounded-2xl']
 
   // Full width classes
   const widthClasses = props.fullWidth ? ['w-full'] : []

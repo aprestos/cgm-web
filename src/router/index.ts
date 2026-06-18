@@ -12,6 +12,7 @@ declare module 'vue-router' {
     requiresAuth?: boolean
     guard?: RouteGuard
     permission?: string
+    title?: string
   }
 }
 
@@ -93,42 +94,61 @@ const router = createRouter({
         {
           path: 'library',
           name: RouteNames.admin.library,
+          meta: { title: 'Library' },
           component: (): Promise<unknown> =>
             import('../views/admin/library/PageLibraryHome.vue'),
         },
         {
           path: 'events',
           name: RouteNames.admin.events,
+          meta: { title: 'Events' },
           component: (): Promise<unknown> =>
             import('../views/admin/events/EventsHome.vue'),
         },
         {
           path: 'tournaments',
           name: RouteNames.admin.tournaments,
+          meta: { title: 'Tournaments' },
           component: (): Promise<unknown> =>
             import('../views/admin/tournaments/HomeView.vue'),
         },
         {
           path: 'tickets',
           name: RouteNames.admin.tickets,
+          meta: { title: 'Tickets' },
           component: (): Promise<unknown> =>
             import('../views/admin/tickets/PageTicketsHome.vue'),
         },
         {
           path: 'orders',
-          name: RouteNames.admin.orders,
+          name: RouteNames.admin.ordersRoot,
+          redirect: { name: RouteNames.admin.orders.overview },
+          meta: { title: 'Orders' },
           component: (): Promise<unknown> =>
-            import('../views/admin/orders/PageOverview.vue'),
+            import('../views/admin/orders/TemplateOrders.vue'),
+          children: [
+            {
+              path: 'overview',
+              name: RouteNames.admin.orders.overview,
+              component: (): Promise<unknown> =>
+                import('../views/admin/orders/overview/PageOverview.vue'),
+            },
+            {
+              path: 'details',
+              name: RouteNames.admin.orders.details,
+              component: (): Promise<unknown> =>
+                import('../views/admin/orders/details/PageList.vue'),
+            },
+          ],
         },
         {
           path: 'settings',
+          name: RouteNames.admin.settings,
+          redirect: { name: RouteNames.admin.settingsOrganization },
           component: (): Promise<unknown> =>
             import('../views/admin/settings/SettingsView.vue'),
+          meta: { title: 'Settings' },
           children: [
-            {
-              path: '',
-              redirect: { name: RouteNames.admin.settingsOrganization },
-            },
             {
               path: 'organization',
               name: RouteNames.admin.settingsOrganization,
@@ -144,42 +164,49 @@ const router = createRouter({
             {
               path: 'features',
               name: RouteNames.admin.settingsFeatures,
+              meta: { title: 'Features' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/features/FeaturesSettings.vue'),
             },
             {
               path: 'library',
               name: RouteNames.admin.settingsLibrary,
+              meta: { title: 'Library' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/library/LibrarySettings.vue'),
             },
             {
               path: 'tournaments',
               name: RouteNames.admin.settingsTournaments,
+              meta: { title: 'Tournaments' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/tournaments/TournamentsSettings.vue'),
             },
             {
               path: 'tickets',
               name: RouteNames.admin.settingsTickets,
+              meta: { title: 'Tickets' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/tickets/TicketsSettings.vue'),
             },
             {
               path: 'events',
               name: RouteNames.admin.settingsEventsModule,
+              meta: { title: 'Events' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/events/EventsSettings.vue'),
             },
             {
               path: 'flea-market',
               name: RouteNames.admin.settingsFleaMarket,
+              meta: { title: 'Flea Market' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/flea-market/FleaMarketSettings.vue'),
             },
             {
               path: 'advanced',
               name: RouteNames.admin.settingsAdvanced,
+              meta: { title: 'Advanced' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/advanced/AdvancedSettings.vue'),
             },

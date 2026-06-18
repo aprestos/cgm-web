@@ -13,11 +13,13 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { IconMenu2 } from '@tabler/icons-vue'
 import SidebarUserProfile from '@/components/navigation/SidebarUserProfile.vue'
 import { useI18n } from 'vue-i18n'
-import { RouteNames } from '@/router/routeNames'
 import type { NavigationItem } from '@/navigation/navigation.model.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
+import { editionStore } from '@/stores/edition.ts'
+import { formatDateRange } from '@/utils/date.ts'
+import { RouteNames } from '@/router/routeNames.ts'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 interface PublicPage {
   id: string
@@ -38,6 +40,8 @@ defineEmits<{
 }>()
 
 const route = useRoute()
+
+const homeRouteName = RouteNames.landing.home
 
 const sidebarOpen = ref<boolean>(false)
 </script>
@@ -117,7 +121,9 @@ const sidebarOpen = ref<boolean>(false)
                             v-if="item.enabled"
                             :to="{ name: item.routeName }"
                             :class="[
-                              route.name === item.routeName
+                              route.matched.some(
+                                (r) => r.name === item.routeName,
+                              )
                                 ? 'bg-gray-100 text-indigo-600 dark:bg-white/5 dark:text-white'
                                 : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white',
                               'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
@@ -127,7 +133,9 @@ const sidebarOpen = ref<boolean>(false)
                               :is="item.icon"
                               stroke="1.5"
                               :class="[
-                                route.name === item.routeName
+                                route.matched.some(
+                                  (r) => r.name === item.routeName,
+                                )
                                   ? 'text-indigo-600 dark:text-white'
                                   : 'text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-white',
                                 'size-6 shrink-0',
@@ -177,20 +185,35 @@ const sidebarOpen = ref<boolean>(false)
     >
       <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div
-        class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-50 px-6 ring-1 ring-gray-200 dark:bg-black/20 dark:ring-white/5"
+        class="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-50 px-6 ring-1 ring-slate-200 dark:bg-black/20 dark:ring-white/5"
       >
-        <router-link :to="{ name: RouteNames.landing.home }">
-          <div class="flex h-16 shrink-0 items-center">
+        <router-link :to="{ name: homeRouteName }">
+          <div class="flex flex-row h-16 shrink-0 items-center">
             <!-- Logo SkeletonLoader -->
             <!--        <SkeletonLoader v-if="!tenantStore?.logo" width="128px" height="32px" />-->
             <!-- Actual Logo -->
             <img
               class="h-10 w-auto"
               :src="
-                getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'
+                getTenantLogo(LogoType.square) || '@/assets/logoipsum-381.svg'
               "
               :alt="tenantStore?.name + ' logo'"
             />
+            <div class="flex flex-col">
+              <span
+                class="font-display font-bold dark:text-gray-300 text-gray-800"
+                >{{ editionStore?.name }}</span
+              >
+              <span class="text-sm dark:text-gray-500 text-gray-800"
+                >{{
+                  formatDateRange(
+                    editionStore?.start_date,
+                    editionStore?.end_date,
+                    locale,
+                  )
+                }}
+              </span>
+            </div>
           </div>
         </router-link>
         <nav class="flex flex-1 flex-col">
@@ -202,7 +225,7 @@ const sidebarOpen = ref<boolean>(false)
                     v-if="item.enabled"
                     :to="{ name: item.routeName }"
                     :class="[
-                      route.name === item.routeName
+                      route.matched.some((r) => r.name === item.routeName)
                         ? 'bg-gray-100 text-indigo-600 dark:bg-white/5 dark:text-white'
                         : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white',
                       'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold',
@@ -212,14 +235,14 @@ const sidebarOpen = ref<boolean>(false)
                       :is="item.icon"
                       stroke="1.5"
                       :class="[
-                        route.name === item.routeName
+                        route.matched.some((r) => r.name === item.routeName)
                           ? 'text-indigo-600 dark:text-white'
                           : 'text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-white',
                         'size-6 shrink-0',
                       ]"
                       aria-hidden="true"
                     />
-                    {{ t(`admin.navigation.${item.id}`) }}
+                    <span>{{ t(`admin.navigation.${item.id}`) }}</span>
                   </RouterLink>
                 </li>
               </ul>
@@ -259,7 +282,7 @@ const sidebarOpen = ref<boolean>(false)
             <RouterLink
               :to="{ name: item.routeName }"
               :class="[
-                route.name === item.routeName
+                route.matched.some((r) => r.name === item.routeName)
                   ? 'bg-gray-100 text-indigo-600 dark:bg-white/5 dark:text-white'
                   : 'text-gray-700 hover:bg-gray-100 hover:text-indigo-600 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white',
                 'group flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold -mx-2',
@@ -268,7 +291,7 @@ const sidebarOpen = ref<boolean>(false)
               <component
                 :is="item.icon"
                 :class="[
-                  route.name === item.routeName
+                  route.matched.some((r) => r.name === item.routeName)
                     ? 'text-indigo-600 dark:text-white'
                     : 'text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-white',
                   'size-6 shrink-0',
@@ -285,13 +308,13 @@ const sidebarOpen = ref<boolean>(false)
           </div>
 
           <!-- User Profile -->
-          <SidebarUserProfile :user="user" />
+          <SidebarUserProfile class="-mx-6 mt-auto" :user="user" />
         </nav>
       </div>
     </div>
 
     <div
-      class="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-xs sm:px-6 lg:hidden dark:bg-gray-900 dark:shadow-none dark:after:pointer-events-none dark:after:absolute dark:after:inset-0 dark:after:border-b dark:after:border-white/10 dark:after:bg-black/10"
+      class="flex items-center gap-x-6 px-4 py-4 sm:px-6 lg:hidden dark:after:pointer-events-none dark:after:absolute"
     >
       <button
         type="button"
@@ -301,12 +324,10 @@ const sidebarOpen = ref<boolean>(false)
         <span class="sr-only">Open sidebar</span>
         <IconMenu2 class="size-6" aria-hidden="true" />
       </button>
-      <div class="flex-1 text-sm/6 font-semibold text-gray-900 dark:text-white">
-        <img
-          class="size-8"
-          :src="getTenantLogo(LogoType.long)"
-          :alt="tenantStore?.name"
-        />
+      <div
+        class="flex-1 text-lg font-semibold font-display text-gray-900 dark:text-white"
+      >
+        {{ route.meta.title }}
       </div>
     </div>
   </div>

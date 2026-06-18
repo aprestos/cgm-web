@@ -78,7 +78,21 @@
     </SettingsSection>
     <EditionPoster v-model:poster="formData.poster" />
   </div>
-  <SettingsBottomBar :loading="isSaving" @save="saveEdition" />
+  <SettingsBottomBar>
+    <CButton
+      size="lg"
+      type="button"
+      :loading="isSaving"
+      loading-text="Saving..."
+      class="shadow-lg shadow-black/10 dark:shadow-black/30 ring-1 ring-black/5 dark:ring-white/10"
+      @click="saveEdition"
+    >
+      <template #icon-left>
+        <IconDeviceFloppy class="h-4 w-4" aria-hidden="true" />
+      </template>
+      Save
+    </CButton>
+  </SettingsBottomBar>
 </template>
 
 <script setup lang="ts">
@@ -91,7 +105,9 @@ import { tenantStore } from '@/stores/tenant.ts'
 import { editionStore } from '@/stores/edition.ts'
 import logger from '@/lib/logger.ts'
 import CInput from '@/components/CInput.vue'
+import CButton from '@/components/CButton.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
+import { IconDeviceFloppy } from '@tabler/icons-vue'
 
 // Form data
 const formData = ref({

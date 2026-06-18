@@ -23,6 +23,7 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import DialogCreateTicket from '@/views/admin/tickets/DialogCreateTicket.vue'
 import TicketGroupTable from '@/views/admin/tickets/TicketGroupTable.vue'
 import { formatPrice } from '@/utils/price.ts'
+import BaseCard from '@/components/BaseCard.vue'
 
 const { t } = useI18n()
 
@@ -205,7 +206,8 @@ onMounted(async () => {
         :label="t('admin.tickets.totalTickets')"
         :value="statistics.total"
         :icon="IconTicket"
-        icon-color="text-blue-600 dark:text-blue-400"
+        :loading="loading"
+        color="fuchsia"
         :subtitle="`${t('admin.tickets.active')}: ${statistics.active} • ${t('admin.tickets.inactive')}: ${statistics.inactive}`"
       />
 
@@ -213,7 +215,8 @@ onMounted(async () => {
         :label="t('admin.tickets.revenuePotential')"
         :value="formatPrice(statistics.totalRevenue)"
         :icon="IconCurrencyEuro"
-        icon-color="text-green-600 dark:text-green-400"
+        :loading="loading"
+        color="green"
         :subtitle="t('admin.tickets.basedOnQuantityPrice')"
       />
 
@@ -221,7 +224,8 @@ onMounted(async () => {
         :label="t('admin.tickets.totalCapacity')"
         :value="statistics.totalQuantity"
         :icon="IconUsers"
-        icon-color="text-purple-600 dark:text-purple-400"
+        :loading="loading"
+        color="purple"
         :subtitle="t('admin.tickets.totalAvailableSlots')"
       />
 
@@ -229,7 +233,8 @@ onMounted(async () => {
         :label="t('admin.tickets.activeStatus')"
         :value="statistics.active"
         :icon="IconCalendar"
-        icon-color="text-emerald-600 dark:text-emerald-400"
+        :loading="loading"
+        color="emerald"
         :subtitle="t('admin.tickets.currentlyOnSale')"
       />
     </div>
@@ -246,7 +251,7 @@ onMounted(async () => {
     </div>
 
     <!-- Empty State -->
-    <div
+    <BaseCard
       v-else-if="tickets.length === 0"
       class="bg-white dark:bg-gray-800 rounded-xl p-12 text-center border border-gray-200 dark:border-gray-700"
     >
@@ -263,7 +268,7 @@ onMounted(async () => {
         </template>
         {{ t('admin.tickets.createFirstTicket') }}
       </CButton>
-    </div>
+    </BaseCard>
 
     <!-- Tickets Table by Group -->
     <div v-else class="space-y-6">
