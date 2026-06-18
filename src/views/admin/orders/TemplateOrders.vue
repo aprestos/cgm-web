@@ -22,10 +22,9 @@ const secondaryNavigation = ref([
   },
   {
     name: t('admin.orders.navDetails'),
-    label: t('admin.orders.navDetails'),
     routeName: RouteNames.admin.orders.details,
     icon: IconDatabase,
-  },
+  }
 ])
 </script>
 

@@ -144,7 +144,7 @@ const buyerInitials = computed<string>(() => {
 
 <template>
   <TransitionRoot as="template" :show="props.open">
-    <Dialog class="relative z-100" @close="emit('close')">
+    <Dialog class="relative z-[100]" @close="emit('close')">
       <TransitionChild
         as="template"
         enter="ease-out duration-300"

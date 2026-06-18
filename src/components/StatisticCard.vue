@@ -39,12 +39,28 @@ const props = withDefaults(defineProps<Props>(), {
   loading: false,
 })
 
-const iconClasses = computed(() => {
-  return {
-    text: `text-${props.color}-600`,
-    bg: `bg-${props.color}-50 dark:bg-${props.color}-900/20`,
-  }
-})
+const COLOR_ICON_CLASSES: Partial<Record<Color, { text: string; bg: string }>> = {
+  amber: { text: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  blue: { text: 'text-blue-600', bg: 'bg-blue-50 dark:bg-blue-900/20' },
+  emerald: {
+    text: 'text-emerald-600',
+    bg: 'bg-emerald-50 dark:bg-emerald-900/20',
+  },
+  fuchsia: {
+    text: 'text-fuchsia-600',
+    bg: 'bg-fuchsia-50 dark:bg-fuchsia-900/20',
+  },
+  green: { text: 'text-green-600', bg: 'bg-green-50 dark:bg-green-900/20' },
+  purple: {
+    text: 'text-purple-600',
+    bg: 'bg-purple-50 dark:bg-purple-900/20',
+  },
+  sky: { text: 'text-sky-600', bg: 'bg-sky-50 dark:bg-sky-900/20' },
+}
+
+const iconClasses = computed(() =>
+  COLOR_ICON_CLASSES[props.color] ?? (COLOR_ICON_CLASSES.amber as { text: string; bg: string }),
+)
 </script>
 
 <template>
