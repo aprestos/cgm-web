@@ -24,13 +24,11 @@ const columns: DataTableColumn<RecentOrder>[] = [
     key: 'id',
     label: t('admin.orders.colOrderId'),
     sortable: false,
-    copy: true,
   },
   {
     key: 'customer',
     label: t('admin.orders.colUserId'),
     sortable: false,
-    copy: true,
   },
   {
     key: 'status',
