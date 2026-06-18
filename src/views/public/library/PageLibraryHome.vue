@@ -69,23 +69,14 @@
         <div class="flex items-center gap-4 pb-6">
           <!-- Search Input -->
           <div class="flex-1">
-            <div class="relative">
-              <div
-                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
-              >
-                <IconSearch class="h-6 w-6 text-gray-400" aria-hidden="true" />
-              </div>
-              <input
-                v-model="searchQuery"
-                type="text"
-                :placeholder="t('library.search')"
-                class="block w-full pl-14 pr-4 py-4 text-lg bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-full text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400 shadow-sm"
-              />
-            </div>
+            <SearchInput
+              v-model="searchQuery"
+              :placeholder="t('library.search')"
+            />
           </div>
 
           <!-- Sort Combobox -->
-          <div class="flex-shrink-0 self-stretch">
+          <div class="shrink-0 self-stretch">
             <Listbox v-model="selectedSort" class="h-full">
               <div class="relative h-full">
                 <ListboxButton
@@ -176,7 +167,7 @@
           </div>
 
           <!-- Filter Button -->
-          <div class="flex-shrink-0 lg:hidden self-stretch">
+          <div class="shrink-0 lg:hidden self-stretch">
             <button
               type="button"
               class="h-full px-5 py-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors flex items-center gap-2"
@@ -228,13 +219,13 @@ import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
   IconArrowsSort,
+  IconCheck,
   IconMoodKidFilled,
   IconPlayCard2Filled,
-  IconSearch,
-  IconCheck,
-  IconUsersGroup,
   IconTrophyFilled,
+  IconUsersGroup,
 } from '@tabler/icons-vue'
+import SearchInput from '@/components/SearchInput.vue'
 import GameList from '@/views/public/library/GameList.vue'
 import ReservationList from '@/views/public/library/ReservationList.vue'
 import LibraryFilters from '@/views/public/library/LibraryFilters.vue'

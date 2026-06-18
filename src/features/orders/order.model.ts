@@ -1,14 +1,28 @@
+export interface OrderTicketInfo {
+  group: string
+  validFrom: string
+  validUntil: string
+}
+
 export interface Order {
   id: string
   status: 'placed' | 'paid' | 'canceled' | 'failed'
   total: number
+  created_at?: string
+  customer_id?: string
+  customer?: {
+    email?: string
+    name?: string
+  }
   items: OrderItem[]
   issuances: Issuance[]
+  stripe_session_id?: string
 }
 
 export interface OrderItem {
   ticket_id: number
   quantity: number
+  ticket?: OrderTicketInfo
 }
 
 export interface Issuance {

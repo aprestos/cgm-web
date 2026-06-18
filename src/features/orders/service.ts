@@ -241,10 +241,11 @@ export const orderService = {
     // When filtering by email, resolve matching profile IDs first
     let customerIds: string[] | undefined
     if (email) {
-      const { data: matchedProfiles, error: matchedProfilesError } = await supabase
-        .from('profiles')
-        .select('id')
-        .ilike('email', `%${email}%`)
+      const { data: matchedProfiles, error: matchedProfilesError } =
+        await supabase
+          .from('profiles')
+          .select('id')
+          .ilike('email', `%${email}%`)
 
       if (matchedProfilesError) throw matchedProfilesError
       customerIds = ((matchedProfiles ?? []) as { id: string }[]).map(
@@ -258,7 +259,7 @@ export const orderService = {
       .select('id,customer_id,status,total,created_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(100)
 
     if (customerIds) query = query.in('customer_id', customerIds)
 
@@ -326,6 +327,46 @@ export const orderService = {
     }
 
     return { orderId: data.order_id }
+  },
+  async getOrder(order_id: string): Promise<Order> {
+    const [orderResponse, issuancesResponse] = await Promise.all([
+      supabase
+        .schema('commerce')
+        .from('orders')
+        .select('*,items:order_items(*)')
+        .eq('id', order_id)
+        .single<Order>(),
+      supabase
+        .schema('tickets')
+        .from('issuances')
+        .select('*,ticket:types(id,valid_from,valid_until)')
+        .eq('order_id', order_id),
+    ])
+
+    if (orderResponse.error || issuancesResponse.error) {
+      throw new Error('Order not found')
+    }
+
+    const orderData = orderResponse.data
+
+    const { data: customerData } = await supabase
+      .schema('public')
+      .from('profiles')
+      .select('name,email')
+      .eq('id', orderResponse.data?.customer_id)
+      .single<{ name: string; email: string }>()
+
+    return {
+      id: orderData.id,
+      status: orderData.status,
+      total: orderData.total,
+      created_at: orderData.created_at as string,
+      customer_id: orderData.customer_id as string,
+      customer: { name: customerData?.name, email: customerData?.email },
+      items: orderData.items,
+      issuances: (issuancesResponse.data ?? []) as Order['issuances'],
+      stripe_session_id: orderData.stripe_session_id,
+    }
   },
 } as const
 

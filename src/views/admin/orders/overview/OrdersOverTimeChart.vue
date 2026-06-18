@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Line } from 'vue-chartjs'
 import {
@@ -15,7 +15,8 @@ import {
 import 'chartjs-adapter-luxon'
 import { IconChartLine } from '@tabler/icons-vue'
 import type { OrdersOverTimeEntry } from '@/features/orders/service'
-import type { Period, PeriodParams } from './orders.types'
+import type { Period } from './orders.types'
+import BaseCard from '@/components/BaseCard.vue'
 
 ChartJS.register(
   TimeScale,
@@ -30,15 +31,14 @@ ChartJS.register(
 const props = defineProps<{
   loading: boolean
   entries: OrdersOverTimeEntry[]
+  selectedPeriod: Period
 }>()
 
 const emit = defineEmits<{
-  periodChange: [params: PeriodParams]
+  periodChange: [period: Period]
 }>()
 
 const { t } = useI18n()
-
-const selectedPeriod = ref<Period>('1m')
 
 const periodOptions = computed<{ label: string; value: Period }[]>(() => [
   { label: t('admin.orders.period1d'), value: '1d' },
@@ -55,12 +55,6 @@ function getDateRange(period: Period): { from?: string; to?: string } {
   else if (period === '1w') from.setDate(from.getDate() - 7)
   else if (period === '1m') from.setMonth(from.getMonth() - 1)
   return { from: from.toISOString(), to: now.toISOString() }
-}
-
-function getGranularity(period: Period): PeriodParams['granularity'] {
-  if (period === '1d') return '30min'
-  if (period === '1w') return '6h'
-  return '1d'
 }
 
 function getTimeScaleConfig(period: Period): {
@@ -89,16 +83,9 @@ function getTimeScaleConfig(period: Period): {
   }
 }
 
-function buildParams(period: Period): PeriodParams {
-  return { period, ...getDateRange(period), granularity: getGranularity(period) }
-}
-
 function selectPeriod(period: Period): void {
-  selectedPeriod.value = period
-  emit('periodChange', buildParams(period))
+  emit('periodChange', period)
 }
-
-onMounted(() => emit('periodChange', buildParams(selectedPeriod.value)))
 
 const chartData = computed(() => ({
   labels: props.entries.map((e) => e.date),
@@ -110,15 +97,15 @@ const chartData = computed(() => ({
       backgroundColor: 'rgba(99,102,241,0.08)',
       fill: true,
       tension: 0.4,
-      pointRadius: 4,
-      pointHoverRadius: 6,
+      pointRadius: 0,
+      pointHoverRadius: 0,
       borderWidth: 2,
     },
   ],
 }))
 
 const chartOptions = computed(() => {
-  const { from, to } = getDateRange(selectedPeriod.value)
+  const { from, to } = getDateRange(props.selectedPeriod)
   return {
     responsive: true,
     maintainAspectRatio: false,
@@ -131,14 +118,14 @@ const chartOptions = computed(() => {
         type: 'time' as const,
         min: from,
         max: to,
-        time: getTimeScaleConfig(selectedPeriod.value),
+        time: getTimeScaleConfig(props.selectedPeriod),
         grid: { display: false },
-        ticks: { color: '#9ca3af', font: { size: 11 } },
+        ticks: { color: '#9ca3af', font: { size: 12 } },
       },
       y: {
+        display: false,
         beginAtZero: true,
-        grid: { color: 'rgba(156,163,175,0.1)' },
-        ticks: { color: '#9ca3af', font: { size: 11 }, stepSize: 1 },
+        grid: { display: false },
       },
     },
   }
@@ -146,58 +133,53 @@ const chartOptions = computed(() => {
 </script>
 
 <template>
-  <div
-    class="bg-white dark:bg-gray-800 sm:rounded-xl shadow-sm sm:border border-gray-200 dark:border-gray-700"
-  >
-    <div
-      class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-4"
-    >
-      <h2 class="text-base font-semibold text-gray-900 dark:text-white">
-        {{ t('admin.orders.chartTitle') }}
-      </h2>
-      <div
-        class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-700 p-1"
-      >
-        <button
-          v-for="option in periodOptions"
-          :key="option.value"
-          type="button"
-          class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 cursor-pointer"
-          :class="
-            selectedPeriod === option.value
-              ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
-              : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
-          "
-          @click="selectPeriod(option.value)"
-        >
-          {{ option.label }}
-        </button>
-      </div>
-    </div>
-
-    <div class="p-6">
-      <div v-if="loading" class="flex items-center justify-center h-64">
+  <div>
+    <BaseCard>
+      <div class="flex flex-wrap items-center justify-between gap-4">
         <div
-          class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"
-        />
+          class="flex items-center gap-1 rounded-lg bg-gray-100 dark:bg-gray-700 p-1"
+        >
+          <button
+            v-for="option in periodOptions"
+            :key="option.value"
+            type="button"
+            class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 cursor-pointer"
+            :class="
+              props.selectedPeriod === option.value
+                ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+            "
+            @click="selectPeriod(option.value)"
+          >
+            {{ option.label }}
+          </button>
+        </div>
       </div>
 
-      <div
-        v-else-if="entries.length === 0"
-        class="flex flex-col items-center justify-center h-64 text-center"
-      >
-        <IconChartLine
-          class="size-12 text-gray-300 dark:text-gray-600"
-          stroke="1.5"
-        />
-        <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
-          {{ t('admin.orders.noOrdersInPeriod') }}
-        </p>
-      </div>
+      <div class="mt-4">
+        <div v-if="loading" class="flex items-center justify-center h-64">
+          <div
+            class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"
+          />
+        </div>
 
-      <div v-else class="h-64">
-        <Line :data="chartData" :options="chartOptions" />
+        <div
+          v-else-if="entries.length === 0"
+          class="flex flex-col items-center justify-center h-64 text-center"
+        >
+          <IconChartLine
+            class="size-12 text-gray-300 dark:text-gray-600"
+            stroke="1.5"
+          />
+          <p class="mt-3 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('admin.orders.noOrdersInPeriod') }}
+          </p>
+        </div>
+
+        <div v-else class="h-64">
+          <Line :data="chartData" :options="chartOptions" />
+        </div>
       </div>
-    </div>
+    </BaseCard>
   </div>
 </template>

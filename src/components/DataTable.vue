@@ -88,14 +88,28 @@
               :key="column.key"
               :class="getCellClasses(column, colIndex)"
             >
+              <div
+                v-if="column.copy"
+                class="group/copy flex items-center gap-1.5"
+              >
+                <slot
+                  :name="`cell-${column.key}`"
+                  :item="item"
+                  :value="getNestedValue(item, column.key)"
+                  :column="column"
+                  :index="rowIndex"
+                >
+                  {{ getNestedValue(item, column.key) }}
+                </slot>
+              </div>
               <slot
+                v-else
                 :name="`cell-${column.key}`"
                 :item="item"
                 :value="getNestedValue(item, column.key)"
                 :column="column"
                 :index="rowIndex"
               >
-                <!-- Default cell content -->
                 {{ getNestedValue(item, column.key) }}
               </slot>
             </td>
@@ -128,12 +142,12 @@
 
 <script setup lang="ts" generic="T">
 import {
-  ref,
   computed,
-  type PropType,
-  watch,
   onMounted,
   onUnmounted,
+  type PropType,
+  ref,
+  watch,
 } from 'vue'
 import {
   IconArrowsSort,
@@ -151,6 +165,8 @@ export interface DataTableColumn<T = Record<string, unknown>> {
   breakpoint?: 'sm' | 'md' | 'lg' | 'xl' | '2xl'
   sortable?: boolean
   sortFn?: (a: T, b: T) => number
+  copy?: boolean
+  copyValue?: (item: T) => string
 }
 
 interface SortConfig {
@@ -254,10 +270,7 @@ const getRowKey = (item: T, index: number): string | number => {
   if (typeof props.rowKey === 'function') {
     return props.rowKey(item, index)
   }
-  return (
-    ((item as { [props.rowKey]: string })[props.rowKey] as string | number) ||
-    index
-  )
+  return (item as { [props.rowKey]: string })[props.rowKey] || index
 }
 
 const getNestedValue = (obj: T, path: string): unknown => {
