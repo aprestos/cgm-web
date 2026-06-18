@@ -6,7 +6,6 @@ interface Props {
 
 withDefaults(defineProps<Props>(), {
   description: '',
-  actionLabel: '',
 })
 </script>
 

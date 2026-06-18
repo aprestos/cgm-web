@@ -143,7 +143,7 @@ const router = createRouter({
         },
         {
           path: 'settings',
-          name: RouteNames.admin.settingsRoot,
+          name: RouteNames.admin.settings,
           redirect: { name: RouteNames.admin.settingsOrganization },
           component: (): Promise<unknown> =>
             import('../views/admin/settings/SettingsView.vue'),

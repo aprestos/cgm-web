@@ -11,7 +11,6 @@ const Admin = {
   tickets: 'admin.tickets',
   ordersRoot: 'admin.orders',
   orders: AdminOrders,
-  settingsRoot: 'admin.settings',
   stripeCallback: 'admin.stripe.callback',
   settings: 'admin.settings',
   settingsOrganization: 'admin.settings.organization',

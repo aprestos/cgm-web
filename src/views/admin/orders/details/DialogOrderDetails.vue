@@ -136,9 +136,9 @@ function ticketGroupShortLabel(group?: string): string {
 }
 
 const buyerInitials = computed<string>(() => {
-  const email = order.value?.customer?.name
-  if (!email) return '?'
-  return email.slice(0, 2).toUpperCase()
+  const name = order.value?.customer?.name
+  if (!name) return '?'
+  return name.slice(0, 2).toUpperCase()
 })
 </script>
 
@@ -208,7 +208,7 @@ const buyerInitials = computed<string>(() => {
                       <h2
                         class="font-display text-xl font-bold text-gray-900 dark:text-white"
                       >
-                        Order #{{ shortId(order.id) }}
+                        {{ t('admin.orders.orderNumber') }}{{ shortId(order.id) }}
                       </h2>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
@@ -225,7 +225,7 @@ const buyerInitials = computed<string>(() => {
                       v-if="order.created_at"
                       class="mt-1 text-sm text-gray-500 dark:text-gray-400"
                     >
-                      Placed {{ formatPlacedAt(order.created_at) }}
+                      {{ t('admin.orders.placedAt') }} {{ formatPlacedAt(order.created_at) }}
                     </p>
                   </div>
                   <button
@@ -256,19 +256,19 @@ const buyerInitials = computed<string>(() => {
                     <p
                       class="text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500"
                     >
-                      Payment
+                      {{ t('admin.orders.payment') }}
                     </p>
                     <p
                       class="text-base font-bold text-gray-900 dark:text-white"
                     >
-                      {{ order.stripe_session_id ? 'Stripe' : 'Cash' }}
+                      {{ order.stripe_session_id ? 'Stripe' : t('admin.orders.paymentCash') }}
                     </p>
                   </div>
                   <div class="px-4 py-2.5">
                     <p
                       class="text-[11px] font-medium uppercase tracking-wide text-gray-400 dark:text-gray-500"
                     >
-                      Total
+                      {{ t('admin.orders.total') }}
                     </p>
                     <p
                       class="font-display text-base font-bold tabular-nums text-gray-900 dark:text-white"
@@ -373,7 +373,7 @@ const buyerInitials = computed<string>(() => {
                       <span
                         class="shrink-0 inline-flex rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400"
                       >
-                        Valid
+                        {{ t('admin.orders.ticketValid') }}
                       </span>
                     </div>
                   </div>
@@ -426,7 +426,6 @@ const buyerInitials = computed<string>(() => {
                         × {{ item.quantity }}
                       </span>
                     </div>
-                    {{ order.issuances }}
                   </div>
                 </section>
 
@@ -435,15 +434,15 @@ const buyerInitials = computed<string>(() => {
                   <h3
                     class="text-xs font-semibold uppercase tracking-wide text-gray-400 dark:text-gray-500 mb-2"
                   >
-                    Payment
+                    {{ t('admin.orders.payment') }}
                   </h3>
                   <div
                     class="rounded-xl border border-gray-200 dark:border-white/10 p-4 text-sm"
                   >
                     <div class="flex justify-between">
-                      <span class="font-semibold text-gray-900 dark:text-white"
-                        >Total paid</span
-                      >
+                      <span class="font-semibold text-gray-900 dark:text-white">
+                        {{ t('admin.orders.totalPaid') }}
+                      </span>
                       <span
                         class="font-display text-base font-bold tabular-nums text-gray-900 dark:text-white"
                       >
@@ -474,13 +473,13 @@ const buyerInitials = computed<string>(() => {
                       d="M4 6h16v12H4zM4 7l8 6 8-6"
                     />
                   </svg>
-                  Resend tickets
+                  {{ t('admin.orders.resendTickets') }}
                 </button>
                 <div class="flex items-center gap-2">
                   <button
                     class="rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
                   >
-                    Refund
+                    {{ t('admin.orders.refund') }}
                   </button>
                   <button
                     class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-colors"
@@ -498,7 +497,7 @@ const buyerInitials = computed<string>(() => {
                         d="M5 13l4 4L19 7"
                       />
                     </svg>
-                    Check in all
+                    {{ t('admin.orders.checkInAll') }}
                   </button>
                 </div>
               </div>

@@ -17,6 +17,7 @@ import type { NavigationItem } from '@/navigation/navigation.model.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { editionStore } from '@/stores/edition.ts'
 import { formatDateRange } from '@/utils/date.ts'
+import { RouteNames } from '@/router/routeNames.ts'
 
 const { t, locale } = useI18n()
 
@@ -39,6 +40,8 @@ defineEmits<{
 }>()
 
 const route = useRoute()
+
+const homeRouteName = RouteNames.landing.home
 
 const sidebarOpen = ref<boolean>(false)
 </script>
@@ -184,7 +187,7 @@ const sidebarOpen = ref<boolean>(false)
       <div
         class="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-50 px-6 ring-1 ring-slate-200 dark:bg-black/20 dark:ring-white/5"
       >
-        <router-link :to="{ name: RouteNames.landing.home }">
+        <router-link :to="{ name: homeRouteName }">
           <div class="flex flex-row h-16 shrink-0 items-center">
             <!-- Logo SkeletonLoader -->
             <!--        <SkeletonLoader v-if="!tenantStore?.logo" width="128px" height="32px" />-->

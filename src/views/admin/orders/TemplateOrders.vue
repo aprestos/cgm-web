@@ -36,7 +36,7 @@ const secondaryNavigation = ref([
     <router-view />
   </div>
   <SettingsBottomBar>
-    <CButton size="xl">
+    <CButton class="hidden" size="xl">
       <slot name="action-icon" />
       <IconShoppingBagPlus /> {{ t('admin.orders.newOrder') }}
     </CButton>
