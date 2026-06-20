@@ -16,8 +16,10 @@ import DialogComponent from '@/components/DialogComponent.vue'
 import ticketIssuanceService from '@/features/tickets/issuance.service.ts'
 import logger from '@/lib/logger.ts'
 import { computedAsync } from '@vueuse/core'
+import { formatWeekday } from '@/utils/date.ts'
+import { DateTime } from 'luxon'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 type TicketQrPayload = JWTPayload & { order?: { id?: string } }
 
@@ -93,7 +95,7 @@ const closeDialog = (): void => {
         </div>
 
         <div
-          v-if="!isValid"
+          v-else-if="!isValid"
           class="flex flex-col items-center gap-3 w-full rounded-xl py-6 bg-yellow-50 dark:bg-yellow-900/20"
         >
           <IconCircleX class="size-16 text-yellow-500" :stroke-width="1.5" />
@@ -104,7 +106,7 @@ const closeDialog = (): void => {
           </span>
         </div>
         <div
-          v-else-if="canCheckin !== false"
+          v-else
           class="flex flex-col items-center gap-3 w-full rounded-xl py-6 bg-emerald-50 dark:bg-emerald-900/20"
         >
           <IconCircleCheck
@@ -134,7 +136,7 @@ const closeDialog = (): void => {
               <!-- TODO: map from detectedPayload.name -->
               <span
                 class="text-base font-semibold text-gray-900 dark:text-white"
-                >John Doe</span
+                >{{ detectedPayload?.name ?? '' }}</span
               >
             </div>
           </div>
@@ -153,7 +155,17 @@ const closeDialog = (): void => {
               <!-- TODO: map from detectedPayload -->
               <span
                 class="text-base font-semibold text-gray-900 dark:text-white"
-                >General Admission</span
+                >{{
+                  formatWeekday(
+                    DateTime.fromSeconds(
+                      detectedPayload?.nbf ?? 0,
+                    ).toISO() as string,
+                    DateTime.fromSeconds(
+                      detectedPayload?.exp ?? 0,
+                    ).toISO() as string,
+                    locale,
+                  )
+                }}</span
               >
             </div>
           </div>
@@ -171,7 +183,11 @@ const closeDialog = (): void => {
           :disabled="isValid && canCheckin === null"
           @click="isValid && canCheckin ? checkin() : closeDialog()"
         >
-          {{ isValid && canCheckin ? t('admin.checkIn.confirmCheckIn') : t('admin.checkIn.dismiss') }}
+          {{
+            isValid && canCheckin
+              ? t('admin.checkIn.confirmCheckIn')
+              : t('admin.checkIn.dismiss')
+          }}
         </button>
       </div>
     </dialog-component>
