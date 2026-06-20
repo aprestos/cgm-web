@@ -159,7 +159,6 @@ export const orderService = {
       `No order with stripe_session_id '${sessionId}' reached 'paid' status within the allowed time.`,
     )
   },
-
   async getOrdersOverTime(
     tenantId: string,
     editionId: number,
@@ -171,6 +170,7 @@ export const orderService = {
       .from('orders')
       .select('created_at')
       .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
       .eq('status', 'paid')
       .order('created_at', { ascending: true })
 
@@ -235,7 +235,7 @@ export const orderService = {
       status: string
       total: number
       created_at: string
-      profiles: { email: string } | null
+      profiles: { name: string; email: string } | null
     }[]
   > {
     // When filtering by email, resolve matching profile IDs first
@@ -277,20 +277,19 @@ export const orderService = {
 
     const { data: profileRows, error: profileRowsError } = await supabase
       .from('profiles')
-      .select('id,email')
+      .select('id,email,name')
       .in('id', allCustomerIds)
 
     if (profileRowsError) throw profileRowsError
     const profileMap = new Map(
-      ((profileRows ?? []) as { id: string; email: string }[]).map((p) => [
-        p.id,
-        p.email,
-      ]),
+      (
+        (profileRows ?? []) as { id: string; email: string; name: string }[]
+      ).map((p) => [p.id, { email: p.email, name: p.name }]),
     )
 
     return orders.map((o) => {
       const customerId = o.customer_id as string | null
-      const email = customerId ? profileMap.get(customerId) : undefined
+      const customer = customerId ? profileMap.get(customerId) : undefined
 
       return {
         id: o.id as string,
@@ -298,7 +297,9 @@ export const orderService = {
         status: o.status as string,
         total: o.total as number,
         created_at: o.created_at as string,
-        profiles: email ? { email } : null,
+        profiles: customer
+          ? { name: customer.name, email: customer.email }
+          : null,
       }
     })
   },

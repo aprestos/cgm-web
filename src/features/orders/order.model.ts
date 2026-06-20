@@ -6,7 +6,7 @@ export interface OrderTicketInfo {
 
 export interface Order {
   id: string
-  status: 'placed' | 'paid' | 'canceled' | 'failed'
+  status: 'placed' | 'paid' | 'canceled' | 'failed' | 'refunded'
   total: number
   created_at?: string
   customer_id?: string

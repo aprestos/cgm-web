@@ -6,7 +6,7 @@
     @click="$emit('click', $event)"
   >
     <span v-if="loading" class="flex items-center gap-2.5">
-      <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+      <svg class="h-6 w-6 animate-spin" fill="none" viewBox="0 0 24 24">
         <circle
           class="opacity-25"
           cx="12"
@@ -74,7 +74,6 @@ const buttonClasses = computed(() => {
     'font-semibold',
     'transition-all',
     'duration-300',
-    'hover:scale-105',
     'focus-visible:outline',
     'focus-visible:outline-2',
     'focus-visible:outline-offset-2',
@@ -82,6 +81,7 @@ const buttonClasses = computed(() => {
     'disabled:opacity-50',
     'disabled:cursor-not-allowed',
     'disabled:hover:scale-100',
+    'transition-colors',
   ]
 
   // Size classes
@@ -100,7 +100,7 @@ const buttonClasses = computed(() => {
       'shadow-lg',
       'shadow-indigo-500/30',
       'hover:bg-indigo-500',
-      'hover:shadow-md',
+      'hover:shadow-sm',
       'hover:shadow-indigo-500/40',
       'focus-visible:outline-indigo-600',
       'dark:bg-indigo-500',
@@ -111,7 +111,7 @@ const buttonClasses = computed(() => {
     secondary: [
       'bg-white',
       'text-gray-900',
-      'shadow-md',
+      'shadow-sm',
       'shadow-gray-200/80',
       'ring-1',
       'ring-inset',
@@ -131,7 +131,7 @@ const buttonClasses = computed(() => {
       'text-gray-900',
       'shadow-md',
       'hover:bg-gray-200',
-      'hover:shadow-md',
+      'hover:shadow-sm',
       'focus-visible:outline-gray-500',
       'dark:bg-gray-700',
       'dark:text-white',
@@ -141,7 +141,7 @@ const buttonClasses = computed(() => {
     yellow: [
       'bg-amber-500',
       'text-white',
-      'shadow-md',
+      'shadow-sm',
       'shadow-amber-500/30',
       'hover:bg-amber-400',
       'hover:shadow-xl',
@@ -154,7 +154,7 @@ const buttonClasses = computed(() => {
     danger: [
       'bg-red-600',
       'text-white',
-      'shadow-md',
+      'shadow-xs',
       'shadow-red-500/30',
       'hover:bg-red-500',
       'hover:shadow-lg',

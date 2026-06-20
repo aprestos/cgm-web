@@ -7,12 +7,17 @@ import {
   TransitionChild,
   TransitionRoot,
 } from '@headlessui/vue'
-import { IconX } from '@tabler/icons-vue'
+import { IconCheck, IconMail, IconTicket, IconX } from '@tabler/icons-vue'
 import type { Order } from '@/features/orders/order.model.ts'
 import orderService from '@/features/orders/service.ts'
 import logger from '@/lib/logger.ts'
 import { shortId } from '@/utils/order.ts'
 import { formatPrice } from '@/utils/price.ts'
+import ticketIssuanceService from '@/features/tickets/issuance.service.ts'
+import { toast } from 'vue-sonner'
+import { tenantStore } from '@/stores/tenant.ts'
+import { editionStore } from '@/stores/edition.ts'
+import CButton from '@/components/CButton.vue'
 
 const props = defineProps<{
   open: boolean
@@ -27,6 +32,7 @@ const { t, locale } = useI18n()
 
 const order = ref<Order | null>(null)
 const loading = ref(false)
+const sendingTickets = ref(false)
 
 watch(
   () => props.open,
@@ -140,6 +146,25 @@ const buyerInitials = computed<string>(() => {
   if (!name) return '?'
   return name.slice(0, 2).toUpperCase()
 })
+
+const sendEmails = async (): Promise<void> => {
+  try {
+    if (tenantStore?.value?.id && editionStore?.value?.id && order.value?.id) {
+      sendingTickets.value = true
+      await ticketIssuanceService.sendEmails(
+        tenantStore?.value?.id,
+        editionStore?.value?.id,
+        [order.value.id],
+      )
+      toast.success('Successfully sent tickets by email.')
+    }
+  } catch (error) {
+    logger.error('Failed to send ticket emails', { error })
+    toast.error('Unable to send emails. Try again later')
+  } finally {
+    sendingTickets.value = false
+  }
+}
 </script>
 
 <template>
@@ -208,7 +233,8 @@ const buyerInitials = computed<string>(() => {
                       <h2
                         class="font-display text-xl font-bold text-gray-900 dark:text-white"
                       >
-                        {{ t('admin.orders.orderNumber') }}{{ shortId(order.id) }}
+                        {{ t('admin.orders.orderNumber')
+                        }}{{ shortId(order.id) }}
                       </h2>
                       <span
                         class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
@@ -225,14 +251,15 @@ const buyerInitials = computed<string>(() => {
                       v-if="order.created_at"
                       class="mt-1 text-sm text-gray-500 dark:text-gray-400"
                     >
-                      {{ t('admin.orders.placedAt') }} {{ formatPlacedAt(order.created_at) }}
+                      {{ t('admin.orders.placedAt') }}
+                      {{ formatPlacedAt(order.created_at) }}
                     </p>
                   </div>
                   <button
                     class="grid h-9 w-9 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
                     @click="emit('close')"
                   >
-                    <IconX class="h-5 w-5" />
+                    <IconX class="cursor-pointer h-5 w-5" />
                   </button>
                 </div>
 
@@ -261,7 +288,11 @@ const buyerInitials = computed<string>(() => {
                     <p
                       class="text-base font-bold text-gray-900 dark:text-white"
                     >
-                      {{ order.stripe_session_id ? 'Stripe' : t('admin.orders.paymentCash') }}
+                      {{
+                        order.stripe_session_id
+                          ? 'Stripe'
+                          : t('admin.orders.paymentCash')
+                      }}
                     </p>
                   </div>
                   <div class="px-4 py-2.5">
@@ -327,19 +358,7 @@ const buyerInitials = computed<string>(() => {
                       <span
                         class="grid h-9 w-9 place-items-center rounded-lg bg-gray-100 dark:bg-white/10 text-gray-500 dark:text-gray-400 shrink-0"
                       >
-                        <svg
-                          class="h-4 w-4"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                          stroke-width="1.8"
-                        >
-                          <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M4 9a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H6a2 2 0 0 1-2-2 2 2 0 0 0 0-4Z"
-                          />
-                        </svg>
+                        <IconTicket size="20" />
                       </span>
                       <div class="min-w-0 flex-1">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -370,6 +389,12 @@ const buyerInitials = computed<string>(() => {
                           {{ issuance.recipient_email }}
                         </p>
                       </div>
+                      <span
+                        v-if="order.status === 'refunded'"
+                        class="shrink-0 inline-flex rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400"
+                      >
+                        {{ t('admin.orders.ticketValid') }}
+                      </span>
                       <span
                         class="shrink-0 inline-flex rounded-full bg-emerald-50 dark:bg-emerald-900/30 px-2 py-0.5 text-[11px] font-medium text-emerald-700 dark:text-emerald-400"
                       >
@@ -455,50 +480,28 @@ const buyerInitials = computed<string>(() => {
 
               <!-- Footer actions -->
               <div
-                class="hidden flex-none items-center justify-between gap-2 px-6 py-4 border-t border-gray-100 dark:border-white/10 bg-gray-50/60 dark:bg-white/5"
+                class="flex flex-none items-center justify-between gap-2 px-6 py-4 border-t border-gray-100 dark:border-white/10 bg-gray-50/60 dark:bg-white/5"
               >
-                <button
-                  class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-white/10 transition-colors"
+                <CButton
+                  :disabled="sendingTickets"
+                  variant="transparent"
+                  :loading="sendingTickets"
+                  loading-text="Sending..."
+                  @click="sendEmails"
                 >
-                  <svg
-                    class="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.8"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M4 6h16v12H4zM4 7l8 6 8-6"
-                    />
-                  </svg>
+                  <IconMail class="h-6 w-6" />
                   {{ t('admin.orders.resendTickets') }}
-                </button>
+                </CButton>
                 <div class="flex items-center gap-2">
                   <button
-                    class="rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
+                    class="cursor-pointer hidden rounded-xl px-3 py-2 text-sm font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-colors"
                   >
                     {{ t('admin.orders.refund') }}
                   </button>
-                  <button
-                    class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 hover:bg-indigo-700 transition-colors"
-                  >
-                    <svg
-                      class="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      stroke-width="2"
-                    >
-                      <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
+                  <CButton>
+                    <IconCheck size="16" />
                     {{ t('admin.orders.checkInAll') }}
-                  </button>
+                  </CButton>
                 </div>
               </div>
             </template>

@@ -1,6 +1,11 @@
 export interface CreateOrderInput {
   items: OrderItem[]
   issuances: OrderItemIssuance[]
+  customerId: string
+  currency: string
+  payment: {
+    type: 'stripe' | 'cash'
+  }
 }
 
 export interface OrderItem {

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
 import PageHeader from '@/components/PageHeader.vue'
 import SearchInput from '@/components/SearchInput.vue'
@@ -12,13 +13,32 @@ import DialogOrderDetails from './DialogOrderDetails.vue'
 import type { RecentOrder } from '@/views/admin/orders/overview/orders.types.ts'
 
 const { t } = useI18n()
+const route = useRoute()
+const router = useRouter()
 
 const selectedOrderId = ref<string | null>(null)
 const detailsOpen = ref(false)
 
+watch(
+  () => route.query.order,
+  (orderId) => {
+    if (typeof orderId === 'string' && orderId) {
+      selectedOrderId.value = orderId
+      detailsOpen.value = true
+    } else {
+      detailsOpen.value = false
+      selectedOrderId.value = null
+    }
+  },
+  { immediate: true },
+)
+
 function openDetails(orderId: string): void {
-  selectedOrderId.value = orderId
-  detailsOpen.value = true
+  void router.push({ query: { ...route.query, order: orderId } })
+}
+
+function closeDetails(): void {
+  void router.push({ query: { ...route.query, order: undefined } })
 }
 
 const recentOrdersLoading = ref(false)
@@ -49,7 +69,7 @@ onMounted(() => void loadRecentOrders())
 </script>
 
 <template>
-  <div class="p-6 gap-6 flex flex-col">
+  <div class="p-4 gap-4 md:p-6 md:gap-6 flex flex-col">
     <PageHeader
       :title="t('admin.orders.list.title')"
       :description="t('admin.orders.list.description')"
@@ -72,6 +92,6 @@ onMounted(() => void loadRecentOrders())
   <DialogOrderDetails
     :open="detailsOpen"
     :order-id="selectedOrderId"
-    @close="detailsOpen = false"
+    @close="closeDetails"
   />
 </template>

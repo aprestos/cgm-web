@@ -15,5 +15,5 @@ export interface RecentOrder {
   status: string
   total: number
   created_at: string
-  profiles: { email: string } | null
+  profiles: { name: string; email: string } | null
 }

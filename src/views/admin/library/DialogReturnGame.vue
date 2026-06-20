@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { computed, watch } from 'vue'
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
-import { libraryWithdrawService } from '@/features/library/withdraws/service.ts'
 import type { LibraryWithdraw } from '@/features/library/withdraws/service.ts'
-import { userService } from '@/features/users/service.ts'
+import { libraryWithdrawService } from '@/features/library/withdraws/service.ts'
 import type { User } from '@/features/users/service.ts'
+import { userService } from '@/features/users/service.ts'
 import { useTimeAgo } from '@vueuse/core'
 import { IconHourglassHigh } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
@@ -166,14 +165,7 @@ const returnGame = async (): Promise<void> => {
           v-else-if="withdrawUser"
           class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-900 rounded-lg"
         >
-          <img
-            v-if="withdrawUser.avatar_url"
-            class="size-12 rounded-full object-cover shadow-sm shrink-0"
-            :src="withdrawUser.avatar_url"
-            :alt="withdrawUser.name || withdrawUser.email"
-          />
           <div
-            v-else
             class="size-12 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center shrink-0"
           >
             <span

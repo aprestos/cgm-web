@@ -1,9 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import {
-  hasAnyOfRoles,
-  navigationGuard,
-  type RouteGuard,
-} from '@/router/guards'
+import { hasAnyOfRoles, navigationGuard, type RouteGuard } from '@/router/guards'
 import { RouteNames } from '@/router/routeNames.ts'
 
 // Extend Vue Router's RouteMeta interface
@@ -84,7 +80,8 @@ const router = createRouter({
     },
     {
       path: '/admin',
-      component: (): Promise<unknown> => import('../views/admin/HomeView.vue'),
+      component: (): Promise<unknown> =>
+        import('../views/admin/TemplateDashboard.vue'),
       meta: {
         requiresAuth: true,
         permission: 'admin',
@@ -140,6 +137,13 @@ const router = createRouter({
                 import('../views/admin/orders/details/PageList.vue'),
             },
           ],
+        },
+        {
+          path: 'check-in',
+          name: RouteNames.admin.checkIn,
+          meta: { title: 'Check-in' },
+          component: (): Promise<unknown> =>
+            import('../views/admin/check-in/HomeView.vue'),
         },
         {
           path: 'settings',
