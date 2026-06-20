@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { hasAnyOfRoles, navigationGuard, type RouteGuard, } from '@/router/guards'
+import { hasAnyOfRoles, navigationGuard, type RouteGuard } from '@/router/guards'
 import { RouteNames } from '@/router/routeNames.ts'
 
 // Extend Vue Router's RouteMeta interface

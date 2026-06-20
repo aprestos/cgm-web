@@ -158,7 +158,8 @@ const sendEmails = async (): Promise<void> => {
       )
       toast.success('Successfully sent tickets by email.')
     }
-  } catch {
+  } catch (error) {
+    logger.error('Failed to send ticket emails', { error })
     toast.error('Unable to send emails. Try again later')
   } finally {
     sendingTickets.value = false

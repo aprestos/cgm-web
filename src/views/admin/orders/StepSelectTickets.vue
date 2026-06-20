@@ -27,7 +27,7 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 const emailErrors = computed<string[]>(() => {
   if (!emailTouched.value || props.buyerEmail.trim() === '') return []
-  return EMAIL_REGEX.test(props.buyerEmail)
+  return EMAIL_REGEX.test(props.buyerEmail.trim())
     ? []
     : [t('admin.orders.create.emailInvalid')]
 })

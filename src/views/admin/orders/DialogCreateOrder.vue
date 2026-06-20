@@ -74,7 +74,9 @@ const selectedTickets = computed(() =>
 )
 
 const canAdvance = computed(
-  () => selectedTickets.value.length > 0 && EMAIL_REGEX.test(buyerEmail.value),
+  () =>
+    selectedTickets.value.length > 0 &&
+    EMAIL_REGEX.test(buyerEmail.value.trim()),
 )
 
 const canSubmit = computed(

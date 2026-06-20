@@ -11,8 +11,8 @@ export default defineConfig({
   plugins: [tailwindcss(), vue(), vueJsx(), vueDevTools({ componentInspector: false }), basicSsl()],
   server: {
     https: true,
-    host: true,
-  },
+    host: process.env.VITE_DEV_HOST === 'true',
+  }
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

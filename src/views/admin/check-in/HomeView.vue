@@ -19,10 +19,11 @@ import { computedAsync } from '@vueuse/core'
 
 const { t } = useI18n()
 
+type TicketQrPayload = JWTPayload & { order?: { id?: string } }
+
 const dialogOpen = ref(false)
 const isValid = ref(true) // dummy
-const detectedPayload = ref<JWTPayload | null>(null)
-const loadingCheckin = ref(false)
+const detectedPayload = ref<TicketQrPayload | null>(null)
 
 const onDetect = async (detectedCodes: DetectedBarcode[]): Promise<void> => {
   const raw = detectedCodes[0]?.rawValue
@@ -41,7 +42,7 @@ const onDetect = async (detectedCodes: DetectedBarcode[]): Promise<void> => {
 }
 
 const checkin = async () => {
-  const orderId = detectedPayload?.value?.order?.id
+  const orderId = detectedPayload.value?.order?.id
 
   if (orderId) {
     try {
@@ -83,7 +84,7 @@ const closeDialog = (): void => {
         <!-- Status banner -->
         <div
           v-if="!canCheckin"
-          class="flex flex-col items-center gap-3 w-full rounded-xl py-6 'bg-red-50 dark:bg-red-900/20'"
+          class="flex flex-col items-center gap-3 w-full rounded-xl py-6 bg-red-50 dark:bg-red-900/20"
         >
           <IconCircleX class="size-16 text-red-500" :stroke-width="1.5" />
           <span class="text-lg font-semibold text-red-700 dark:text-red-400">
@@ -103,7 +104,7 @@ const closeDialog = (): void => {
           </span>
         </div>
         <div
-          v-else
+          v-else-if="canCheckin !== false"
           class="flex flex-col items-center gap-3 w-full rounded-xl py-6 bg-emerald-50 dark:bg-emerald-900/20"
         >
           <IconCircleCheck
@@ -167,8 +168,8 @@ const closeDialog = (): void => {
               ? 'bg-emerald-500 hover:bg-emerald-600'
               : 'bg-gray-400 cursor-not-allowed'
           "
-          :disabled="!isValid && canCheckin"
-          @click="checkin"
+          :disabled="isValid && canCheckin === null"
+          @click="isValid && canCheckin ? checkin() : closeDialog()"
         >
           {{ isValid && canCheckin ? t('admin.checkIn.confirmCheckIn') : t('admin.checkIn.dismiss') }}
         </button>
