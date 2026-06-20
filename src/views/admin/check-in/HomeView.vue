@@ -55,20 +55,18 @@ const checkin = async () => {
   }
 }
 
-const canCheckin = computedAsync(async () => {
-  const orderId = detectedPayload?.value?.order?.id
+const canCheckin = computedAsync<boolean | null>(async () => {
+  const orderId = detectedPayload.value?.order?.id
+  if (!orderId) return null
 
-  if (orderId) {
-    try {
-      const status = await ticketIssuanceService.getStatus(orderId)
-      return status === 'valid'
-    } catch (error) {
-      logger.warn('Error checking issuance status', { error })
-      toast.error(t('admin.checkIn.errorStatusFailed'))
-      return false
-    }
+  try {
+    const status = await ticketIssuanceService.getStatus(orderId)
+    return status === 'valid'
+  } catch (error) {
+    logger.warn('Error checking issuance status', { error })
+    return false
   }
-})
+}, null)
 
 const closeDialog = (): void => {
   dialogOpen.value = false
