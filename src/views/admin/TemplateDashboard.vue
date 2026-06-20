@@ -26,6 +26,7 @@ import { settingsStore } from '@/features/settings/useSettings.store.ts'
 import {
   IconBooks,
   IconHome,
+  IconScanTraces,
   IconSettings,
   IconShoppingBag,
   IconTicket,
@@ -71,6 +72,12 @@ const navigation = ref([
     id: 'orders',
     routeName: RouteNames.admin.ordersRoot,
     icon: IconShoppingBag,
+    enabled: settingsStore?.value?.tickets?.enabled ?? false,
+  },
+  {
+    id: 'check-in',
+    routeName: RouteNames.admin.checkIn,
+    icon: IconScanTraces,
     enabled: settingsStore?.value?.tickets?.enabled ?? false,
   },
 ])

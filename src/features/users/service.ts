@@ -1,13 +1,11 @@
 import { supabase } from '@/lib/supabase'
 import logger from '@/lib/logger.ts'
+import { toCamelCaseAs } from '@/utils/caseConverter.ts'
 
 export interface User {
   id: string
   name: string
   email: string
-  avatar_url?: string
-  created_at: string
-  updated_at: string
 }
 
 export const userService = {
@@ -47,7 +45,24 @@ export const userService = {
     return data as User
   },
 
-  async create(name: string, email: string): Promise<User> {
+  async getByEmail(email: string): Promise<User | undefined> {
+    const { data, error } = await supabase
+      .schema('public')
+      .from('profiles')
+      .select('id,name,email')
+      .eq('email', email)
+      .maybeSingle<{ id: string; name: string; email: string }>()
+
+    if (error) {
+      logger.error('Unable to get user', { error })
+      throw new Error('Unable to get user')
+    }
+
+    if (data) return toCamelCaseAs<User>(data)
+    else return undefined
+  },
+
+  async create(name: string | null, email: string): Promise<User> {
     const { data, error } = await supabase.functions.invoke('users', {
       body: {
         name,
@@ -56,7 +71,7 @@ export const userService = {
       method: 'POST',
     })
 
-    if (data) return data as User
+    if (data) return toCamelCaseAs<User>(data)
     else {
       logger.error('Unable to create user', { error })
       if ((error as { message: string })?.message)

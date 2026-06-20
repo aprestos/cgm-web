@@ -12,6 +12,7 @@ const Admin = {
   ordersRoot: 'admin.orders',
   orders: AdminOrders,
   stripeCallback: 'admin.stripe.callback',
+  checkIn: 'admin.check-in',
   settings: 'admin.settings',
   settingsOrganization: 'admin.settings.organization',
   settingsEdition: 'admin.settings.edition',

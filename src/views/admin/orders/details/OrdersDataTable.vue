@@ -28,6 +28,7 @@ const columns: DataTableColumn<RecentOrder>[] = [
   {
     key: 'customer',
     label: t('admin.orders.colUserId'),
+    cellClass: 'whitespace-nowrap',
     sortable: false,
   },
   {
@@ -106,7 +107,9 @@ function formatDate(iso: string): string {
         </template>
 
         <template #cell-customer="{ item }">
-          {{ item.profiles?.email ?? item.customer_id ?? '—' }}
+          <span class="text-gray-700 dark:text-gray-300">
+            {{ item.profiles?.name ?? item.profiles?.email ?? '—' }}
+          </span>
         </template>
 
         <template #cell-status="{ item }">

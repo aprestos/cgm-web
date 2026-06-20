@@ -11,8 +11,11 @@ import SecondaryNavigation from '@/components/navigation/SecondaryNavigation.vue
 import { RouteNames } from '@/router/routeNames.ts'
 import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
 import CButton from '@/components/CButton.vue'
+import DialogCreateOrder from './DialogCreateOrder.vue'
 
 const { t } = useI18n()
+
+const createOrderOpen = ref(false)
 
 const secondaryNavigation = ref([
   {
@@ -24,7 +27,7 @@ const secondaryNavigation = ref([
     name: t('admin.orders.navDetails'),
     routeName: RouteNames.admin.orders.details,
     icon: IconDatabase,
-  }
+  },
 ])
 </script>
 
@@ -34,10 +37,19 @@ const secondaryNavigation = ref([
   <div class="flex flex-col">
     <router-view />
   </div>
+
   <SettingsBottomBar>
-    <CButton class="hidden" size="xl">
-      <slot name="action-icon" />
-      <IconShoppingBagPlus /> {{ t('admin.orders.newOrder') }}
+    <CButton size="xl" @click="createOrderOpen = true">
+      <template #icon-left>
+        <IconShoppingBagPlus class="h-5 w-5" />
+      </template>
+      {{ t('admin.orders.newOrder') }}
     </CButton>
   </SettingsBottomBar>
+
+  <DialogCreateOrder
+    :open="createOrderOpen"
+    @close="createOrderOpen = false"
+    @created="createOrderOpen = false"
+  />
 </template>
