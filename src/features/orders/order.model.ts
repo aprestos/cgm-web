@@ -30,4 +30,8 @@ export interface Issuance {
   recipient_id?: string
   recipient_name: string
   recipient_email: string
+  ticket: {
+    valid_from: string
+    valid_until: string
+  }
 }

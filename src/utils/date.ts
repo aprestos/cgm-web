@@ -81,6 +81,28 @@ export const formatDateRange = (
   return formatter.formatRange(startDate, endDate)
 }
 
+export const getTicketDays = (
+  validFrom: string | undefined,
+  validUntil: string | undefined,
+  locale = 'en',
+): string[] => {
+  if (!validFrom || !validUntil) return []
+
+  const start = DateTime.fromISO(validFrom).startOf('day')
+  const end = DateTime.fromISO(validUntil).startOf('day')
+
+  if (!start.isValid || !end.isValid || end < start) return []
+
+  const days: string[] = []
+  let current = start
+  while (current <= end) {
+    days.push(current.setLocale(locale).toLocaleString({ weekday: 'short' }))
+    current = current.plus({ days: 1 })
+  }
+
+  return days
+}
+
 export const formatWeekday = (
   start: string | undefined,
   end: string | undefined,

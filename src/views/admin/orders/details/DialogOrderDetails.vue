@@ -18,6 +18,7 @@ import { toast } from 'vue-sonner'
 import { tenantStore } from '@/stores/tenant.ts'
 import { editionStore } from '@/stores/edition.ts'
 import CButton from '@/components/CButton.vue'
+import { getTicketDays } from '@/utils/date.ts'
 
 const props = defineProps<{
   open: boolean
@@ -95,17 +96,6 @@ function getStatusLabel(status: string): string {
 const totalTicketCount = computed(
   () => order.value?.items.reduce((s, i) => s + i.quantity, 0) ?? 0,
 )
-
-const ticketInfoMap = computed(() => {
-  const map = new Map<
-    number,
-    { group: string; validFrom: string; validUntil: string }
-  >()
-  for (const item of order.value?.items ?? []) {
-    if (item.ticket) map.set(item.ticket_id, item.ticket)
-  }
-  return map
-})
 
 const GROUP_COLORS = [
   'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
@@ -368,19 +358,15 @@ const sendEmails = async (): Promise<void> => {
                             {{ issuance.recipient_name }}
                           </p>
                           <span
-                            v-if="ticketInfoMap.get(issuance.ticket_id)"
+                            v-for="day in getTicketDays(
+                              issuance.ticket.valid_from,
+                              issuance.ticket.valid_until,
+                            )"
+                            :key="day"
                             class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
-                            :class="
-                              groupTagColor(
-                                ticketInfoMap.get(issuance.ticket_id)?.group,
-                              )
-                            "
+                            :class="groupTagColor(day)"
                           >
-                            {{
-                              ticketGroupShortLabel(
-                                ticketInfoMap.get(issuance.ticket_id)?.group,
-                              )
-                            }}
+                            {{ day }}
                           </span>
                         </div>
                         <p
