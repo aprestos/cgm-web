@@ -411,6 +411,7 @@ const pt = {
       statusPaid: 'Pago',
       statusPlaced: 'Colocada',
       statusCanceled: 'Cancelada',
+      statusRefunded: 'Reembolsada',
       statusFailed: 'Falhada',
       navOverview: 'Visão Geral',
       navDetails: 'Detalhes',
@@ -470,8 +471,10 @@ const pt = {
       confirmCheckIn: 'Confirmar Check-in',
       dismiss: 'Fechar',
       errorInvalidTicket: 'Bilhete inválido',
-      errorCheckInFailed: 'Erro ao fazer check-in. O bilhete pode já ter sido utilizado.',
-      errorStatusFailed: 'Erro ao verificar o estado do bilhete. Tente novamente.',
+      errorCheckInFailed:
+        'Erro ao fazer check-in. O bilhete pode já ter sido utilizado.',
+      errorStatusFailed:
+        'Erro ao verificar o estado do bilhete. Tente novamente.',
     },
   },
   landing: {

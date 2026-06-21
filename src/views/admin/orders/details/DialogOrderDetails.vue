@@ -18,6 +18,7 @@ import { toast } from 'vue-sonner'
 import { tenantStore } from '@/stores/tenant.ts'
 import { editionStore } from '@/stores/edition.ts'
 import CButton from '@/components/CButton.vue'
+import { getTicketDays } from '@/utils/date.ts'
 
 const props = defineProps<{
   open: boolean
@@ -96,17 +97,6 @@ const totalTicketCount = computed(
   () => order.value?.items.reduce((s, i) => s + i.quantity, 0) ?? 0,
 )
 
-const ticketInfoMap = computed(() => {
-  const map = new Map<
-    number,
-    { group: string; validFrom: string; validUntil: string }
-  >()
-  for (const item of order.value?.items ?? []) {
-    if (item.ticket) map.set(item.ticket_id, item.ticket)
-  }
-  return map
-})
-
 const GROUP_COLORS = [
   'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
   'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -131,14 +121,6 @@ const groupColorMap = computed(() => {
 function groupTagColor(group?: string): string {
   if (!group) return GROUP_COLORS[0]
   return groupColorMap.value.get(group) ?? GROUP_COLORS[0]
-}
-
-function ticketGroupShortLabel(group?: string): string {
-  if (!group) return '—'
-  const key = `admin.tickets.${group}`
-  const translated = t(key)
-  const label = translated === key ? group : translated
-  return label.slice(0, 3).toUpperCase()
 }
 
 const buyerInitials = computed<string>(() => {
@@ -368,19 +350,16 @@ const sendEmails = async (): Promise<void> => {
                             {{ issuance.recipient_name }}
                           </p>
                           <span
-                            v-if="ticketInfoMap.get(issuance.ticket_id)"
+                            v-for="(day, index) in getTicketDays(
+                              issuance.ticket?.valid_from,
+                              issuance.ticket?.valid_until,
+                              locale,
+                            )"
+                            :key="`${issuance.ticket_id}-${index}`"
                             class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
-                            :class="
-                              groupTagColor(
-                                ticketInfoMap.get(issuance.ticket_id)?.group,
-                              )
-                            "
+                            :class="groupTagColor(day)"
                           >
-                            {{
-                              ticketGroupShortLabel(
-                                ticketInfoMap.get(issuance.ticket_id)?.group,
-                              )
-                            }}
+                            {{ day.toUpperCase() }}
                           </span>
                         </div>
                         <p
@@ -434,17 +413,6 @@ const sendEmails = async (): Promise<void> => {
                           />
                         </svg>
                       </span>
-                      <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span
-                            v-if="item.ticket?.group"
-                            class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
-                            :class="groupTagColor(item.ticket.group)"
-                          >
-                            {{ ticketGroupShortLabel(item.ticket.group) }}
-                          </span>
-                        </div>
-                      </div>
                       <span
                         class="shrink-0 text-sm font-semibold text-gray-900 dark:text-white tabular-nums"
                       >
