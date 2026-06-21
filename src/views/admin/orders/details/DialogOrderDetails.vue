@@ -350,11 +350,12 @@ const sendEmails = async (): Promise<void> => {
                             {{ issuance.recipient_name }}
                           </p>
                           <span
-                            v-for="day in getTicketDays(
-                              issuance.ticket.valid_from,
-                              issuance.ticket.valid_until,
+                            v-for="(day, index) in getTicketDays(
+                              issuance.ticket?.valid_from,
+                              issuance.ticket?.valid_until,
+                              locale,
                             )"
-                            :key="day"
+                            :key="`${issuance.ticket_id}-${index}`"
                             class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
                             :class="groupTagColor(day)"
                           >
