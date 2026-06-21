@@ -415,6 +415,7 @@ const en = {
       statusPaid: 'Paid',
       statusPlaced: 'Placed',
       statusCanceled: 'Canceled',
+      statusRefunded: 'Refunded',
       statusFailed: 'Failed',
       orderNumber: 'Order #',
       placedAt: 'Placed',
@@ -471,7 +472,8 @@ const en = {
       confirmCheckIn: 'Confirm Check-in',
       dismiss: 'Dismiss',
       errorInvalidTicket: 'Invalid ticket',
-      errorCheckInFailed: 'Failed to check in. Maybe the ticket has already been checked in.',
+      errorCheckInFailed:
+        'Failed to check in. Maybe the ticket has already been checked in.',
       errorStatusFailed: 'Failed to check ticket status. Try again later.',
     },
   },

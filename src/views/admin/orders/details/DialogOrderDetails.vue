@@ -123,14 +123,6 @@ function groupTagColor(group?: string): string {
   return groupColorMap.value.get(group) ?? GROUP_COLORS[0]
 }
 
-function ticketGroupShortLabel(group?: string): string {
-  if (!group) return '—'
-  const key = `admin.tickets.${group}`
-  const translated = t(key)
-  const label = translated === key ? group : translated
-  return label.slice(0, 3).toUpperCase()
-}
-
 const buyerInitials = computed<string>(() => {
   const name = order.value?.customer?.name
   if (!name) return '?'
@@ -366,7 +358,7 @@ const sendEmails = async (): Promise<void> => {
                             class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
                             :class="groupTagColor(day)"
                           >
-                            {{ day }}
+                            {{ day.toUpperCase() }}
                           </span>
                         </div>
                         <p
@@ -420,17 +412,6 @@ const sendEmails = async (): Promise<void> => {
                           />
                         </svg>
                       </span>
-                      <div class="min-w-0 flex-1">
-                        <div class="flex items-center gap-2 flex-wrap">
-                          <span
-                            v-if="item.ticket?.group"
-                            class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
-                            :class="groupTagColor(item.ticket.group)"
-                          >
-                            {{ ticketGroupShortLabel(item.ticket.group) }}
-                          </span>
-                        </div>
-                      </div>
                       <span
                         class="shrink-0 text-sm font-semibold text-gray-900 dark:text-white tabular-nums"
                       >
