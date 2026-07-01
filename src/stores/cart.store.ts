@@ -1,4 +1,5 @@
 import { ref, computed, type ComputedRef } from 'vue'
+import { useStorage } from '@vueuse/core'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { cartService } from '@/features/cart/service.ts'
 import { supabase } from '@/lib/supabase.ts'
@@ -27,6 +28,8 @@ export interface CartItem {
   quantity: number
 }
 
+const persistedCart = useStorage<PersistedCart | null>(LOCAL_STORAGE_KEY, null)
+
 const items = ref<CartItem[]>([])
 const cartId = ref<string | null>(null)
 const syncStatus = ref<CartSyncStatus>('idle')
@@ -52,47 +55,20 @@ interface UseCartReturn {
   flushSync: () => Promise<void>
 }
 
-/**
- * Persists the current in-memory cart snapshot to localStorage.
- * This keeps user actions resilient across refreshes and offline transitions.
- */
 function persistLocally(): void {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  const payload: PersistedCart = {
+  persistedCart.value = {
     cartId: cartId.value,
     items: items.value,
   }
-
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload))
 }
 
-/**
- * Restores the latest cart snapshot from localStorage when available.
- * Invalid payloads are discarded to avoid keeping corrupted state.
- */
 function loadLocalCart(): void {
-  if (typeof window === 'undefined') {
+  const saved = persistedCart.value
+  if (!saved) {
     return
   }
-
-  const raw = localStorage.getItem(LOCAL_STORAGE_KEY)
-  if (!raw) {
-    return
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as PersistedCart
-    cartId.value = parsed.cartId
-    items.value = parsed.items
-  } catch (error) {
-    logger.warn('Unable to parse local cart cache, clearing cache', {
-      error,
-    })
-    localStorage.removeItem(LOCAL_STORAGE_KEY)
-  }
+  cartId.value = saved.cartId
+  items.value = saved.items
 }
 
 /**

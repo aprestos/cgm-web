@@ -1,13 +1,15 @@
-import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { useI18n } from 'vue-i18n'
+import { computed } from 'vue'
 import type { Composer } from 'vue-i18n'
+import { useI18n } from 'vue-i18n'
 import type { LocaleInfo } from '@/i18n'
 import {
+  AVAILABLE_LOCALE_CODES,
   AVAILABLE_LOCALES,
   DEFAULT_LOCALE,
-  AVAILABLE_LOCALE_CODES,
 } from '@/i18n'
+
+import { useStorage } from '@vueuse/core'
 
 interface UseLocaleReturn {
   locale: Composer['locale']
@@ -20,6 +22,7 @@ interface UseLocaleReturn {
 }
 
 const LOCALE_STORAGE_KEY = 'app-locale'
+const storedLocale = useStorage(LOCALE_STORAGE_KEY, DEFAULT_LOCALE)
 
 /**
  * Check if a locale code is valid (has a translation file)
@@ -60,12 +63,7 @@ export function useLocale(): UseLocaleReturn {
       return
     }
     locale.value = code
-    // Save to localStorage
-    try {
-      localStorage.setItem(LOCALE_STORAGE_KEY, code)
-    } catch (error) {
-      console.error('Failed to save locale to localStorage:', error)
-    }
+    storedLocale.value = code
   }
 
   return {
@@ -83,15 +81,9 @@ export function useLocale(): UseLocaleReturn {
  * Load saved locale from localStorage with browser locale as fallback
  */
 export function loadSavedLocale(): string {
-  try {
-    const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
-    if (saved && isValidLocale(saved)) {
-      return saved
-    }
-  } catch (error) {
-    console.error('Failed to load locale from localStorage:', error)
+  const saved = storedLocale.value
+  if (saved && isValidLocale(saved)) {
+    return saved
   }
-
-  // Fallback to browser locale
   return getBrowserLocale()
 }

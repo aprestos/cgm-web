@@ -1,4 +1,5 @@
 import { createI18n } from 'vue-i18n'
+import { useStorage } from '@vueuse/core'
 import type { TranslationSchema } from './locales/en'
 
 // Auto-import all locale files using Vite's glob import
@@ -70,26 +71,22 @@ function isValidLocale(code: string): boolean {
   return availableLocaleCodes.includes(code)
 }
 
-// Load saved locale (this needs to be done before createI18n)
+const LOCALE_STORAGE_KEY = 'app-locale'
+const storedLocale = useStorage(LOCALE_STORAGE_KEY, DEFAULT_LOCALE)
+
 function getInitialLocale(): string {
-  const LOCALE_STORAGE_KEY = 'app-locale'
-  try {
-    const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
-    if (saved && isValidLocale(saved)) {
-      return saved
-    }
-  } catch (error) {
-    console.error('Failed to load locale from localStorage:', error)
+  const saved = storedLocale.value
+  if (saved && isValidLocale(saved)) {
+    return saved
   }
 
-  // Fallback to browser locale
   try {
     const browserLang = navigator.language.split('-')[0] ?? ''
     if (browserLang && isValidLocale(browserLang)) {
       return browserLang
     }
-  } catch (error) {
-    console.error('Failed to get browser locale:', error)
+  } catch {
+    // ignore
   }
 
   return DEFAULT_LOCALE
