@@ -4,7 +4,13 @@ import { tenantStore } from '@/stores/tenant.ts'
 import { editionStore } from '@/stores/edition.ts'
 import logger from '@/lib/logger.ts'
 import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
-import type { Order } from '@/features/orders/order.model.ts'
+import type { Order, OrderItem } from '@/features/orders/order.model.ts'
+import { formatWeekday } from '@/utils/date.ts'
+
+export interface TicketDistributionEntry {
+  label: string
+  count: number
+}
 
 export interface OrdersOverTimeEntry {
   date: string // ISO string — YYYY-MM-DD for daily, YYYY-MM-DDTHH:mm:ss.sssZ for sub-day
@@ -216,8 +222,9 @@ export const orderService = {
   async getOrderItemsCount(tenantId: string): Promise<number> {
     const { data, error } = await commerceClient
       .from('order_items')
-      .select('count:id.count()')
+      .select('count:id.count(), order:orders!inner(status)')
       .eq('tenant_id', tenantId)
+      .eq('orders.status', 'paid')
       .single<{ count: number }>()
 
     if (error) throw error
@@ -329,6 +336,75 @@ export const orderService = {
 
     return { orderId: data.order_id }
   },
+  async getTicketsDistribution(
+    tenantId: string,
+    editionId: number,
+    locale: string,
+  ): Promise<TicketDistributionEntry[]> {
+    const [
+      { data: orderItems, error: orderItemsError },
+      { data: tickets, error: ticketsError },
+    ] = await Promise.all([
+      commerceClient
+        .from('order_items')
+        .select('ticket_id, quantity, order:orders!inner(status, edition_id)')
+        .eq('tenant_id', tenantId)
+        .eq('orders.status', 'paid')
+        .eq('orders.edition_id', editionId),
+      supabase
+        .schema('tickets')
+        .from('types')
+        .select('id, valid_from, valid_until')
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId),
+    ])
+
+    if (ticketsError || orderItemsError) {
+      console.error('Unable to get tickets distribution', {
+        ticketsError,
+        orderItemsError,
+      })
+      throw new Error('Unable to get tickets distribution')
+    }
+    if (!tickets?.length) return []
+
+    const totalsMap = new Map<
+      number,
+      {
+        label: string
+        count: number
+      }
+    >()
+    for (const item of tickets ?? []) {
+      totalsMap.set(item.id as number, {
+        label: formatWeekday(
+          item.valid_from,
+          item.valid_until,
+          locale,
+        ),
+        count: 0,
+      })
+    }
+
+    orderItems?.forEach((item: OrderItem) => {
+      const mapItem = totalsMap.get(item.ticket_id)
+
+      if (mapItem) {
+        console.info('before', {
+          count: mapItem.count,
+          quantity: item.quantity,
+        })
+        mapItem.count += item.quantity
+        console.info('after', {
+          count: mapItem.count,
+          quantity: item.quantity,
+        })
+      }
+    })
+
+    return Array.from(totalsMap.values())
+  },
+
   async getOrder(order_id: string): Promise<Order> {
     const [orderResponse, issuancesResponse] = await Promise.all([
       supabase
