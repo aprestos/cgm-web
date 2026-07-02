@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { OrdersOverTimeEntry } from '@/features/orders/service'
+import type {
+  OrdersOverTimeEntry,
+  TicketDistributionEntry,
+} from '@/features/orders/service'
 import orderService from '@/features/orders/service'
 import { tenantStore } from '@/stores/tenant'
 import { editionStore } from '@/stores/edition'
@@ -14,8 +17,9 @@ import type {
   RecentOrder,
 } from '@/views/admin/orders/overview/orders.types.ts'
 import PageHeader from '@/components/PageHeader.vue'
+import TicketsDistributionCard from '@/views/admin/orders/overview/TicketsDistributionCard.vue'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 const selectedPeriod = ref<Period>('1m')
 
@@ -24,6 +28,8 @@ const chartEntries = ref<OrdersOverTimeEntry[]>([])
 const ordersCount = ref(0)
 const ordersRevenue = ref(0)
 const orderItemsCounts = ref(0)
+
+const ticketsDistribution = ref<TicketDistributionEntry[]>([])
 
 const recentOrdersLoading = ref(false)
 const recentOrders = ref<RecentOrder[]>([])
@@ -60,8 +66,8 @@ function onPeriodChange(period: Period): void {
 
 async function loadStats(params: PeriodParams): Promise<void> {
   if (!tenantStore.value?.id || !editionStore.value?.id) return
-  try {
-    const [ordersOverTime, stats, itemsStats] = await Promise.all([
+  const [ordersOverTime, stats, itemsStats, distribution] =
+    await Promise.allSettled([
       orderService.getOrdersOverTime(
         tenantStore.value.id,
         editionStore.value.id,
@@ -71,16 +77,40 @@ async function loadStats(params: PeriodParams): Promise<void> {
       ),
       orderService.getOrdersCount(tenantStore.value.id),
       orderService.getOrderItemsCount(tenantStore.value.id),
+      orderService.getTicketsDistribution(
+        tenantStore.value.id,
+        editionStore.value.id,
+        locale.value,
+      ),
     ])
-    chartEntries.value = ordersOverTime
-    ordersCount.value = stats.count
-    ordersRevenue.value = stats.revenue
-    orderItemsCounts.value = itemsStats
-  } catch (error) {
-    logger.error('Failed to load orders stats', { error })
-  } finally {
-    loading.value = false
+
+  if (ordersOverTime.status === 'fulfilled')
+    chartEntries.value = ordersOverTime.value
+  if (stats.status === 'fulfilled') {
+    ordersCount.value = stats.value.count
+    ordersRevenue.value = stats.value.revenue
   }
+  if (itemsStats.status === 'fulfilled')
+    orderItemsCounts.value = itemsStats.value
+  if (distribution.status === 'fulfilled')
+    ticketsDistribution.value = distribution.value
+
+  if (ordersOverTime.status === 'rejected')
+    logger.error('Failed to load orders over time', {
+      error: ordersOverTime.reason,
+    })
+  if (stats.status === 'rejected')
+    logger.error('Failed to load orders count', { error: stats.reason })
+  if (itemsStats.status === 'rejected')
+    logger.error('Failed to load order items count', {
+      error: itemsStats.reason,
+    })
+  if (distribution.status === 'rejected')
+    logger.error('Failed to load tickets distribution', {
+      error: distribution.reason,
+    })
+
+  loading.value = false
 }
 
 async function loadRecentOrders(): Promise<void> {
@@ -110,6 +140,8 @@ onMounted(() => {
       :title="t('admin.orders.overview.title')"
       :description="t('admin.orders.overview.description')"
     />
+    {{ ordersCount }}
+    {{ ordersRevenue }}
     <OrdersStatsGrid
       :orders-count="ordersCount"
       :orders-revenue="ordersRevenue"
@@ -122,6 +154,11 @@ onMounted(() => {
       :entries="chartEntries"
       :selected-period="selectedPeriod"
       @period-change="onPeriodChange"
+    />
+    <TicketsDistributionCard
+      :total="orderItemsCounts"
+      :entries="ticketsDistribution"
+      :loading="loading"
     />
   </div>
 </template>
