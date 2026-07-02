@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import type {
   OrdersOverTimeEntry,
-  TicketDistributionEntry,
+  TicketsStats,
 } from '@/features/orders/service'
 import orderService from '@/features/orders/service'
 import { tenantStore } from '@/stores/tenant'
@@ -27,9 +27,8 @@ const loading = ref(true)
 const chartEntries = ref<OrdersOverTimeEntry[]>([])
 const ordersCount = ref(0)
 const ordersRevenue = ref(0)
-const orderItemsCounts = ref(0)
 
-const ticketsDistribution = ref<TicketDistributionEntry[]>([])
+const ticketStats = ref<TicketsStats>({ total: 0, distribution: [] })
 
 const recentOrdersLoading = ref(false)
 const recentOrders = ref<RecentOrder[]>([])
@@ -66,23 +65,21 @@ function onPeriodChange(period: Period): void {
 
 async function loadStats(params: PeriodParams): Promise<void> {
   if (!tenantStore.value?.id || !editionStore.value?.id) return
-  const [ordersOverTime, stats, itemsStats, distribution] =
-    await Promise.allSettled([
-      orderService.getOrdersOverTime(
-        tenantStore.value.id,
-        editionStore.value.id,
-        params.from,
-        params.to,
-        params.granularity,
-      ),
-      orderService.getOrdersCount(tenantStore.value.id),
-      orderService.getOrderItemsCount(tenantStore.value.id),
-      orderService.getTicketsDistribution(
-        tenantStore.value.id,
-        editionStore.value.id,
-        locale.value,
-      ),
-    ])
+  const [ordersOverTime, stats, distribution] = await Promise.allSettled([
+    orderService.getOrdersOverTime(
+      tenantStore.value.id,
+      editionStore.value.id,
+      params.from,
+      params.to,
+      params.granularity,
+    ),
+    orderService.getOrdersCount(tenantStore.value.id),
+    orderService.getTicketsDistribution(
+      tenantStore.value.id,
+      editionStore.value.id,
+      locale.value,
+    ),
+  ])
 
   if (ordersOverTime.status === 'fulfilled')
     chartEntries.value = ordersOverTime.value
@@ -90,10 +87,9 @@ async function loadStats(params: PeriodParams): Promise<void> {
     ordersCount.value = stats.value.count
     ordersRevenue.value = stats.value.revenue
   }
-  if (itemsStats.status === 'fulfilled')
-    orderItemsCounts.value = itemsStats.value
-  if (distribution.status === 'fulfilled')
-    ticketsDistribution.value = distribution.value
+  if (distribution.status === 'fulfilled') {
+    ticketStats.value = distribution.value
+  }
 
   if (ordersOverTime.status === 'rejected')
     logger.error('Failed to load orders over time', {
@@ -101,10 +97,6 @@ async function loadStats(params: PeriodParams): Promise<void> {
     })
   if (stats.status === 'rejected')
     logger.error('Failed to load orders count', { error: stats.reason })
-  if (itemsStats.status === 'rejected')
-    logger.error('Failed to load order items count', {
-      error: itemsStats.reason,
-    })
   if (distribution.status === 'rejected')
     logger.error('Failed to load tickets distribution', {
       error: distribution.reason,
@@ -140,12 +132,10 @@ onMounted(() => {
       :title="t('admin.orders.overview.title')"
       :description="t('admin.orders.overview.description')"
     />
-    {{ ordersCount }}
-    {{ ordersRevenue }}
     <OrdersStatsGrid
       :orders-count="ordersCount"
       :orders-revenue="ordersRevenue"
-      :order-items-counts="orderItemsCounts"
+      :order-items-counts="ticketStats.total"
       :loading="loading"
     />
 
@@ -156,8 +146,8 @@ onMounted(() => {
       @period-change="onPeriodChange"
     />
     <TicketsDistributionCard
-      :total="orderItemsCounts"
-      :entries="ticketsDistribution"
+      :total="ticketStats.total"
+      :entries="ticketStats.distribution"
       :loading="loading"
     />
   </div>
