@@ -7,6 +7,11 @@ import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order, OrderItem } from '@/features/orders/order.model.ts'
 import { formatWeekday } from '@/utils/date.ts'
 
+export interface TicketsStats {
+  total: number
+  distribution: TicketDistributionEntry[]
+}
+
 export interface TicketDistributionEntry {
   label: string
   count: number
@@ -222,7 +227,7 @@ export const orderService = {
   async getOrderItemsCount(tenantId: string): Promise<number> {
     const { data, error } = await commerceClient
       .from('order_items')
-      .select('count:id.count(), order:orders!inner(status)')
+      .select('count:id.count(), order:orders!inner(status,edition_id)')
       .eq('tenant_id', tenantId)
       .eq('orders.status', 'paid')
       .single<{ count: number }>()
@@ -340,7 +345,7 @@ export const orderService = {
     tenantId: string,
     editionId: number,
     locale: string,
-  ): Promise<TicketDistributionEntry[]> {
+  ): Promise<TicketsStats> {
     const [
       { data: orderItems, error: orderItemsError },
       { data: tickets, error: ticketsError },
@@ -366,8 +371,9 @@ export const orderService = {
       })
       throw new Error('Unable to get tickets distribution')
     }
-    if (!tickets?.length) return []
+    if (!tickets?.length) return { total: 0, distribution: [] }
 
+    let totalTickets = 0
     const totalsMap = new Map<
       number,
       {
@@ -377,11 +383,7 @@ export const orderService = {
     >()
     for (const item of tickets ?? []) {
       totalsMap.set(item.id as number, {
-        label: formatWeekday(
-          item.valid_from,
-          item.valid_until,
-          locale,
-        ),
+        label: formatWeekday(item.valid_from, item.valid_until, locale),
         count: 0,
       })
     }
@@ -390,19 +392,12 @@ export const orderService = {
       const mapItem = totalsMap.get(item.ticket_id)
 
       if (mapItem) {
-        console.info('before', {
-          count: mapItem.count,
-          quantity: item.quantity,
-        })
+        totalTickets += item.quantity
         mapItem.count += item.quantity
-        console.info('after', {
-          count: mapItem.count,
-          quantity: item.quantity,
-        })
       }
     })
 
-    return Array.from(totalsMap.values())
+    return { total: totalTickets, distribution: Array.from(totalsMap.values()) }
   },
 
   async getOrder(order_id: string): Promise<Order> {
