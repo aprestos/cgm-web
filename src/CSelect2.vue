@@ -98,7 +98,7 @@
               :value="item"
             >
               <li
-                class="group relative cursor-pointer select-none py-2 pl-10 pr-4"
+                class="relative cursor-pointer select-none py-2 pl-10 pr-4"
                 :class="
                   active
                     ? 'bg-indigo-600 text-white dark:bg-indigo-500'
@@ -112,7 +112,12 @@
                   {{ getItemLabel(item) }}
                   <span
                     v-if="getItemSecondaryLabel(item)"
-                    class="ml-1 group-[.bg-indigo-600]:text-indigo-100 dark:group-[.bg-indigo-500]:text-indigo-100 text-gray-500 dark:text-gray-400"
+                    class="ml-1"
+                    :class="
+                      active
+                        ? 'text-indigo-100'
+                        : 'text-gray-500 dark:text-gray-400'
+                    "
                   >
                     {{ getItemSecondaryLabel(item) }}
                   </span>
@@ -121,7 +126,9 @@
                   class="absolute inset-y-0 left-0 flex items-center pl-3"
                   :class="
                     isSelected
-                      ? 'group-[.bg-indigo-600]:text-white dark:group-[.bg-indigo-500]:text-white text-indigo-600 dark:text-indigo-500'
+                      ? active
+                        ? 'text-white'
+                        : 'text-indigo-600 dark:text-indigo-500'
                       : 'text-gray-300 dark:text-gray-600'
                   "
                 >

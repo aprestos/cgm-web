@@ -79,8 +79,6 @@ const { t } = useI18n()
     >
       {{ paymentIssue?.description }}
     </div>
-
-    <div
     <div
       v-else-if="paymentIssue?.type === 'warning'"
       class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300"
@@ -98,7 +96,7 @@ const { t } = useI18n()
       </button>
       <button
         type="button"
-        class="rounded-xl cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+        class="rounded-xl hover:cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
         :disabled="isWaitingForPaymentSession"
         @click="emit('submit')"
       >
