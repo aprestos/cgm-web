@@ -131,45 +131,84 @@
             enable online payments.
           </p>
           <div
-            class="flex flex-row justify-between items-center mt-3 text-gray-700 dark:text-white/70"
+            class="mt-4 flex items-center justify-between gap-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900/40 p-4"
           >
-            <div class="flex flex-row gap-3">
-              <div class="flex flex-row gap-1">
-                <IconBrandStripe />
-                <div class="flex flex-col">
-                  <span>Stripe</span>
+            <div class="flex items-center gap-3">
+              <div
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30"
+              >
+                <IconBrandStripe
+                  class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span
+                    class="text-sm font-semibold text-gray-900 dark:text-white"
+                    >Stripe</span
+                  >
+                  <CBadge
+                    v-if="stripeConfiguration"
+                    size="sm"
+                    :type="
+                      stripeConfiguration.accountType === 'live'
+                        ? 'blue'
+                        : 'gray'
+                    "
+                    >{{
+                      stripeConfiguration.accountType === 'live'
+                        ? 'Live'
+                        : 'Sandbox'
+                    }}</CBadge
+                  >
+                </div>
+                <div class="mt-1 flex items-center">
+                  <CBadge
+                    v-if="stripeConfiguration?.onboardingStatus === 'pending'"
+                    size="sm"
+                    type="yellow"
+                    >Setup incomplete</CBadge
+                  >
+                  <CBadge
+                    v-else-if="
+                      stripeConfiguration?.onboardingStatus === 'complete'
+                    "
+                    size="sm"
+                    type="green"
+                    ><IconCircleCheck class="mr-1" size="14" />Active</CBadge
+                  >
+                  <CBadge
+                    v-else-if="
+                      stripeConfiguration?.onboardingStatus === 'restricted'
+                    "
+                    size="sm"
+                    type="red"
+                    >Restricted</CBadge
+                  >
+                  <CBadge v-else size="sm" type="gray">Not connected</CBadge>
                 </div>
               </div>
-              <CBadge
-                v-if="stripeConfiguration?.onboardingStatus === 'pending'"
-                text="Incomplete"
-                type="yellow"
-                size="sm"
-                >Incomplete</CBadge
-              >
-              <CBadge
-                v-else-if="stripeConfiguration?.onboardingStatus === 'complete'"
-                size="sm"
-                type="green"
-                ><IconCircleCheck class="mr-2" size="14" />Active</CBadge
-              >
-              <CBadge v-else type="gray">Not started</CBadge>
             </div>
             <CButton
+              v-if="isStripeConnected"
+              type="button"
+              size="sm"
+              variant="secondary"
+              @click="() => openDialog('disconnect-stripe')"
+              >Disconnect</CButton
+            >
+            <CButton
+              v-else
               type="button"
               size="sm"
               variant="secondary"
               @click="() => openDialog('connect-stripe')"
-              >Connect</CButton
+              >{{
+                stripeConfiguration?.onboardingStatus === 'pending'
+                  ? 'Continue setup'
+                  : 'Connect'
+              }}</CButton
             >
-            <!--            <CButton-->
-            <!--              v-else-->
-            <!--              type="button"-->
-            <!--              size="sm"-->
-            <!--              variant="secondary"-->
-            <!--              @click="() => openDialog('disconnect-stripe')"-->
-            <!--              >Disconnect</CButton-->
-            <!--            >-->
           </div>
         </div>
       </div>
@@ -199,16 +238,16 @@
 </template>
 
 <script async setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import {
-  IconCircleCheck,
+  IconAlertCircle,
   IconBrandGoogle,
   IconBrandStripe,
-  IconMail,
-  IconCreditCard,
   IconCheck,
-  IconAlertCircle,
+  IconCircleCheck,
+  IconCreditCard,
+  IconMail,
 } from '@tabler/icons-vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
@@ -235,6 +274,12 @@ const saveEmailConfig = (): void => {
 }
 
 const stripeConfiguration = ref<StripeConfiguration | null>(null)
+
+const isStripeConnected = computed(
+  () =>
+    stripeConfiguration.value?.onboardingStatus === 'complete' ||
+    stripeConfiguration.value?.onboardingStatus === 'restricted',
+)
 onMounted(async () => {
   // subscribe to service updates
   stripeConfiguration.value = await stripeService.getConfiguration(

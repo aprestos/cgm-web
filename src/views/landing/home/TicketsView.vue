@@ -13,7 +13,7 @@ import type { Ticket } from '@/features/tickets/ticket.model'
 import { useI18n } from 'vue-i18n'
 import { formatPrice } from '@/utils/price'
 import { useCart } from '@/stores/cart.store'
-import { formatDateRange, formatWeekday } from '@/utils/date'
+import { getTicketTitle } from '@/utils/ticket'
 import { RouteNames } from '@/router/routeNames.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
@@ -72,6 +72,13 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
 
   return true
 }
+
+const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
+  getTicketTitle(
+    ticket.accessDays ?? [],
+    locale.value,
+    t('landing.tickets.weekend'),
+  )
 </script>
 
 <template>
@@ -132,9 +139,7 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
                   : 'text-gray-700 dark:text-white',
               ]"
             >
-              <span>{{
-                formatWeekday(ticket.validFrom, ticket.validUntil, locale)
-              }}</span>
+              <span>{{ getTitle(ticket).weekday }}</span>
             </h3>
             <div
               :class="[
@@ -146,16 +151,14 @@ const isAvailableToBuy = (ticket: Ticket): boolean => {
             >
               <IconCalendar class="h-5 w-5 shrink-0" />
               <span>
-                {{
-                  formatDateRange(ticket.validFrom, ticket.validUntil, locale)
-                }}
+                {{ getTitle(ticket).displayDate }}
               </span>
             </div>
 
             <div class="mt-4 flex items-baseline gap-1">
               <span
                 :class="[
-                  'text-5xl font-bold tracking-tight',
+                  'font-display text-5xl font-bold tracking-tight',
                   ticket.isPopular
                     ? 'text-white'
                     : 'text-gray-900 dark:text-white',

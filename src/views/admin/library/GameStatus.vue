@@ -104,10 +104,10 @@ const fetchWithdrawDetails = async (): Promise<void> => {
               <CheckCircleIcon
                 class="h-5 w-5 inline-block mr-1.5 text-green-500"
               />
-              {{ t('game.status.availableForBorrowing') }}
+              {{ t('admin.library.gameStatus.availableForBorrowing') }}
             </h3>
             <p class="mt-2 text-xs text-gray-500">
-              {{ t('game.status.canWithdrawFromLibrary') }}
+              {{ t('admin.library.gameStatus.canWithdrawFromLibrary') }}
             </p>
           </div>
 
@@ -118,7 +118,7 @@ const fetchWithdrawDetails = async (): Promise<void> => {
           >
             <div v-if="withdraw" class="text-sm">
               <h3 class="text-sm font-semibold text-gray-900">
-                {{ t('game.status.withdrawnFromLibrary') }}
+                {{ t('admin.library.gameStatus.withdrawnFromLibrary') }}
               </h3>
               <p class="text-gray-600 mb-2"></p>
 
@@ -145,7 +145,7 @@ const fetchWithdrawDetails = async (): Promise<void> => {
               </div>
             </div>
             <div v-else class="text-sm text-gray-600">
-              <p>{{ t('game.status.currentlyWithdrawn') }}</p>
+              <p>{{ t('admin.library.gameStatus.currentlyWithdrawn') }}</p>
             </div>
           </div>
 
@@ -156,10 +156,10 @@ const fetchWithdrawDetails = async (): Promise<void> => {
           >
             <p>
               <XCircleIcon class="h-5 w-5 inline-block mr-1.5 text-red-500" />
-              {{ t('game.status.currentlyNotAvailable') }}
+              {{ t('admin.library.gameStatus.currentlyNotAvailable') }}
             </p>
             <p class="mt-2 text-xs text-gray-500">
-              {{ t('game.status.underMaintenanceOrUnavailable') }}
+              {{ t('admin.library.gameStatus.underMaintenanceOrUnavailable') }}
             </p>
           </div>
 
@@ -170,16 +170,17 @@ const fetchWithdrawDetails = async (): Promise<void> => {
           >
             <p>
               <ClockIcon class="h-5 w-5 inline-block mr-1.5 text-blue-500" />
-              {{ t('game.status.reservedByAnotherUser') }}
+              {{ t('admin.library.gameStatus.reservedByAnotherUser') }}
             </p>
             <p class="mt-2 text-xs text-gray-500">
-              {{ t('game.status.checkBackLater') }}
+              {{ t('admin.library.gameStatus.checkBackLater') }}
             </p>
           </div>
 
           <div class="border-t border-gray-200 pt-3">
             <p class="text-xs text-gray-500">
-              {{ t('game.status.lastUpdated') }}: {{ useTimeAgo(new Date()) }}
+              {{ t('admin.library.gameStatus.lastUpdated') }}:
+              {{ useTimeAgo(new Date()) }}
             </p>
           </div>
         </div>

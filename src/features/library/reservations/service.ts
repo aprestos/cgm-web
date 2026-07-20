@@ -79,7 +79,7 @@ export const libraryReservationService = {
   },
 
   async post(libraryGameId: number): Promise<void> {
-    const { error } = await supabase.functions.invoke('library-reservations', {
+    const { error } = await supabase.functions.invoke('library/reservations', {
       method: 'POST',
       body: {
         library_game_id: libraryGameId,

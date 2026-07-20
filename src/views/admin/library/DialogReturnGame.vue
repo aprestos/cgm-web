@@ -93,7 +93,7 @@ const returnGame = async (): Promise<void> => {
     :open="open"
     :title="t('admin.library.returnGame')"
     :confirm-text="t('admin.library.yesReturnIt')"
-    :cancel-text="t('common.cancel')"
+    :cancel-text="t('common.actions.cancel')"
     :loading="isReturningGame"
     @confirm="handleConfirm"
     @cancel="emit('close')"

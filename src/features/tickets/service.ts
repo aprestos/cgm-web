@@ -1,7 +1,9 @@
 import { supabase } from '@/lib/supabase'
 import type {
-  Ticket,
+  CreateTicketDayInput,
   CreateTicketInput,
+  Ticket,
+  TicketDay,
   UpdateTicketInput,
 } from './ticket.model'
 import { toCamelCaseAs, toSnakeCaseAs } from '@/utils/caseConverter'
@@ -22,6 +24,77 @@ export const ticketService = {
     return toCamelCaseAs<Ticket>(data ?? [])
   },
 
+  async getAll(tenantId: string, editionId: number): Promise<Ticket[]> {
+    const { data, error } = await supabase
+      .from('ticket_types')
+      .select('*,access_days:ticket_days!ticket_type_days(day)')
+      .eq('edition_id', editionId)
+      .eq('tenant_id', tenantId)
+
+    if (error) throw error
+    return toCamelCaseAs<Ticket>(data ?? [])
+  },
+
+  /**
+   * Get the pre-defined days an edition offers, that ticket types can be linked to
+   */
+  async getDays(tenantId: string, editionId: number): Promise<TicketDay[]> {
+    const { data, error } = await supabase
+      .from('ticket_days')
+      .select('*')
+      .eq('edition_id', editionId)
+      .eq('tenant_id', tenantId)
+      .order('day', { ascending: true })
+
+    if (error) throw error
+    return toCamelCaseAs<TicketDay>(data ?? [])
+  },
+
+  /**
+   * Create a new pre-defined day for an edition, that ticket types can be linked to
+   */
+  async createDay(input: CreateTicketDayInput): Promise<TicketDay> {
+    const { data, error } = await supabase
+      .from('ticket_days')
+      .insert(
+        toSnakeCaseAs<Record<string, unknown>>(
+          input as unknown as Record<string, unknown>,
+        ),
+      )
+      .select()
+      .single()
+
+    if (error) throw error
+    return toCamelCaseAs<TicketDay>(data)
+  },
+
+  /**
+   * Update the people capacity for a pre-defined day
+   */
+  async updateDayQuantity(dayId: string, quantity: number): Promise<TicketDay> {
+    const { data, error } = await supabase
+      .from('ticket_days')
+      .update({ quantity })
+      .eq('id', dayId)
+      .select()
+      .single()
+
+    if (error) throw error
+    return toCamelCaseAs<TicketDay>(data)
+  },
+
+  /**
+   * Delete a pre-defined day. Fails if the day is still linked to a ticket type.
+   */
+  async deleteDay(dayId: string): Promise<void> {
+    const { error } = await supabase
+      .from('ticket_days')
+      .delete()
+      .eq('id', dayId)
+
+    if (error) throw error
+  },
+
   /**
    * Get a single ticket by ID
    */
@@ -33,17 +106,39 @@ export const ticketService = {
   },
 
   /**
-   * Create a new ticket
+   * Create a new ticket type and link it to its selected access days
    */
   async create(input: CreateTicketInput): Promise<Ticket> {
-    const ticketData = toSnakeCaseAs<Record<string, unknown>>({
-      ...input,
-      active: true,
-    } as Record<string, unknown>)
+    const { dayIds, ...ticketFields } = input
+    const ticketData = toSnakeCaseAs<Record<string, unknown>>(
+      ticketFields as unknown as Record<string, unknown>,
+    )
 
-    const { data, error } = await table.insert(ticketData).select().single()
+    const { data, error } = await supabase
+      .from('ticket_types')
+      .insert(ticketData)
+      .select()
+      .single()
 
     if (error) throw error
+
+    const insertedId = (data as { id: string }).id
+
+    if (dayIds.length > 0) {
+      const { error: daysError } = await supabase
+        .from('ticket_type_days')
+        .insert(
+          dayIds.map((day) => ({
+            type: insertedId,
+            day,
+            tenant_id: input.tenantId,
+            edition_id: input.editionId,
+          })),
+        )
+
+      if (daysError) throw daysError
+    }
+
     return toCamelCaseAs<Ticket>(data)
   },
 

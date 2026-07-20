@@ -193,7 +193,7 @@ const handleClose = (): void => {
               :label="t('admin.library.location')"
               :placeholder="t('admin.library.selectALocation')"
               :options="locations"
-              :helper-text="t('admin.library.optional')"
+              :helper-text="t('common.actions.optional')"
             />
 
             <CTextArea
@@ -201,7 +201,7 @@ const handleClose = (): void => {
               v-model="formData.notes"
               :label="t('admin.library.notes')"
               :rows="4"
-              :helper-text="t('admin.library.optional')"
+              :helper-text="t('common.actions.optional')"
             />
           </div>
         </div>
@@ -216,7 +216,7 @@ const handleClose = (): void => {
           class="order-2 sm:order-1 w-full sm:w-auto"
           @click="handleClose"
         >
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </CButton>
         <CButton
           type="button"
@@ -224,10 +224,10 @@ const handleClose = (): void => {
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('admin.library.updating')"
+          :loading-text="t('common.actions.updating')"
           @click="submit"
         >
-          {{ t('admin.library.update') }}
+          {{ t('common.actions.update') }}
         </CButton>
       </div>
     </form>

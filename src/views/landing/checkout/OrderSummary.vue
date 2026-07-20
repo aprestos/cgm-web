@@ -19,7 +19,7 @@ const { t, locale } = useI18n()
     class="self-start rounded-3xl border border-gray-200 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-gray-900 sm:p-6 lg:sticky lg:top-24"
   >
     <h2 class="text-lg font-semibold">
-      {{ t('checkout.section.summary') }}
+      {{ t('landing.checkout.section.summary') }}
     </h2>
 
     <ul class="mt-4 space-y-3">
@@ -39,7 +39,9 @@ const { t, locale } = useI18n()
             }}
           </p>
           <p class="text-xs text-gray-500 dark:text-gray-400">
-            {{ t('checkout.summary.quantity', { count: item.quantity }) }}
+            {{
+              t('landing.checkout.summary.quantity', { count: item.quantity })
+            }}
           </p>
         </div>
         <p class="text-sm font-semibold">
@@ -54,7 +56,7 @@ const { t, locale } = useI18n()
       <div
         class="flex items-center justify-between pt-2 text-base font-semibold text-gray-900 dark:text-white"
       >
-        <dt>{{ t('checkout.summary.total') }}</dt>
+        <dt>{{ t('landing.checkout.summary.total') }}</dt>
         <dd>{{ formatPrice(total) }}</dd>
       </div>
     </dl>

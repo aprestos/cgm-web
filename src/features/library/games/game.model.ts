@@ -60,13 +60,13 @@ export const getStatusLabel = (game: LibraryGame): string => {
 
   switch (status) {
     case 'withdrawn':
-      return t('game.withdrawn')
+      return t('public.game.status.withdrawn')
     case 'reserved':
-      return t('game.reserved')
+      return t('public.game.status.reserved')
     case 'not-available':
-      return t('game.notAvailable')
+      return t('public.game.status.notAvailable')
     case 'available':
-      return t('game.available')
+      return t('public.game.status.available')
     default:
       return ''
   }

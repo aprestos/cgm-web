@@ -36,6 +36,18 @@ export const navigationGuard = async (
   to: RouteLocationNormalized,
 ): Promise<NavigationGuardReturn> => {
   try {
+    // Routes with a custom guard or requiresAuth need a logged-in user first
+    if (to.meta.guard || to.meta.requiresAuth) {
+      const isAuthenticated = await requiresAuth()
+
+      if (!isAuthenticated) {
+        return {
+          name: RouteNames.auth.signIn,
+          query: { redirect: to.fullPath },
+        }
+      }
+    }
+
     // Check custom guard function
     if (to.meta.guard) {
       logger.debug('calling guard', to.meta)
@@ -46,17 +58,6 @@ export const navigationGuard = async (
         return
       } else {
         return { name: RouteNames.error.notFound }
-      }
-    }
-
-    // Check authentication requirement
-    if (to.meta.requiresAuth) {
-      const isAuthenticated = await requiresAuth()
-
-      if (isAuthenticated) {
-        return
-      } else {
-        return { name: RouteNames.auth.signIn }
       }
     }
 

@@ -96,7 +96,7 @@
             class="order-2 sm:order-1 w-full sm:w-auto"
             @click="emit('close')"
           >
-            {{ t('common.cancel') }}
+            {{ t('common.actions.cancel') }}
           </CButton>
           <CButton
             type="submit"

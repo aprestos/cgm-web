@@ -68,10 +68,10 @@ const isCartEmpty = computed((): boolean => totalItems.value === 0)
 
 const availableSteps = computed((): CheckoutStep[] => {
   const allSteps: CheckoutStep[] = [
-    { id: 'account', name: t('checkout.section.account') },
-    { id: 'tickets', name: t('checkout.section.tickets') },
-    { id: 'payment', name: t('checkout.section.payment') },
-    { id: 'completed', name: t('checkout.section.completed') },
+    { id: 'account', name: t('landing.checkout.section.account') },
+    { id: 'tickets', name: t('landing.checkout.section.tickets') },
+    { id: 'payment', name: t('landing.checkout.section.payment') },
+    { id: 'completed', name: t('landing.checkout.section.completed') },
   ]
 
   return isAuthenticated.value
@@ -230,7 +230,7 @@ function handleStripeReturn(): void {
         })
         paymentIssue.value = {
           type: 'warning',
-          description: t('checkout.payment.confirmationTimeout', {
+          description: t('landing.checkout.payment.confirmationTimeout', {
             email: getTenantEmail(),
           }),
         }
@@ -242,8 +242,8 @@ function handleStripeReturn(): void {
       type: 'error',
       description:
         status === 'cancelled'
-          ? t('checkout.payment.cancelled')
-          : t('checkout.payment.failed'),
+          ? t('landing.checkout.payment.cancelled')
+          : t('landing.checkout.payment.failed'),
     }
   }
 }
@@ -321,13 +321,13 @@ function goToNextStep(): void {
 function validateAccountStep(): boolean {
   const errors: Record<string, string> = {}
   if (!accountForm.value.name.trim()) {
-    errors.name = t('checkout.validation.nameRequired')
+    errors.name = t('common.validation.required')
   }
   if (!accountForm.value.email.includes('@')) {
-    errors.email = t('checkout.validation.emailRequired')
+    errors.email = t('common.validation.required')
   }
   if (!accountForm.value.acceptedTerms) {
-    errors.terms = t('checkout.validation.termsRequired')
+    errors.terms = t('landing.checkout.validation.termsRequired')
   }
   accountErrors.value = errors
   return Object.keys(errors).length === 0
@@ -376,7 +376,7 @@ async function handlePaymentSubmit(): Promise<void> {
     isProcessingPayment.value = false
     paymentIssue.value = {
       type: 'error',
-      description: t('checkout.payment.failed'),
+      description: t('landing.checkout.payment.failed'),
     }
     toast.error(paymentIssue.value.description)
   }
@@ -396,10 +396,10 @@ async function handlePaymentSubmit(): Promise<void> {
     >
       <header>
         <h1 class="text-3xl font-bold tracking-tight sm:text-4xl">
-          {{ t('checkout.title') }}
+          {{ t('landing.checkout.title') }}
         </h1>
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-          {{ t('checkout.subtitle') }}
+          {{ t('landing.checkout.subtitle') }}
         </p>
       </header>
 
@@ -411,16 +411,18 @@ async function handlePaymentSubmit(): Promise<void> {
         v-if="isCartEmpty && currentStep !== 'completed'"
         class="mt-8 rounded-3xl border border-dashed border-gray-300 bg-white p-8 text-center shadow-sm dark:border-white/15 dark:bg-gray-900"
       >
-        <p class="text-lg font-semibold">{{ t('checkout.emptyCart.title') }}</p>
+        <p class="text-lg font-semibold">
+          {{ t('landing.checkout.emptyCart.title') }}
+        </p>
         <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-          {{ t('checkout.emptyCart.description') }}
+          {{ t('landing.checkout.emptyCart.description') }}
         </p>
         <RouterLink
           class="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
           :to="{ name: RouteNames.landing.home, hash: '#tickets' }"
         >
           <IconArrowLeft class="size-4" />
-          {{ t('checkout.emptyCart.action') }}
+          {{ t('landing.checkout.emptyCart.action') }}
         </RouterLink>
       </div>
 

@@ -32,14 +32,14 @@
               :errors="r$.$errors.owner"
             />
 
-            <CSelect
+            <CSelect2
               id="location"
               v-model="formData.selectedLocation"
               :label="t('admin.library.location')"
               :placeholder="t('admin.library.selectALocation')"
-              :options="locations"
+              :items="locations"
               :errors="r$.$errors.selectedLocation"
-              :helper-text="t('admin.library.optional')"
+              :helper-text="t('common.actions.optional')"
             />
 
             <CTextArea
@@ -48,7 +48,7 @@
               :label="t('admin.library.notes')"
               :rows="4"
               :errors="r$.$errors.notes"
-              :helper-text="t('admin.library.optional')"
+              :helper-text="t('common.actions.optional')"
             />
           </div>
         </div>
@@ -63,7 +63,7 @@
           class="order-2 sm:order-1 w-full sm:w-auto"
           @click="emit('close')"
         >
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </CButton>
         <CButton
           type="button"
@@ -71,10 +71,10 @@
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('admin.library.submitting')"
+          :loading-text="t('common.actions.submitting')"
           @click="submit"
         >
-          {{ t('admin.library.submit') }}
+          {{ t('common.actions.submit') }}
         </CButton>
       </div>
     </form>
@@ -90,7 +90,6 @@ import type { Option } from 'vue3-select-component'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
-import CSelect from '@/components/CSelect.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import type { Game } from '@/features/external-game/model.ts'
 import gameService from '@/features/external-game/service.ts'
@@ -112,12 +111,12 @@ defineProps<Props>()
 const formData = ref<{
   selectedGame: string | null
   owner: string
-  selectedLocation: number | undefined
+  selectedLocation: number | null
   notes: string
 }>({
   selectedGame: null,
   owner: '',
-  selectedLocation: undefined,
+  selectedLocation: null,
   notes: '',
 })
 const locations = ref<Option<number>[]>([])

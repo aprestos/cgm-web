@@ -1,5 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { hasAnyOfRoles, navigationGuard, type RouteGuard } from '@/router/guards'
+import {
+  hasAnyOfRoles,
+  navigationGuard,
+  type RouteGuard,
+} from '@/router/guards'
 import { RouteNames } from '@/router/routeNames.ts'
 
 // Extend Vue Router's RouteMeta interface
@@ -71,6 +75,12 @@ const router = createRouter({
             import('../views/auth/SignInView.vue'),
         },
         {
+          path: 'verify',
+          name: RouteNames.auth.verify,
+          component: (): Promise<unknown> =>
+            import('../views/auth/SignInVerify.vue'),
+        },
+        {
           path: 'confirm',
           name: RouteNames.auth.confirm,
           component: (): Promise<unknown> =>
@@ -111,10 +121,19 @@ const router = createRouter({
         },
         {
           path: 'tickets',
-          name: RouteNames.admin.tickets,
+          name: RouteNames.admin.tickets.root,
+          redirect: { name: RouteNames.admin.tickets.overview },
           meta: { title: 'Tickets' },
           component: (): Promise<unknown> =>
-            import('../views/admin/tickets/PageTicketsHome.vue'),
+            import('../views/admin/tickets/TemplateTickets.vue'),
+          children: [
+            {
+              path: 'overview',
+              name: RouteNames.admin.tickets.overview,
+              component: (): Promise<unknown> =>
+                import('../views/admin/tickets/overview/PageTicketsHome.vue'),
+            },
+          ],
         },
         {
           path: 'orders',

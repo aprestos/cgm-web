@@ -133,7 +133,7 @@ const gameStatus = computed(() => {
                     ]"
                     aria-hidden="true"
                   />
-                  {{ t('admin.library.edit') }}
+                  {{ t('common.actions.edit') }}
                 </a>
               </MenuItem>
 
@@ -230,7 +230,7 @@ const gameStatus = computed(() => {
                     ]"
                     aria-hidden="true"
                   />
-                  {{ t('common.delete') }}
+                  {{ t('common.actions.delete') }}
                 </a>
               </MenuItem>
             </div>

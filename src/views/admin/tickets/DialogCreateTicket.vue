@@ -7,132 +7,134 @@
   >
     <form>
       <div class="space-y-6 mx-auto max-w-7xl">
-        <!-- FormTabs for Single Day vs Multiple Days (only validity fields inside) -->
-        <FormTabs
-          v-model="selectedTab"
-          :tabs="tabs"
-          @tab-change="handleTabChange"
-        >
-          <!-- Tab 0: Single Day Ticket -->
-          <template #tab-0>
-            <div class="grid grid-cols-1 gap-x-6 gap-y-8">
-              <CInput
-                id="ticket-valid-date"
-                v-model="formData.validFrom"
-                :label="t('admin.tickets.accessDay')"
-                type="date"
-                :errors="r$.$errors.validFrom"
-                :min="
-                  editionStore?.start_date
-                    ? DateTime.fromISO(editionStore?.start_date).toFormat(
-                        'yyyy-MM-dd',
-                      )
-                    : ''
-                "
-              />
-            </div>
-          </template>
+        <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
+          <CInput
+            id="ticket-name"
+            v-model="formData.name"
+            :label="t('admin.tickets.name')"
+            :errors="r$.$errors.name"
+            class="col-span-full"
+          />
 
-          <!-- Tab 1: Multiple Days Ticket -->
-          <template #tab-1>
-            <div class="grid grid-cols-2 gap-x-6 gap-y-8">
-              <CInput
-                id="ticket-valid-from-multi"
-                v-model="formData.validFrom"
-                :label="t('admin.tickets.validFrom')"
-                type="date"
-                :errors="r$.$errors.validFrom"
-                class="col-span-full sm:col-span-1"
-              />
-
-              <CInput
-                id="ticket-valid-until-multi"
-                v-model="formData.validUntil"
-                :label="t('admin.tickets.validUntil')"
-                type="date"
-                :errors="r$.$errors.validUntil"
-                class="col-span-full sm:col-span-1"
-              />
-            </div>
-          </template>
-        </FormTabs>
-
-        <!-- Common fields (render once) -->
-        <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
           <CInputCurrency
             id="ticket-price"
             v-model="formData.price"
             :label="t('admin.tickets.price')"
             :errors="r$.$errors.price"
           />
+        </div>
 
+        <!-- Access Days: multi-select from the edition's pre-defined ticket_days -->
+        <div>
+          <label
+            id="access-days-label"
+            class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+          >
+            {{ t('admin.tickets.accessDays') }}
+          </label>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('admin.tickets.accessDaysHelper') }}
+          </p>
+
+          <div
+            v-if="loadingDays"
+            class="mt-3 text-sm text-gray-500 dark:text-gray-400"
+          >
+            {{ t('common.state.loading') }}
+          </div>
+
+          <p
+            v-else-if="ticketDays.length === 0"
+            class="mt-3 text-sm text-gray-500 dark:text-gray-400"
+          >
+            {{ t('admin.tickets.noDaysAvailable') }}
+          </p>
+
+          <div
+            v-else
+            class="mt-3 flex flex-wrap gap-2"
+            role="group"
+            aria-labelledby="access-days-label"
+          >
+            <button
+              v-for="day in ticketDays"
+              :key="day.id"
+              type="button"
+              :aria-pressed="isDaySelected(day.id)"
+              :class="[
+                'inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors cursor-pointer',
+                isDaySelected(day.id)
+                  ? 'bg-indigo-600 border-indigo-600 text-white dark:bg-indigo-700 dark:border-indigo-700'
+                  : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-white/5 dark:border-white/10 dark:text-gray-200 dark:hover:bg-white/10',
+              ]"
+              @click="toggleDay(day.id)"
+            >
+              <IconCheck v-if="isDaySelected(day.id)" class="size-4" />
+              {{ dayLabel(day.day) }}
+            </button>
+          </div>
+
+          <ValidationErrors :errors="daysError ? [daysError] : []" />
+        </div>
+
+        <!-- Sale Period -->
+        <div class="grid sm:grid-cols-2 gap-6">
           <CInput
-            id="ticket-quantity"
-            v-model="formData.quantity"
-            :label="t('admin.tickets.quantity')"
-            type="number"
-            :errors="r$.$errors.quantity"
+            id="ticket-sale-from"
+            v-model="formData.saleFrom"
+            :label="t('admin.tickets.saleFrom')"
+            type="datetime-local"
+            :errors="r$.$errors.saleFrom"
+            :helper-text="t('common.actions.optional')"
+            class="col-span-full sm:col-span-1"
           />
 
-          <!-- Sale Period: side-by-side grid for start and end -->
-          <div class="sm:col-span-6">
-            <div class="grid sm:grid-cols-2 gap-6">
-              <CInput
-                id="ticket-sale-from"
-                v-model="formData.saleFrom"
-                :label="t('admin.tickets.saleFrom')"
-                type="datetime-local"
-                :errors="r$.$errors.saleFrom"
-                :helper-text="t('admin.tickets.optional')"
-                class="col-span-full sm:col-span-1"
-              />
+          <CInput
+            id="ticket-sale-until"
+            v-model="formData.saleUntil"
+            :label="t('admin.tickets.saleUntil')"
+            type="datetime-local"
+            :errors="r$.$errors.saleUntil"
+            :helper-text="t('common.actions.optional')"
+            class="col-span-full sm:col-span-1"
+          />
+        </div>
 
-              <CInput
-                id="ticket-sale-until"
-                v-model="formData.saleUntil"
-                :label="t('admin.tickets.saleUntil')"
-                type="datetime-local"
-                :errors="r$.$errors.saleUntil"
-                :helper-text="t('admin.tickets.optional')"
-                class="col-span-full sm:col-span-1"
-              />
-            </div>
-          </div>
-          <div class="col-span-full flex items-center justify-between">
-            <span class="flex grow flex-col">
-              <label
-                id="availability-label"
-                class="text-sm/6 font-medium text-gray-900 dark:text-white"
-                >Popular choice</label
-              >
-              <span
-                id="availability-description"
-                class="text-sm text-gray-500 dark:text-gray-400"
-                >When selected the ticket will be shown as popular</span
-              >
-            </span>
-            <div
-              class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500"
+        <!-- Popular option -->
+        <div class="flex items-center justify-between">
+          <span class="flex grow flex-col">
+            <label
+              id="availability-label"
+              class="text-sm/6 font-medium text-gray-900 dark:text-white"
+              >Popular choice</label
             >
-              <span
-                class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"
-              ></span>
-              <input
-                id="availability"
-                v-model="formData.isPopular"
-                type="checkbox"
-                class="absolute inset-0 size-full appearance-none focus:outline-hidden"
-                name="availability"
-                aria-labelledby="availability-label"
-                aria-describedby="availability-description"
-              />
-            </div>
+            <span
+              id="availability-description"
+              class="text-sm text-gray-500 dark:text-gray-400"
+              >When selected the ticket will be shown as popular</span
+            >
+          </span>
+          <div
+            class="group relative inline-flex w-11 shrink-0 rounded-full bg-gray-200 p-0.5 inset-ring inset-ring-gray-900/5 outline-offset-2 outline-indigo-600 transition-colors duration-200 ease-in-out has-checked:bg-indigo-600 has-focus-visible:outline-2 dark:bg-white/5 dark:inset-ring-white/10 dark:outline-indigo-500 dark:has-checked:bg-indigo-500"
+          >
+            <span
+              class="size-5 rounded-full bg-white shadow-xs ring-1 ring-gray-900/5 transition-transform duration-200 ease-in-out group-has-checked:translate-x-5"
+            ></span>
+            <input
+              id="availability"
+              v-model="formData.isPopular"
+              type="checkbox"
+              class="absolute inset-0 size-full appearance-none focus:outline-hidden"
+              name="availability"
+              aria-labelledby="availability-label"
+              aria-describedby="availability-description"
+            />
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end">
+      <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end mt-6">
         <CButton
           type="button"
           variant="secondary"
@@ -140,7 +142,7 @@
           class="order-2 sm:order-1 w-full sm:w-auto"
           @click="emit('close')"
         >
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </CButton>
         <CButton
           type="button"
@@ -160,92 +162,61 @@
 
 <script lang="ts" setup>
 import { useRegle } from '@regle/core'
-import { required, requiredIf, minValue, dateAfter } from '@regle/rules'
-import { computed, ref } from 'vue'
+import { required, minValue, dateAfter } from '@regle/rules'
+import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { IconCalendar, IconCalendarEvent } from '@tabler/icons-vue'
+import { IconCheck } from '@tabler/icons-vue'
+import { DateTime } from 'luxon'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import CInputCurrency from '@/components/CInputCurrency.vue'
-import FormTabs from '@/components/FormTabs.vue'
-import type { TabConfig } from '@/components/FormTabs.vue'
+import ValidationErrors from '@/components/ValidationErrors.vue'
 import ticketService from '@/features/tickets/service'
-import type { TicketGroup } from '@/features/tickets/ticket.model'
+import type { TicketDay } from '@/features/tickets/ticket.model'
 import { tenantStore } from '@/stores/tenant'
 import { editionStore } from '@/stores/edition'
 import logger from '@/lib/logger'
-import { DateTime } from 'luxon'
+import { formatDayLabel } from '@/utils/date'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 interface Props {
   open: boolean
-  group?: TicketGroup
 }
 
 const props = defineProps<Props>()
 
 const formData = ref<{
+  name: string
   price: string
-  quantity: string
   saleFrom: string
   saleUntil: string
-  validFrom: string
-  validUntil: string
   isPopular: boolean
+  dayIds: string[]
 }>({
+  name: '',
   price: '',
-  quantity: '',
   saleFrom: '',
   saleUntil: '',
-  validFrom: '',
-  validUntil: '',
   isPopular: false,
+  dayIds: [],
 })
 
 const isSubmitting = ref<boolean>(false)
-const selectedTab = ref<number>(0)
+const ticketDays = ref<TicketDay[]>([])
+const loadingDays = ref<boolean>(false)
+const daysError = ref<string>('')
 
 const emit = defineEmits<{
   close: []
   created: []
 }>()
 
-const tabs = computed<TabConfig[]>(() => [
-  {
-    label: t('admin.tickets.singleDay'),
-    icon: IconCalendar,
-  },
-  {
-    label: t('admin.tickets.multipleDays'),
-    icon: IconCalendarEvent,
-  },
-])
-
-const handleTabChange = (index: number): void => {
-  selectedTab.value = index
-  // Clear validUntil when switching to single day
-  if (index === 0) {
-    formData.value.validUntil = ''
-  }
-}
-
 const { r$ } = useRegle(formData, {
+  name: { required },
   price: { required, minValue: minValue(0) },
-  quantity: { required, minValue: minValue(1) },
-  validFrom: {
-    required,
-    dateAfter: dateAfter(DateTime.local().startOf('day').toJSDate()),
-  },
-  validUntil: {
-    required: requiredIf(() => selectedTab.value === 1),
-    dateAfter: dateAfter(
-      DateTime.local().minus({ days: 1 }).startOf('day').toJSDate(),
-    ),
-    // must be after valid from, to be implemented later
-  },
   saleFrom: {
     dateAfter: dateAfter(
       DateTime.local().minus({ days: 1 }).startOf('day').toJSDate(),
@@ -259,16 +230,57 @@ const { r$ } = useRegle(formData, {
   },
 })
 
+const isDaySelected = (dayId: string): boolean =>
+  formData.value.dayIds.includes(dayId)
+
+const toggleDay = (dayId: string): void => {
+  const index = formData.value.dayIds.indexOf(dayId)
+  if (index === -1) {
+    formData.value.dayIds.push(dayId)
+  } else {
+    formData.value.dayIds.splice(index, 1)
+  }
+  daysError.value = ''
+}
+
+const dayLabel = (day: string): string => formatDayLabel(day, locale.value)
+
+const loadTicketDays = async (): Promise<void> => {
+  if (!tenantStore.value?.id || !editionStore.value?.id) return
+
+  loadingDays.value = true
+  try {
+    ticketDays.value = await ticketService.getDays(
+      tenantStore.value.id,
+      editionStore.value.id,
+    )
+  } catch (error) {
+    logger.error('Error loading ticket days:', { error })
+    toast.error(t('admin.tickets.loadDaysFailed'))
+  } finally {
+    loadingDays.value = false
+  }
+}
+
+onMounted(loadTicketDays)
+
+watch(
+  () => props.open,
+  (open) => {
+    if (open) void loadTicketDays()
+  },
+)
+
 const resetForm = (): void => {
   formData.value = {
+    name: '',
     price: '',
-    quantity: '',
     saleFrom: '',
     saleUntil: '',
-    validFrom: '',
-    validUntil: '',
     isPopular: false,
+    dayIds: [],
   }
+  daysError.value = ''
   r$.$reset()
 }
 
@@ -278,7 +290,12 @@ const submit = async (): Promise<void> => {
   // Validate form before submitting
   const { valid } = await r$.$validate()
 
-  if (!valid) {
+  daysError.value =
+    formData.value.dayIds.length === 0
+      ? t('admin.tickets.selectAtLeastOneDay')
+      : ''
+
+  if (!valid || daysError.value) {
     logger.debug('Form has validation errors', r$.$errors)
     return
   }
@@ -290,38 +307,16 @@ const submit = async (): Promise<void> => {
 
   isSubmitting.value = true
 
-  let validFrom: DateTime | null
-  let validUntil: DateTime | null
-
-  validFrom = DateTime.fromISO(formData.value.validFrom).setZone(
-    editionStore.value.timezone,
-  )
-
-  // For single day tickets, set validUntil to the end of the validFrom day
-  validUntil = DateTime.fromISO(
-    selectedTab.value === 0
-      ? formData.value.validFrom
-      : formData.value.validUntil,
-  ).setZone(editionStore.value.timezone)
-
-  if (!validUntil || !validFrom) return
-
-  validFrom = validFrom.startOf('day')
-  validUntil = validUntil.endOf('day')
-
   try {
     await ticketService.create({
       tenantId: tenantStore.value.id,
       editionId: editionStore.value.id,
+      name: formData.value.name,
       price: parseFloat(formData.value.price) * 100, // save value in cents
-      group: props.group as TicketGroup,
-      quantity: parseInt(formData.value.quantity, 10),
-      active: true,
       saleFrom: formData.value.saleFrom || undefined,
       saleUntil: formData.value.saleUntil || undefined,
-      validFrom: validFrom.toISO() as string,
-      validUntil: validUntil.toISO() as string,
       isPopular: formData.value.isPopular,
+      dayIds: formData.value.dayIds,
     })
 
     toast.success(t('admin.tickets.createSuccess'))

@@ -1,6 +1,6 @@
 <template>
   <form>
-    <h3 class="sr-only">{{ t('library.filters.title') }}</h3>
+    <h3 class="sr-only">{{ t('public.library.filters.title') }}</h3>
 
     <!-- Category Tags -->
     <ul
@@ -34,7 +34,7 @@
             ]"
           />
           <span class="flex-1" @click="handleTagSelect(category.id)">
-            {{ t(`library.filters.${category.id}`) }}
+            {{ t(`public.library.filters.${category.id}`) }}
           </span>
         </label>
       </li>
@@ -62,7 +62,7 @@
           ]"
         >
           <span class="font-medium text-gray-900 dark:text-white">
-            {{ t('library.filters.' + section.id) }}
+            {{ t('public.library.filters.' + section.id) }}
           </span>
           <span class="ml-6 flex items-center">
             <PlusIcon v-if="!open" class="size-5" aria-hidden="true" />

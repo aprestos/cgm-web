@@ -34,7 +34,7 @@ const secondaryNavigation = ref([
 <template>
   <SecondaryNavigation :items="secondaryNavigation" />
 
-  <div class="flex flex-col">
+  <div class="p-4 gap-4 md:p-6 md:gap-6 flex flex-col">
     <router-view />
   </div>
 

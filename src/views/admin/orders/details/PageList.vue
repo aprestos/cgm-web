@@ -69,25 +69,23 @@ onMounted(() => void loadRecentOrders())
 </script>
 
 <template>
-  <div class="p-4 gap-4 md:p-6 md:gap-6 flex flex-col">
-    <PageHeader
-      :title="t('admin.orders.list.title')"
-      :description="t('admin.orders.list.description')"
-      class="hidden lg:block"
-    />
+  <PageHeader
+    :title="t('admin.orders.list.title')"
+    :description="t('admin.orders.list.description')"
+    class="hidden lg:block"
+  />
 
-    <SearchInput
-      :model-value="emailSearch"
-      :placeholder="t('admin.orders.searchByUserIdPlaceholder')"
-      @update:model-value="onSearch"
-    />
+  <SearchInput
+    :model-value="emailSearch"
+    :placeholder="t('admin.orders.searchByUserIdPlaceholder')"
+    @update:model-value="onSearch"
+  />
 
-    <OrdersDataTable
-      :loading="recentOrdersLoading"
-      :orders="recentOrders"
-      @view-details="openDetails"
-    />
-  </div>
+  <OrdersDataTable
+    :loading="recentOrdersLoading"
+    :orders="recentOrders"
+    @view-details="openDetails"
+  />
 
   <DialogOrderDetails
     :open="detailsOpen"

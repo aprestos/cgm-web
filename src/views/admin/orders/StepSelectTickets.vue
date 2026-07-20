@@ -29,7 +29,7 @@ const emailErrors = computed<string[]>(() => {
   if (!emailTouched.value || props.buyerEmail.trim() === '') return []
   return EMAIL_REGEX.test(props.buyerEmail.trim())
     ? []
-    : [t('admin.orders.create.emailInvalid')]
+    : [t('common.validation.emailInvalid')]
 })
 
 function getQty(ticketId: number): number {
@@ -38,7 +38,7 @@ function getQty(ticketId: number): number {
 
 function increment(ticket: Ticket): void {
   const current = getQty(ticket.id)
-  if (current < ticket.quantity) {
+  if (current < (ticket.quantity ?? 0)) {
     emit(
       'update:quantities',
       new Map(props.quantities).set(ticket.id, current + 1),
@@ -61,11 +61,15 @@ const total = computed(() =>
 )
 
 function groupLabel(ticket: Ticket): string {
-  return t(`admin.tickets.${ticket.group}`)
+  return t(`admin.tickets.group.${ticket.group}`)
 }
 
 function validityLabel(ticket: Ticket): string {
-  return formatRange(ticket.validFrom, ticket.validUntil, locale.value)
+  return formatRange(
+    ticket.validFrom ?? '',
+    ticket.validUntil ?? '',
+    locale.value,
+  )
 }
 </script>
 
@@ -172,7 +176,7 @@ function validityLabel(ticket: Ticket): string {
             <button
               type="button"
               class="grid cursor-pointer h-8 w-8 place-items-center rounded-lg border border-gray-200 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 disabled:opacity-30 transition-colors"
-              :disabled="getQty(ticket.id) >= ticket.quantity"
+              :disabled="getQty(ticket.id) >= (ticket.quantity ?? 0)"
               @click="increment(ticket)"
             >
               <IconPlus class="h-3.5 w-3.5" />

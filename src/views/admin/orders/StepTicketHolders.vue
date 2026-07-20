@@ -15,7 +15,11 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-function updateHolder(index: number, field: 'name' | 'email', value: string): void {
+function updateHolder(
+  index: number,
+  field: 'name' | 'email',
+  value: string,
+): void {
   const updated = props.holders.map((h, i) =>
     i === index ? { ...h, [field]: value } : h,
   )
@@ -28,10 +32,9 @@ function holderSlotLabel(index: number): string {
     (h) => h.ticketId === entry.ticketId,
   ).length
   if (sameTicketCount === 1) return entry.ticketLabel
-  const slotNumber =
-    props.holders
-      .slice(0, index + 1)
-      .filter((h) => h.ticketId === entry.ticketId).length
+  const slotNumber = props.holders
+    .slice(0, index + 1)
+    .filter((h) => h.ticketId === entry.ticketId).length
   return `${entry.ticketLabel} (${slotNumber}/${sameTicketCount})`
 }
 </script>

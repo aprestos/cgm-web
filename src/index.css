@@ -1,11 +1,24 @@
 @import 'tailwindcss';
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'InterVariable', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-display: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@layer base {
+  html {
+    /* Let InterVariable's opsz axis pick Display shapes at large sizes (matches design tools) */
+    font-optical-sizing: auto;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+  }
 }
 
 /* Surface color tokens for Volt components */
@@ -65,10 +78,10 @@
 
   /* Set background color for body and html to match theme */
   html {
-    @apply bg-white dark:bg-gray-900;
+    @apply bg-white dark:bg-gray-950;
   }
 
   body {
-    @apply bg-white dark:bg-gray-900;
+    @apply bg-white dark:bg-gray-950;
   }
 }

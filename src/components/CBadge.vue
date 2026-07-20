@@ -3,14 +3,7 @@ import { computed } from 'vue'
 
 interface Props {
   type?:
-    | 'gray'
-    | 'red'
-    | 'yellow'
-    | 'green'
-    | 'blue'
-    | 'indigo'
-    | 'purple'
-    | 'pink'
+    'gray' | 'red' | 'yellow' | 'green' | 'blue' | 'indigo' | 'purple' | 'pink'
   text?: string
   size?: 'sm' | 'md' | 'lg'
 }
@@ -21,7 +14,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
 })
 
-const baseClasses = 'inline-flex items-center rounded-full border'
+const baseClasses = 'inline-flex items-center rounded-full font-semibold'
 
 const colorClasses = {
   gray: 'bg-gray-100 text-gray-600 border-gray-200 dark:bg-gray-400/10 dark:text-gray-400 dark:border-gray-400/30',
@@ -29,7 +22,7 @@ const colorClasses = {
   yellow:
     'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-400/10 dark:text-yellow-300 dark:border-yellow-400/30',
   green:
-    'bg-green-100 text-green-700 border-green-200 dark:bg-green-400/10 dark:text-green-400 dark:border-green-400/30',
+    'bg-green-100 text-green-700 dark:bg-green-400/10 dark:text-green-400 dark:border-green-400/30',
   blue: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-400/10 dark:text-blue-400 dark:border-blue-400/30',
   indigo:
     'bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-400/10 dark:text-indigo-400 dark:border-indigo-400/30',

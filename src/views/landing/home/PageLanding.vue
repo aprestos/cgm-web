@@ -214,7 +214,7 @@ async function loadTrendingGames(): Promise<void> {
 async function loadTickets(): Promise<void> {
   try {
     if (tenant.value?.id && edition.value?.id) {
-      availableTickets.value = await ticketService.get(
+      availableTickets.value = await ticketService.getAll(
         tenant.value.id,
         edition.value.id,
       )

@@ -95,14 +95,14 @@ function getDurationHours(
   >
     <div class="px-6 py-8 border-b border-gray-200 dark:border-gray-700">
       <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-        {{ t('withdraw.history') }}
+        {{ t('public.withdraw.history') }}
       </h2>
       <p class="text-gray-600 dark:text-gray-400 mt-1">
         {{ currentEventWithdraws.length }}
         {{
           currentEventWithdraws.length === 1
-            ? t('withdraw.totalWithdrawals')
-            : t('withdraw.totalWithdrawalsPlural')
+            ? t('public.withdraw.totalWithdrawals')
+            : t('public.withdraw.totalWithdrawalsPlural')
         }}
       </p>
     </div>
@@ -124,9 +124,9 @@ function getDurationHours(
     >
       <div class="text-gray-500 dark:text-gray-400">
         <p class="text-lg font-medium mb-2">
-          {{ t('withdraw.noWithdrawalsYet') }}
+          {{ t('public.withdraw.noWithdrawalsYet') }}
         </p>
-        <p class="text-sm">{{ t('withdraw.noWithdrawalsMessage') }}</p>
+        <p class="text-sm">{{ t('public.withdraw.noWithdrawalsMessage') }}</p>
       </div>
     </div>
 
@@ -197,8 +197,8 @@ function getDurationHours(
                                 <IconCircleCheck class="size-3.5" />
                                 {{
                                   withdraw.ended_at
-                                    ? t('withdraw.returned')
-                                    : t('withdraw.active')
+                                    ? t('public.withdraw.returned')
+                                    : t('public.withdraw.active')
                                 }}
                               </span>
                             </div>
@@ -213,7 +213,7 @@ function getDurationHours(
                               class="flex items-center justify-between text-sm"
                             >
                               <div class="text-gray-600 dark:text-gray-400">
-                                {{ t('withdraw.returnedOn') }}
+                                {{ t('public.withdraw.returnedOn') }}
                                 {{ formatDate(withdraw.ended_at) }}
                               </div>
                               <div
@@ -231,7 +231,7 @@ function getDurationHours(
                                     withdraw.ended_at,
                                   )
                                 }}
-                                {{ t('withdraw.hours') }}
+                                {{ t('public.withdraw.hours') }}
                               </div>
                             </div>
                           </div>
@@ -295,8 +295,8 @@ function getDurationHours(
                                 <IconCircleCheck class="size-3.5" />
                                 {{
                                   withdraw.ended_at
-                                    ? t('withdraw.returned')
-                                    : t('withdraw.active')
+                                    ? t('public.withdraw.returned')
+                                    : t('public.withdraw.active')
                                 }}
                               </span>
                             </div>
@@ -311,7 +311,7 @@ function getDurationHours(
                               class="flex items-center justify-between text-sm"
                             >
                               <div class="text-gray-600 dark:text-gray-400">
-                                {{ t('withdraw.returnedOn') }}
+                                {{ t('public.withdraw.returnedOn') }}
                                 {{ formatDate(withdraw.ended_at) }}
                               </div>
                               <div
@@ -329,7 +329,7 @@ function getDurationHours(
                                     withdraw.ended_at,
                                   )
                                 }}
-                                {{ t('withdraw.hours') }}
+                                {{ t('public.withdraw.hours') }}
                               </div>
                             </div>
                           </div>

@@ -64,7 +64,7 @@ const navigation = ref([
   },
   {
     id: 'tickets',
-    routeName: RouteNames.admin.tickets as string,
+    routeName: RouteNames.admin.tickets.root as string,
     icon: IconTicket,
     enabled: settingsStore?.value?.tickets?.enabled ?? false,
   },

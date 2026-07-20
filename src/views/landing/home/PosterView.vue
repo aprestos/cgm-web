@@ -127,7 +127,7 @@ const altText = props.editionName
               <button
                 type="button"
                 class="absolute right-2 top-2 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white transition-all hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50 sm:-right-4 sm:-top-4 sm:bg-white/10 sm:hover:bg-white/20"
-                :aria-label="t('common.close')"
+                :aria-label="t('common.actions.close')"
                 @click="closeLightbox"
               >
                 <IconX class="h-5 w-5" />

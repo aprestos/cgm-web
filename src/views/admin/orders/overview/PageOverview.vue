@@ -127,28 +127,26 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-4 p-4 sm:gap-6 sm:p-6">
-    <PageHeader
-      :title="t('admin.orders.overview.title')"
-      :description="t('admin.orders.overview.description')"
-    />
-    <OrdersStatsGrid
-      :orders-count="ordersCount"
-      :orders-revenue="ordersRevenue"
-      :order-items-counts="ticketStats.total"
-      :loading="loading"
-    />
+  <PageHeader
+    :title="t('admin.orders.overview.title')"
+    :description="t('admin.orders.overview.description')"
+  />
+  <OrdersStatsGrid
+    :orders-count="ordersCount"
+    :orders-revenue="ordersRevenue"
+    :order-items-counts="ticketStats.total"
+    :loading="loading"
+  />
 
-    <OrdersOverTimeChart
-      :loading="loading"
-      :entries="chartEntries"
-      :selected-period="selectedPeriod"
-      @period-change="onPeriodChange"
-    />
-    <TicketsDistributionCard
-      :total="ticketStats.total"
-      :entries="ticketStats.distribution"
-      :loading="loading"
-    />
-  </div>
+  <OrdersOverTimeChart
+    :loading="loading"
+    :entries="chartEntries"
+    :selected-period="selectedPeriod"
+    @period-change="onPeriodChange"
+  />
+  <TicketsDistributionCard
+    :total="ticketStats.total"
+    :entries="ticketStats.distribution"
+    :loading="loading"
+  />
 </template>

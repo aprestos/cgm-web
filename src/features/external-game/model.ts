@@ -18,6 +18,10 @@ export interface GameSummary {
   year: string
 }
 
-export interface ExternalGameSearchResult {
-  id: string
+export interface GameSearchResult {
+  id?: number
+  externalId: string
+  bggId: string
+  name: string
+  year: number | null
 }
