@@ -132,8 +132,7 @@ import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import libraryWithdrawService from '@/features/library/withdraws/service.ts'
 import { userService } from '@/features/users/service.ts'
 import logger from '@/lib/logger.ts'
-import type { Option } from 'vue3-select-component'
-import CSelect2 from '@/CSelect2.vue'
+import CSelect2, { type Option } from '@/CSelect2.vue'
 import {
   IconSearch,
   IconUserPlus,

@@ -3,10 +3,9 @@ import { useRegle } from '@regle/core'
 import { required } from '@regle/rules'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Option } from 'vue3-select-component'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
-import CSelect from '@/components/CSelect.vue'
+import CSelect2, { type Option } from '@/CSelect2.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
@@ -187,12 +186,11 @@ const handleClose = (): void => {
               :errors="r$.$errors.owner"
             />
 
-            <CSelect
-              id="location"
+            <CSelect2
               v-model="formData.selectedLocation"
               :label="t('admin.library.location')"
               :placeholder="t('admin.library.selectALocation')"
-              :options="locations"
+              :items="locations"
               :helper-text="t('common.actions.optional')"
             />
 
