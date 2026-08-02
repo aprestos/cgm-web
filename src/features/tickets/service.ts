@@ -108,36 +108,27 @@ export const ticketService = {
   /**
    * Create a new ticket type and link it to its selected access days
    */
-  async create(input: CreateTicketInput): Promise<Ticket> {
-    const { dayIds, ...ticketFields } = input
-    const ticketData = toSnakeCaseAs<Record<string, unknown>>(
-      ticketFields as unknown as Record<string, unknown>,
-    )
-
-    const { data, error } = await supabase
-      .from('ticket_types')
-      .insert(ticketData)
-      .select()
-      .single()
+  async create(
+    tenantId: string,
+    editionId: number,
+    input: CreateTicketInput,
+  ): Promise<Ticket> {
+    const { data, error } = await supabase.functions.invoke('tickets/types', {
+      method: 'POST',
+      body: {
+        name: input.name,
+        price: input.price,
+        is_popular: input.isPopular,
+        status: 'active',
+        days: input.dayIds,
+      },
+      headers: {
+        'Tenant-id': tenantId,
+        'Edition-id': String(editionId),
+      },
+    })
 
     if (error) throw error
-
-    const insertedId = (data as { id: string }).id
-
-    if (dayIds.length > 0) {
-      const { error: daysError } = await supabase
-        .from('ticket_type_days')
-        .insert(
-          dayIds.map((day) => ({
-            type: insertedId,
-            day,
-            tenant_id: input.tenantId,
-            edition_id: input.editionId,
-          })),
-        )
-
-      if (daysError) throw daysError
-    }
 
     return toCamelCaseAs<Ticket>(data)
   },

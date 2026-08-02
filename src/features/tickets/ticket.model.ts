@@ -43,14 +43,10 @@ export interface CreateTicketDayInput {
 }
 
 export interface CreateTicketInput {
-  tenantId: string
-  editionId: number
   name: string
   price: number
-  saleFrom?: string
-  saleUntil?: string
   isPopular: boolean
-  /** IDs of the `ticket_days` entries this ticket grants access to */
+  status?: 'active' | 'inactive' | 'draft'
   dayIds: string[]
 }
 

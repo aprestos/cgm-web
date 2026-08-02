@@ -162,7 +162,7 @@
 
 <script lang="ts" setup>
 import { useRegle } from '@regle/core'
-import { required, minValue, dateAfter } from '@regle/rules'
+import { dateAfter, minValue, required } from '@regle/rules'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
@@ -308,13 +308,9 @@ const submit = async (): Promise<void> => {
   isSubmitting.value = true
 
   try {
-    await ticketService.create({
-      tenantId: tenantStore.value.id,
-      editionId: editionStore.value.id,
+    await ticketService.create(tenantStore.value.id, editionStore.value.id, {
       name: formData.value.name,
       price: parseFloat(formData.value.price) * 100, // save value in cents
-      saleFrom: formData.value.saleFrom || undefined,
-      saleUntil: formData.value.saleUntil || undefined,
       isPopular: formData.value.isPopular,
       dayIds: formData.value.dayIds,
     })
