@@ -23,13 +23,7 @@ export interface OrdersOverTimeEntry {
 }
 
 export type ChartGranularity =
-  | '10min'
-  | '30min'
-  | '1h'
-  | '2h'
-  | '6h'
-  | '12h'
-  | '1d'
+  '10min' | '30min' | '1h' | '2h' | '6h' | '12h' | '1d'
 
 function bucketTimestamp(
   isoString: string,

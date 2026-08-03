@@ -91,14 +91,26 @@
                       class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/10 ring-opacity-5 focus:outline-none overflow-hidden"
                     >
                       <!-- Account details header -->
-                      <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+                      <div
+                        class="px-4 py-3 border-b border-gray-100 dark:border-gray-700"
+                      >
                         <div class="flex items-center gap-3">
-                          <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold">
+                          <div
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold"
+                          >
                             {{ user?.name ? user.name[0].toUpperCase() : 'U' }}
                           </div>
                           <div class="min-w-0">
-                            <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ user?.name }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ user?.email }}</p>
+                            <p
+                              class="text-sm font-semibold text-gray-900 dark:text-white truncate"
+                            >
+                              {{ user?.name }}
+                            </p>
+                            <p
+                              class="text-xs text-gray-500 dark:text-gray-400 truncate"
+                            >
+                              {{ user?.email }}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -126,11 +138,15 @@
                       </div>
 
                       <!-- Sign out -->
-                      <div class="border-t border-gray-100 dark:border-gray-700 py-1">
+                      <div
+                        class="border-t border-gray-100 dark:border-gray-700 py-1"
+                      >
                         <MenuItem v-slot="{ active }">
                           <button
                             :class="[
-                              active ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400' : 'text-gray-700 dark:text-gray-300',
+                              active
+                                ? 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
+                                : 'text-gray-700 dark:text-gray-300',
                               'flex items-center gap-2 w-full text-left px-4 py-2 text-sm',
                             ]"
                             @click="handleSignOut"

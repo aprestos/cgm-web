@@ -168,7 +168,8 @@ export default {
     saleFrom: 'Sale From',
     saleUntil: 'Sale Until',
     popularChoice: 'Popular choice',
-    popularChoiceDescription: 'When selected the ticket will be shown as popular',
+    popularChoiceDescription:
+      'When selected the ticket will be shown as popular',
     validFrom: 'Valid From',
     validUntil: 'Valid Until',
     validDate: 'Valid Date',

@@ -171,7 +171,8 @@ export default {
     saleFrom: 'Venda Desde',
     saleUntil: 'Venda Até',
     popularChoice: 'Escolha popular',
-    popularChoiceDescription: 'Quando selecionado, o bilhete será apresentado como popular',
+    popularChoiceDescription:
+      'Quando selecionado, o bilhete será apresentado como popular',
     validFrom: 'Válido Desde',
     validUntil: 'Válido Até',
     validDate: 'Data de Validade',
