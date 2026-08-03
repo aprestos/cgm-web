@@ -178,7 +178,7 @@ const loadPermissions = async (): Promise<void> => {
   const tenantId = tenantStore.value?.id
   if (!tenantId) return
 
-  isLoading.value = true
+  // NOTE: keep `isLoading` scoped to role loading to avoid races with `loadUserRoles()`
   try {
     const [create, update, remove] = await Promise.allSettled([
       authService.hasPermission('roles', 'create'),
