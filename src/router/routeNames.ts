@@ -1,6 +1,13 @@
 const AdminOrders = {
+  root: 'admin.orders',
   overview: 'admin.orders.overview',
   details: 'admin.orders.details',
+} as const
+
+const AdminTickets = {
+  root: 'admin.tickets',
+  overview: 'admin.tickets.overview',
+  issuances: 'admin.tickets.issuances',
 } as const
 
 const Admin = {
@@ -8,7 +15,7 @@ const Admin = {
   library: 'admin.library',
   events: 'admin.events',
   tournaments: 'admin.tournaments',
-  tickets: 'admin.tickets',
+  tickets: AdminTickets,
   ordersRoot: 'admin.orders',
   orders: AdminOrders,
   stripeCallback: 'admin.stripe.callback',
@@ -46,6 +53,7 @@ const Auth = {
   signIn: 'auth.sign-in',
   signUp: 'auth.sign-up',
   checkInbox: 'auth.check-inbox',
+  verify: 'auth.verify',
   confirm: 'auth.confirm',
 } as const
 

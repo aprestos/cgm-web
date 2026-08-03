@@ -54,10 +54,10 @@ const { t } = useI18n()
     </svg>
     <div>
       <p class="text-lg font-semibold">
-        {{ t('checkout.confirming.title') }}
+        {{ t('landing.checkout.confirming.title') }}
       </p>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ t('checkout.confirming.description') }}
+        {{ t('landing.checkout.confirming.description') }}
       </p>
     </div>
   </div>
@@ -66,10 +66,10 @@ const { t } = useI18n()
   <div v-else class="space-y-6">
     <div>
       <h2 class="text-xl font-semibold">
-        {{ t('checkout.section.payment') }}
+        {{ t('landing.checkout.section.payment') }}
       </h2>
       <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        {{ t('checkout.payment.description') }}
+        {{ t('landing.checkout.payment.description') }}
       </p>
     </div>
 
@@ -79,8 +79,6 @@ const { t } = useI18n()
     >
       {{ paymentIssue?.description }}
     </div>
-
-    <div
     <div
       v-else-if="paymentIssue?.type === 'warning'"
       class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-700 dark:border-yellow-500/40 dark:bg-yellow-500/10 dark:text-yellow-300"
@@ -94,18 +92,18 @@ const { t } = useI18n()
         class="rounded-xl border cursor-pointer border-gray-300 px-5 py-2.5 text-sm font-medium transition hover:bg-gray-100 dark:border-white/20 dark:hover:bg-white/10"
         @click="emit('back')"
       >
-        {{ t('checkout.actions.back') }}
+        {{ t('common.actions.back') }}
       </button>
       <button
         type="button"
-        class="rounded-xl cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+        class="rounded-xl hover:cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
         :disabled="isWaitingForPaymentSession"
         @click="emit('submit')"
       >
         {{
           isWaitingForPaymentSession
-            ? t('checkout.actions.processing')
-            : t('checkout.actions.payNow')
+            ? t('landing.checkout.actions.processing')
+            : t('landing.checkout.actions.payNow')
         }}
       </button>
     </div>

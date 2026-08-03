@@ -64,7 +64,7 @@ export const stripeService = {
     const { data, error } = await supabase
       .schema('payments')
       .from('stripe_accounts')
-      .select('account_id,onboarding_status,charges_enabled')
+      .select('account_id,onboarding_status,charges_enabled,account_type')
       .eq('tenant_id', tenantId)
       .maybeSingle<{
         account_id: string

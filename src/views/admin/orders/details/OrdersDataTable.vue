@@ -7,6 +7,7 @@ import type { RecentOrder } from '@/views/admin/orders/overview/orders.types.ts'
 import BaseCard from '@/components/BaseCard.vue'
 import type { DataTableColumn } from '@/components/DataTable.vue'
 import DataTable from '@/components/DataTable.vue'
+import CBadge from '@/components/CBadge.vue'
 
 defineProps<{
   loading: boolean
@@ -113,25 +114,14 @@ function formatDate(iso: string): string {
         </template>
 
         <template #cell-status="{ item }">
-          <span
-            class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-            :class="{
-              'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400':
-                getStatusColor(item.status) === 'green',
-              'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400':
-                getStatusColor(item.status) === 'yellow',
-              'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400':
-                getStatusColor(item.status) === 'red',
-              'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400':
-                getStatusColor(item.status) === 'gray',
-            }"
-          >
-            {{ getStatusLabel(item.status) }}
-          </span>
+          <CBadge
+            :type="getStatusColor(item.status)"
+            :text="getStatusLabel(item.status)"
+          />
         </template>
 
         <template #cell-total="{ item }">
-          {{ formatPrice(item.total) }}
+          <span class="tabular-nums">{{ formatPrice(item.total) }}</span>
         </template>
 
         <template #cell-created_at="{ item }">

@@ -134,16 +134,16 @@ const deleteGame = async (): Promise<void> => {
       <!-- Actions -->
       <div class="flex gap-3 justify-end pt-4">
         <CButton variant="secondary" @click="emit('close')">
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </CButton>
         <CButton
           variant="danger"
           :disabled="!canBeDeleted"
           :loading="isDeletingGame"
-          :loading-text="t('common.loading')"
+          :loading-text="t('common.state.loading')"
           @click="deleteGame"
         >
-          {{ t('common.delete') }}
+          {{ t('common.actions.delete') }}
         </CButton>
       </div>
     </div>

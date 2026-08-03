@@ -87,7 +87,7 @@
         {{ t('auth.didntReceiveCode') }}
         <button
           class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
-          @click="emit('back')"
+          @click="goBack"
         >
           {{ t('auth.tryAgain') }}
         </button>
@@ -115,7 +115,7 @@
     <div class="mt-8">
       <button
         class="flex w-full justify-center rounded-md bg-white dark:bg-white/5 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-offset-0"
-        @click="emit('back')"
+        @click="goBack"
       >
         <ArrowLeftIcon class="mr-2 h-4 w-4" aria-hidden="true" />
         {{ t('auth.sendToDifferentEmail') }}
@@ -140,22 +140,29 @@ import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 
-interface Props {
-  email: string
-}
-
-interface Emits {
-  (e: 'back'): void
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<Emits>()
-
 const OTP_LENGTH = 6
 const otpDigits = ref<string[]>(Array.from({ length: OTP_LENGTH }, () => ''))
 const inputRefs = ref<HTMLInputElement[]>([])
 const isLoading = ref(false)
 const route = useRoute()
+
+const email = computed<string>(() =>
+  typeof route.query.email === 'string' ? route.query.email : '',
+)
+
+if (!email.value) {
+  void router.replace({
+    name: RouteNames.auth.signIn,
+    query: { redirect: route.query.redirect },
+  })
+}
+
+const goBack = (): void => {
+  void router.push({
+    name: RouteNames.auth.signIn,
+    query: { redirect: route.query.redirect },
+  })
+}
 
 const isOtpComplete = computed<boolean>(() => {
   return otpDigits.value.every((digit) => digit !== '')
@@ -222,7 +229,7 @@ const handleSubmit = async (): Promise<void> => {
     isLoading.value = true
     const otp = otpDigits.value.join('')
     try {
-      await authService.validateOTP(props.email, otp)
+      await authService.validateOTP(email.value, otp)
       void router.push({
         name: RouteNames.auth.confirm,
         query: { redirect: route.query.redirect },

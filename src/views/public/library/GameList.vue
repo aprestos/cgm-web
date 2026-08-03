@@ -248,7 +248,7 @@ onUnmounted(() => {
             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
           ></path>
         </svg>
-        <span class="text-sm">{{ t('library.loadingMoreGames') }}</span>
+        <span class="text-sm">{{ t('public.library.loadingMoreGames') }}</span>
       </div>
     </div>
 
@@ -273,10 +273,10 @@ onUnmounted(() => {
         </svg>
       </div>
       <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">
-        {{ t('library.noGamesFound') }}
+        {{ t('public.library.noGamesFound') }}
       </h3>
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ t('library.noGamesFoundDescription') }}
+        {{ t('public.library.noGamesFoundDescription') }}
       </p>
     </div>
 
@@ -291,9 +291,9 @@ onUnmounted(() => {
     <!-- Reservation Confirmation Dialog -->
     <ConfirmationDialog
       :open="showReservationDialog"
-      :title="t('library.reserveGame')"
-      :confirm-text="t('game.reserve')"
-      :cancel-text="t('common.cancel')"
+      :title="t('public.library.reserveGame')"
+      :confirm-text="t('public.game.reserve')"
+      :cancel-text="t('common.actions.cancel')"
       :loading="loadingReservation"
       @confirm="confirmReservation"
       @cancel="cancelReservation"
@@ -301,7 +301,7 @@ onUnmounted(() => {
     >
       <div class="space-y-3">
         <p class="text-sm text-gray-600 dark:text-gray-300">
-          {{ t('reservation.areYouSureReserve') }}
+          {{ t('public.reservation.areYouSureReserve') }}
           <strong>{{ selectedGameForReservation?.game.name }}</strong
           >?
         </p>
@@ -309,15 +309,17 @@ onUnmounted(() => {
           class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md p-3"
         >
           <div class="text-sm text-purple-800 dark:text-purple-200">
-            <p class="font-medium mb-1">{{ t('reservation.important') }}</p>
+            <p class="font-medium mb-1">
+              {{ t('public.reservation.important') }}
+            </p>
             <ul class="list-disc list-inside space-y-1">
               <li>
-                {{ t('reservation.reservationValid') }}
-                <strong>15 {{ t('reservation.minutes') }}</strong>
+                {{ t('public.reservation.reservationValid') }}
+                <strong>15 {{ t('public.reservation.minutes') }}</strong>
                 <!--                TODO load this value from settings-->
               </li>
               <li>
-                {{ t('reservation.oneReservationPerUser') }}
+                {{ t('public.reservation.oneReservationPerUser') }}
               </li>
             </ul>
           </div>
@@ -330,7 +332,7 @@ onUnmounted(() => {
       :open="showAuthDialog"
       :title="t('auth.authenticationRequired')"
       :confirm-text="t('auth.signIn')"
-      :cancel-text="t('common.cancel')"
+      :cancel-text="t('common.actions.cancel')"
       @confirm="redirectToSignIn"
       @cancel="closeAuthDialog"
       @close="closeAuthDialog"

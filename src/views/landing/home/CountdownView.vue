@@ -42,7 +42,7 @@ function formatDate(dateString: string | undefined): string {
           class="flex flex-col items-center rounded-2xl bg-white dark:bg-white/5 px-6 py-8 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none backdrop-blur-sm sm:px-10"
         >
           <span
-            class="text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
+            class="font-display text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
             >{{ countdown.days }}</span
           >
           <span
@@ -54,7 +54,7 @@ function formatDate(dateString: string | undefined): string {
           class="flex flex-col items-center rounded-2xl bg-white dark:bg-white/5 px-6 py-8 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none backdrop-blur-sm sm:px-10"
         >
           <span
-            class="text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
+            class="font-display text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
             >{{ countdown.hours }}</span
           >
           <span
@@ -66,7 +66,7 @@ function formatDate(dateString: string | undefined): string {
           class="flex flex-col items-center rounded-2xl bg-white dark:bg-white/5 px-6 py-8 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none backdrop-blur-sm sm:px-10"
         >
           <span
-            class="text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
+            class="font-display text-5xl font-bold text-gray-900 dark:text-white sm:text-7xl"
             >{{ countdown.minutes }}</span
           >
           <span

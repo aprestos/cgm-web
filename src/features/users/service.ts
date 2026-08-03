@@ -35,9 +35,11 @@ export const userService = {
   },
 
   async getById(id: string): Promise<User | null> {
-    const { data, error } = await supabase.functions.invoke(`users/${id}`, {
-      method: 'GET',
-    })
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single()
     if (error) {
       logger.error('Unable to get user', { error })
       throw new Error('Unable to get user')

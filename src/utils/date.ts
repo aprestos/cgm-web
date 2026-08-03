@@ -103,6 +103,13 @@ export const getTicketDays = (
   return days
 }
 
+export const formatDayLabel = (day: string, locale: string): string =>
+  DateTime.fromISO(day).setLocale(locale).toLocaleString({
+    weekday: 'short',
+    month: 'short',
+    day: 'numeric',
+  })
+
 export const formatWeekday = (
   start: string | undefined,
   end: string | undefined,

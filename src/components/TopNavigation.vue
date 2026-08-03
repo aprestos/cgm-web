@@ -58,7 +58,7 @@
                   class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                 >
                   <IconSettings class="h-4 w-4" aria-hidden="true" />
-                  {{ t('navigation.admin') }}
+                  {{ t('public.navigation.admin') }}
                 </RouterLink>
 
                 <!-- Separator (only show if admin button is visible) -->
@@ -119,7 +119,7 @@
                               ]"
                             >
                               <IconUser class="h-4 w-4" aria-hidden="true" />
-                              {{ t('navigation.profile') }}
+                              {{ t('public.navigation.profile') }}
                             </button>
                           </RouterLink>
                         </MenuItem>
@@ -234,7 +234,7 @@ interface NavigationItem {
 
 const navigation = ref<NavigationItem[]>([
   {
-    name: t('navigation.library'),
+    name: t('public.navigation.library'),
     href: '/library',
     current: true,
     categories: [{ name: 'Popular' }, { name: 'New' }, { name: 'All' }],

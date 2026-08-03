@@ -34,7 +34,7 @@
               >
                 <div class="flex items-center justify-between px-4">
                   <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                    {{ t('library.filters.title') }}
+                    {{ t('public.library.filters.title') }}
                   </h2>
                   <button
                     type="button"
@@ -42,7 +42,9 @@
                     @click="mobileFiltersOpen = false"
                   >
                     <span class="absolute -inset-0.5" />
-                    <span class="sr-only">{{ t('library.closeMenu') }}</span>
+                    <span class="sr-only">{{
+                      t('public.library.closeMenu')
+                    }}</span>
                     <XMarkIcon class="size-6" aria-hidden="true" />
                   </button>
                 </div>
@@ -71,7 +73,7 @@
           <div class="flex-1">
             <SearchInput
               v-model="searchQuery"
-              :placeholder="t('library.search')"
+              :placeholder="t('public.library.search')"
             />
           </div>
 
@@ -94,15 +96,15 @@
                     <span
                       class="text-xs text-gray-500 dark:text-gray-400 mb-0.5"
                     >
-                      {{ t('library.sort.sortBy') }}
+                      {{ t('public.library.sort.sortBy') }}
                     </span>
                     <span
                       class="block truncate text-base font-medium text-gray-900 dark:text-white"
                     >
                       {{
                         selectedSort
-                          ? t(`library.sort.${selectedSort}`)
-                          : t(`library.sort.${SortOption.DEFAULT}`)
+                          ? t(`public.library.sort.${selectedSort}`)
+                          : t(`public.library.sort.${SortOption.DEFAULT}`)
                       }}
                     </span>
                   </span>
@@ -148,7 +150,7 @@
                             'block truncate',
                           ]"
                         >
-                          {{ t('library.sort.' + option) }}
+                          {{ t('public.library.sort.' + option) }}
                         </span>
 
                         <IconCheck
@@ -174,14 +176,14 @@
               @click="mobileFiltersOpen = true"
             >
               <FunnelIcon class="size-6 text-gray-400" aria-hidden="true" />
-              <span class="sr-only">{{ t('library.filters') }}</span>
+              <span class="sr-only">{{ t('public.library.filters') }}</span>
             </button>
           </div>
         </div>
 
         <section aria-labelledby="products-heading" class="">
           <h2 id="products-heading" class="sr-only">
-            {{ t('library.games') }}
+            {{ t('public.library.games') }}
           </h2>
 
           <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">

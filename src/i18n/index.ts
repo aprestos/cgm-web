@@ -1,10 +1,11 @@
 import { createI18n } from 'vue-i18n'
 import type { TranslationSchema } from './locales/en'
 
-// Auto-import all locale files using Vite's glob import
-// Files must be named with the locale code (e.g., en.ts, pt.ts, es.ts)
+// Auto-import all locale directories using Vite's glob import
+// Each locale is a directory named with the locale code (e.g., en/, pt/, es/)
+// whose index.ts assembles the per-namespace message files
 const localeModules = import.meta.glob<{ default: Record<string, unknown> }>(
-  './locales/*.ts',
+  './locales/*/index.ts',
   { eager: true },
 )
 
@@ -13,9 +14,9 @@ import en from './locales/en'
 
 export type MessageSchema = TranslationSchema | Partial<TranslationSchema>
 
-// Extract locale code from file path (e.g., './locales/pt.ts' -> 'pt')
+// Extract locale code from file path (e.g., './locales/pt/index.ts' -> 'pt')
 function getLocaleCode(path: string): string {
-  const match = path.match(/\.\/locales\/(.+)\.ts$/)
+  const match = path.match(/\.\/locales\/(.+)\/index\.ts$/)
   return match && match[1] ? match[1] : ''
 }
 
@@ -33,7 +34,7 @@ for (const [path, module] of Object.entries(localeModules)) {
       messages[code] = en
     } else {
       // Use other locales as-is; vue-i18n will fall back to English at runtime for missing keys
-      messages[code] = module.default as Partial<TranslationSchema>
+      messages[code] = module.default
     }
   }
 }
@@ -47,7 +48,7 @@ export const FALLBACK_LOCALE = 'en'
 const LOCALE_NAMES: Record<string, { name: string; nativeName: string }> = {
   en: { name: 'English', nativeName: 'English' },
   pt: { name: 'Portuguese', nativeName: 'Português' },
-  // Add new locales here when their ./locales/<code>.ts file is created
+  // Add new locales here when their ./locales/<code>/ directory is created
 }
 
 export interface LocaleInfo {

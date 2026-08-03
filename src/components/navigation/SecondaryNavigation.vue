@@ -17,7 +17,7 @@ const isActive = (routeName: string): boolean => route.name === routeName
 </script>
 
 <template>
-  <header class="border-b border-gray-200 dark:border-white/5">
+  <header class="border-b border-gray-200 dark:border-white/10">
     <nav class="flex overflow-x-auto pt-1 lg:pt-2">
       <ul
         role="list"

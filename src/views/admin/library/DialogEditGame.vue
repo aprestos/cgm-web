@@ -3,10 +3,9 @@ import { useRegle } from '@regle/core'
 import { required } from '@regle/rules'
 import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Option } from 'vue3-select-component'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
-import CSelect from '@/components/CSelect.vue'
+import CSelect2, { type Option } from '@/CSelect2.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
@@ -187,13 +186,12 @@ const handleClose = (): void => {
               :errors="r$.$errors.owner"
             />
 
-            <CSelect
-              id="location"
+            <CSelect2
               v-model="formData.selectedLocation"
               :label="t('admin.library.location')"
               :placeholder="t('admin.library.selectALocation')"
-              :options="locations"
-              :helper-text="t('admin.library.optional')"
+              :items="locations"
+              :helper-text="t('common.actions.optional')"
             />
 
             <CTextArea
@@ -201,7 +199,7 @@ const handleClose = (): void => {
               v-model="formData.notes"
               :label="t('admin.library.notes')"
               :rows="4"
-              :helper-text="t('admin.library.optional')"
+              :helper-text="t('common.actions.optional')"
             />
           </div>
         </div>
@@ -216,7 +214,7 @@ const handleClose = (): void => {
           class="order-2 sm:order-1 w-full sm:w-auto"
           @click="handleClose"
         >
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </CButton>
         <CButton
           type="button"
@@ -224,10 +222,10 @@ const handleClose = (): void => {
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('admin.library.updating')"
+          :loading-text="t('common.actions.updating')"
           @click="submit"
         >
-          {{ t('admin.library.update') }}
+          {{ t('common.actions.update') }}
         </CButton>
       </div>
     </form>

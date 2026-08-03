@@ -139,7 +139,7 @@ const isConventionHappening = computed(() => {
           <img
             v-if="!imageError"
             :src="game.game.image"
-            :alt="t('game.coverImage', { name: game.game.name })"
+            :alt="t('public.game.coverImage', { name: game.game.name })"
             loading="lazy"
             decoding="async"
             :class="[
@@ -167,7 +167,7 @@ const isConventionHappening = computed(() => {
                   clip-rule="evenodd"
                 />
               </svg>
-              <p class="text-xs">{{ t('game.imageUnavailable') }}</p>
+              <p class="text-xs">{{ t('public.game.imageUnavailable') }}</p>
             </div>
           </div>
         </div>
@@ -208,7 +208,9 @@ const isConventionHappening = computed(() => {
           variant="tertiary"
           :disabled="getStatus(game) !== 'available'"
           @click="reserveGame"
-          ><HandRaisedIcon class="size-4" />{{ t('game.reserve') }}</CButton
+          ><HandRaisedIcon class="size-4" />{{
+            t('public.game.reserve')
+          }}</CButton
         >
       </div>
     </div>

@@ -91,7 +91,7 @@ function getDurationHours(
 <template>
   <DialogComponent
     :open="open"
-    :title="t('withdraw.history')"
+    :title="t('public.withdraw.history')"
     size="lg"
     @close="emit('close')"
   >

@@ -185,7 +185,7 @@ const sidebarOpen = ref<boolean>(false)
     >
       <!-- Sidebar component, swap this element with another sidebar if you like -->
       <div
-        class="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-50 px-6 ring-1 ring-slate-200 dark:bg-black/20 dark:ring-white/5"
+        class="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-50 px-6 ring-1 ring-slate-200 dark:bg-gray-950 dark:ring-white/10"
       >
         <router-link :to="{ name: homeRouteName }">
           <div class="flex flex-row h-16 shrink-0 items-center">

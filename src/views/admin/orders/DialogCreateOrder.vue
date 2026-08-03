@@ -62,11 +62,11 @@ watch(
 )
 
 function groupLabel(ticket: Ticket): string {
-  return t(`admin.tickets.${ticket.group}`)
+  return t(`admin.tickets.group.${ticket.group}`)
 }
 
 function ticketLabel(ticket: Ticket): string {
-  return `${groupLabel(ticket)} · ${formatRange(ticket.validFrom, ticket.validUntil, locale.value)}`
+  return `${groupLabel(ticket)} · ${formatRange(ticket.validFrom ?? '', ticket.validUntil ?? '', locale.value)}`
 }
 
 const selectedTickets = computed(() =>
@@ -207,7 +207,7 @@ async function submit(): Promise<void> {
         class="w-full sm:w-auto"
         @click="emit('close')"
       >
-        {{ t('common.cancel') }}
+        {{ t('common.actions.cancel') }}
       </CButton>
       <CButton
         v-else
@@ -217,7 +217,7 @@ async function submit(): Promise<void> {
         class="w-full sm:w-auto"
         @click="step = 1"
       >
-        {{ t('admin.orders.create.back') }}
+        {{ t('common.actions.back') }}
       </CButton>
 
       <CButton
@@ -229,7 +229,7 @@ async function submit(): Promise<void> {
         :disabled="!canAdvance"
         @click="goToStep2"
       >
-        {{ t('admin.orders.create.next') }}
+        {{ t('common.actions.next') }}
       </CButton>
       <CButton
         v-else

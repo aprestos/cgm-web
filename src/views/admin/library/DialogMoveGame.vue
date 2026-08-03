@@ -28,11 +28,10 @@
       </div>
 
       <!-- Location Selection -->
-      <CSelect
-        id="location"
+      <CSelect2
         v-model="selectedLocationId"
         :label="t('admin.library.newLocation')"
-        :options="locationOptions"
+        :items="locationOptions"
         :placeholder="t('admin.library.selectALocation')"
       />
 
@@ -43,7 +42,7 @@
           class="rounded-md bg-white dark:bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
           @click="handleClose"
         >
-          {{ t('common.cancel') }}
+          {{ t('common.actions.cancel') }}
         </button>
         <button
           type="button"
@@ -60,10 +59,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogComponent from '@/components/DialogComponent.vue'
-import CSelect from '@/components/CSelect.vue'
+import CSelect2 from '@/CSelect2.vue'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import { toast } from 'vue-sonner'
@@ -133,7 +132,7 @@ const moveGame = async (): Promise<void> => {
     )
     await libraryService.updateGame(props.selectedGame.id, {
       location_id: selectedLocationId.value,
-    } as Partial<LibraryGame>)
+    })
     toast.success(
       t('admin.library.moveSuccess', {
         name: props.selectedGame.game.name,

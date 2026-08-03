@@ -1,0 +1,11 @@
+{
+  "enabledPlugins": {},
+  "extraKnownMarketplaces": {
+    "ccgm": {
+      "source": {
+        "source": "github",
+        "repo": "lucasmccomb/ccgm"
+      }
+    }
+  }
+}

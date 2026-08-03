@@ -76,7 +76,7 @@
 
         <section aria-labelledby="information-heading" class="mt-3">
           <h3 id="information-heading" class="sr-only">
-            {{ t('game.detail.productInformation') }}
+            {{ t('public.game.detail.productInformation') }}
           </h3>
 
           <!-- Game Stats with Icons -->
@@ -91,7 +91,7 @@
                   >{{
                     getRange(game?.game?.minPlayers, game?.game?.maxPlayers)
                   }}
-                  {{ t('game.detail.players') }}</span
+                  {{ t('public.game.detail.players') }}</span
                 >
               </div>
 
@@ -116,14 +116,14 @@
                     class="flex items-center gap-1"
                   >
                     <div class="w-2 h-2 rounded-sm bg-green-500"></div>
-                    <span>{{ t('game.detail.best') }}</span>
+                    <span>{{ t('public.game.detail.best') }}</span>
                   </div>
                   <div
                     v-if="game?.game?.recommendedAt"
                     class="flex items-center gap-1"
                   >
                     <div class="w-2 h-2 rounded-sm bg-blue-300"></div>
-                    <span>{{ t('game.detail.good') }}</span>
+                    <span>{{ t('public.game.detail.good') }}</span>
                   </div>
                 </div>
               </div>
@@ -137,14 +137,17 @@
                 >{{
                   getRange(game?.game?.minPlaytime, game?.game?.maxPlaytime)
                 }}
-                {{ t('game.detail.min') }}</span
+                {{ t('public.game.detail.min') }}</span
               >
             </div>
             <div
               class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
             >
               <CalendarIcon class="h-5 w-5 text-gray-400" />
-              <span>{{ t('game.detail.age') }} {{ game?.game?.minAge }}+</span>
+              <span
+                >{{ t('public.game.detail.age') }}
+                {{ game?.game?.minAge }}+</span
+              >
             </div>
             <div
               class="flex items-center gap-2 text-gray-600 dark:text-gray-400"
@@ -152,7 +155,7 @@
               <IconWorld class="h-5 w-5 text-gray-400" />
               <span>{{
                 t(
-                  'game.detail.languageDependence.' +
+                  'public.game.detail.languageDependence.' +
                     game?.game?.languageDependence,
                 )
               }}</span>
@@ -165,10 +168,10 @@
               class="flex items-center gap-2 font-medium text-gray-900 dark:text-white mb-2"
             >
               <DocumentTextIcon class="h-5 w-5 text-gray-400" />
-              {{ t('game.detail.description') }}
+              {{ t('public.game.detail.description') }}
             </h4>
             <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
-              {{ t('game.detail.notAvailable') }}
+              {{ t('public.game.detail.notAvailable') }}
             </p>
           </div>
           <!-- BGG Link -->
@@ -184,7 +187,7 @@
               class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 rounded-md transition-colors"
             >
               <IconWorld class="h-4 w-4" />
-              <span>{{ t('game.detail.viewOnBGG') }}</span>
+              <span>{{ t('public.game.detail.viewOnBGG') }}</span>
               <svg
                 class="h-4 w-4"
                 fill="none"
@@ -296,17 +299,17 @@ const getPlayerCountClass = (count: number): string => {
 }
 
 const getPlayerCountTooltip = (count: number): string => {
-  if (!game.value?.game) return `${count} ${t('game.detail.players')}`
+  if (!game.value?.game) return `${count} ${t('public.game.detail.players')}`
 
   const bestAt = parseBestAt(game.value.game.bestAt)
   const recommendedAt = parseRecommendedAt(game.value.game.recommendedAt)
 
   if (bestAt.includes(count)) {
-    return `${count} ${t('game.detail.players')} - ${t('game.detail.best')}`
+    return `${count} ${t('public.game.detail.players')} - ${t('public.game.detail.best')}`
   } else if (recommendedAt.includes(count)) {
-    return `${count} ${t('game.detail.players')} - ${t('game.detail.recommended')}`
+    return `${count} ${t('public.game.detail.players')} - ${t('public.game.detail.recommended')}`
   } else {
-    return `${count} ${t('game.detail.players')} - ${t('game.detail.playable')}`
+    return `${count} ${t('public.game.detail.players')} - ${t('public.game.detail.playable')}`
   }
 }
 

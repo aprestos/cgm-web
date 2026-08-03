@@ -6,8 +6,12 @@
     >
       {{ label }}
     </label>
-    <Combobox :model-value="selectedOption" @update:model-value="handleSelect">
-      <div class="relative mt-2">
+    <Combobox
+      :model-value="selectedOption"
+      :by="compareOptions"
+      @update:model-value="handleSelect"
+    >
+      <div class="relative mt-2" @keydown.capture="handleKeydownCapture">
         <div
           :class="[
             'relative w-full cursor-default overflow-hidden rounded-md bg-white dark:bg-white/5 text-left outline-1 -outline-offset-1 focus-within:outline-2 focus-within:-outline-offset-2 sm:text-sm',
@@ -94,7 +98,7 @@
               :value="item"
             >
               <li
-                class="group relative cursor-default select-none py-2 pl-10 pr-4"
+                class="relative cursor-pointer select-none py-2 pl-10 pr-4"
                 :class="
                   active
                     ? 'bg-indigo-600 text-white dark:bg-indigo-500'
@@ -108,7 +112,12 @@
                   {{ getItemLabel(item) }}
                   <span
                     v-if="getItemSecondaryLabel(item)"
-                    class="ml-1 group-[.bg-indigo-600]:text-indigo-100 dark:group-[.bg-indigo-500]:text-indigo-100 text-gray-500 dark:text-gray-400"
+                    class="ml-1"
+                    :class="
+                      active
+                        ? 'text-indigo-100'
+                        : 'text-gray-500 dark:text-gray-400'
+                    "
                   >
                     {{ getItemSecondaryLabel(item) }}
                   </span>
@@ -117,7 +126,9 @@
                   class="absolute inset-y-0 left-0 flex items-center pl-3"
                   :class="
                     isSelected
-                      ? 'group-[.bg-indigo-600]:text-white dark:group-[.bg-indigo-500]:text-white text-indigo-600 dark:text-indigo-500'
+                      ? active
+                        ? 'text-white'
+                        : 'text-indigo-600 dark:text-indigo-500'
                       : 'text-gray-300 dark:text-gray-600'
                   "
                 >
@@ -129,12 +140,15 @@
         </TransitionRoot>
       </div>
     </Combobox>
+    <p v-if="helperText" class="text-xs mt-1 text-gray-600 dark:text-gray-400">
+      {{ helperText }}
+    </p>
     <ValidationErrors v-if="errors" :errors="errors" />
   </div>
 </template>
 
 <script lang="ts" setup generic="T">
-import { ref, computed } from 'vue'
+import { ref, shallowRef, computed } from 'vue'
 import {
   Combobox,
   ComboboxInput,
@@ -162,6 +176,7 @@ interface Props {
   placeholder?: string
   label?: string
   errors?: string[]
+  helperText?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -171,6 +186,7 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Type to search',
   label: undefined,
   errors: undefined,
+  helperText: undefined,
 })
 
 const emit = defineEmits<{
@@ -179,16 +195,28 @@ const emit = defineEmits<{
 
 const query = ref('')
 const isLoading = ref(false)
-const searchResults = ref<Array<Option<T>>>([])
+const searchResults = shallowRef<Array<Option<T>>>([])
+// Remembers the last picked option so the selection keeps displaying even
+// after searchResults change (new search, dropdown reopened, ...)
+const lastSelected = shallowRef<Option<T> | null>(null)
 let abortController: AbortController | null = null
 
 // Computed: Find selected option based on modelValue
 const selectedOption = computed(() => {
-  if (!props.modelValue) return null
+  if (props.modelValue === null || props.modelValue === undefined) return null
 
-  const allItems = props.searchFn ? searchResults.value : displayItems.value
-  return allItems.find((item) => item.value === props.modelValue) ?? null
+  const allItems = props.searchFn ? searchResults.value : props.items
+  const found = allItems.find((item) => item.value === props.modelValue)
+  if (found) return found
+
+  return lastSelected.value?.value === props.modelValue
+    ? lastSelected.value
+    : null
 })
+
+function compareOptions(a: Option<T> | null, b: Option<T> | null): boolean {
+  return a?.value === b?.value
+}
 
 // Computed: Items to display in dropdown
 const displayItems = computed(() => {
@@ -206,19 +234,33 @@ const displayItems = computed(() => {
   )
 })
 
-// Handle search with debounce
-const handleQueryChange = useDebounceFn(async (event: Event) => {
+// Update query and loading state immediately on every keystroke so the
+// dropdown gives instant feedback; only the remote search is debounced.
+function handleQueryChange(event: Event): void {
   const target = event.target as HTMLInputElement
   query.value = target.value
 
+  if (!props.searchFn) return
+
+  if (!query.value.length) {
+    abortController?.abort()
+    abortController = null
+    isLoading.value = false
+    searchResults.value = []
+    return
+  }
+
+  isLoading.value = true
+  void debouncedSearch()
+}
+
+const debouncedSearch = useDebounceFn(async () => {
   if (!props.searchFn || !query.value.length) return
 
   // Abort previous request
   abortController?.abort()
   abortController = new AbortController()
   const currentController = abortController
-
-  isLoading.value = true
 
   try {
     const results = await props.searchFn(query.value, currentController.signal)
@@ -241,8 +283,19 @@ const handleQueryChange = useDebounceFn(async (event: Event) => {
   }
 }, 300)
 
+// While a search is in flight, Enter would make Headless UI close the
+// dropdown without selecting anything (no active option yet) — swallow it
+// so the user can pick once the results arrive.
+function handleKeydownCapture(event: KeyboardEvent): void {
+  if (event.key === 'Enter' && isLoading.value) {
+    event.preventDefault()
+    event.stopPropagation()
+  }
+}
+
 // Handle selection
 function handleSelect(option: Option<T> | null): void {
+  lastSelected.value = option
   emit('update:modelValue', option?.value ?? null)
 }
 
@@ -250,6 +303,7 @@ function handleSelect(option: Option<T> | null): void {
 function handleClear(): void {
   query.value = ''
   searchResults.value = []
+  lastSelected.value = null
   emit('update:modelValue', null)
 }
 
