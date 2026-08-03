@@ -39,14 +39,7 @@
 
 <script setup lang="ts">
 import { useRegle } from '@regle/core'
-import {
-  alpha,
-  string,
-  email,
-  maxLength,
-  minLength,
-  required,
-} from '@regle/rules'
+import { email, maxLength, minLength, required, string } from '@regle/rules'
 import { ref, watchEffect } from 'vue'
 import { toast } from 'vue-sonner'
 import CInput from '@/components/CInput.vue'
@@ -79,7 +72,6 @@ const initialValues = ref({
 const { r$ } = useRegle(formData, {
   name: {
     required,
-    alpha,
     minLength: minLength(2),
     maxLength: maxLength(50),
   },

@@ -140,4 +140,11 @@ export const authService = {
 
     return roles.includes(user.access.role)
   },
+
+  async hasPermission(domain: string, action: string): Promise<boolean> {
+    const user = await this.getUser()
+
+    if (user?.access?.role === 'super-admin') return true
+    else return (user?.access?.permissions[domain] ?? []).includes(action)
+  },
 }

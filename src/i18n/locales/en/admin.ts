@@ -307,4 +307,33 @@ export default {
       'Failed to check in. Maybe the ticket has already been checked in.',
     errorStatusFailed: 'Failed to check ticket status. Try again later.',
   },
+  settings: {
+    roles: {
+      title: 'Team & Roles',
+      description:
+        'Manage which users have access to this organization and their roles',
+      columnUser: 'User',
+      columnRole: 'Role',
+      columnAdded: 'Added',
+      unknownUser: 'Unknown user',
+      empty: 'No users have roles in this organization yet.',
+      removeTitle: 'Remove user',
+      removeMessage:
+        'Remove {name} from the organization? They will lose all access.',
+      removeConfirm: 'Remove',
+      thisUser: 'this user',
+      loadFailed: 'Failed to load users. Please try again.',
+      updateSuccess: 'Role updated successfully!',
+      updateFailed: 'Failed to update role. Please try again.',
+      removeSuccess: 'User removed successfully!',
+      removeFailed: 'Failed to remove user. Please try again.',
+      // Enum-label map — keys match the `app_role` values verbatim
+      role: {
+        'super-admin': 'Super Admin',
+        admin: 'Admin',
+        staff: 'Staff',
+        user: 'User',
+      },
+    },
+  },
 }

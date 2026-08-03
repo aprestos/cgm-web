@@ -313,4 +313,32 @@ export default {
     errorStatusFailed:
       'Erro ao verificar o estado do bilhete. Tente novamente.',
   },
+  settings: {
+    roles: {
+      title: 'Equipa e Funções',
+      description:
+        'Gira quais utilizadores têm acesso a esta organização e as suas funções',
+      columnUser: 'Utilizador',
+      columnRole: 'Função',
+      columnAdded: 'Adicionado',
+      unknownUser: 'Utilizador desconhecido',
+      empty: 'Ainda não existem utilizadores com funções nesta organização.',
+      removeTitle: 'Remover utilizador',
+      removeMessage: 'Remover {name} da organização? Perderá todo o acesso.',
+      removeConfirm: 'Remover',
+      thisUser: 'este utilizador',
+      loadFailed: 'Erro ao carregar utilizadores. Tente novamente.',
+      updateSuccess: 'Função atualizada com sucesso!',
+      updateFailed: 'Erro ao atualizar a função. Tente novamente.',
+      removeSuccess: 'Utilizador removido com sucesso!',
+      removeFailed: 'Erro ao remover o utilizador. Tente novamente.',
+      // Mapa de rótulos — as chaves correspondem aos valores de `app_role`
+      role: {
+        'super-admin': 'Super Admin',
+        admin: 'Administrador',
+        staff: 'Staff',
+        user: 'Utilizador',
+      },
+    },
+  },
 } satisfies DeepPartial<typeof enAdmin>
