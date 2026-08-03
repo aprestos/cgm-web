@@ -40,7 +40,7 @@
         <select
           v-else
           :value="item.role"
-          :disabled="!hasUpdatePermission"
+          :disabled="!hasUpdatePermission || !!updatingUserId"
           class="rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-gray-900 py-1.5 pl-3 pr-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-50"
           @change="onRoleChange(item, $event)"
         >
