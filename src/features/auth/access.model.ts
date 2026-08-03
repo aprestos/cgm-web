@@ -4,5 +4,5 @@ export type Access = {
 
 export type TenantAccess = {
   role: string
-  permissions: string[]
+  permissions: Record<string, string[]>
 }
