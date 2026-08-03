@@ -5,8 +5,8 @@ import type {
   TicketsStats,
 } from '@/features/orders/service'
 import orderService from '@/features/orders/service'
-import { tenantStore } from '@/stores/tenant'
-import { editionStore } from '@/stores/edition'
+import { tenantStore } from '@/features/tenant/tenant.store'
+import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
 import OrdersStatsGrid from './OrdersStatsGrid.vue'

@@ -45,7 +45,7 @@ import { toast } from 'vue-sonner'
 import CInput from '@/components/CInput.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import tenantService from '@/features/tenant/service.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 export interface BasicInformationForm {

@@ -180,7 +180,7 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { XMarkIcon } from '@heroicons/vue/24/outline'
-import { useCart } from '@/stores/cart.store'
+import { useCart } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
 import { IconTicketFilled } from '@tabler/icons-vue'
 import { formatDateRange, formatWeekday } from '@/utils/date'

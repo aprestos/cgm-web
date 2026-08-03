@@ -1,8 +1,8 @@
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/stores/edition.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { editionStore } from '@/features/events/edition.store'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs } from '@/utils/caseConverter.ts'
 

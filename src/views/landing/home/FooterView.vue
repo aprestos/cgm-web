@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { getTenantEmail, getTenantLogo, tenantStore } from '@/stores/tenant.ts'
+import {
+  getTenantEmail,
+  getTenantLogo,
+  tenantStore,
+} from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 
 const { t } = useI18n()

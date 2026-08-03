@@ -11,7 +11,7 @@ import UserHeader from './UserHeader.vue'
 import WithdrawUserHistory from './WithdrawUserHistory.vue'
 import { RouteNames } from '@/router/routeNames.ts'
 import CButton from '@/components/CButton.vue'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 
 const route = useRoute()
 const userId = route.params.id as string

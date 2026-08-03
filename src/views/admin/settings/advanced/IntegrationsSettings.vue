@@ -255,7 +255,7 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import logger from '@/lib/logger.ts'
 import { stripeService } from '@/features/settings/stripe.service.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import CBadge from '@/components/CBadge.vue'
 import type { StripeConfiguration } from '@/features/settings/stripe.model.ts'
 

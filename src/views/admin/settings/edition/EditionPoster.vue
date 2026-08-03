@@ -59,7 +59,7 @@ import { toast } from 'vue-sonner'
 import CButton from '@/components/CButton.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import FilePondUploadDialog from '@/components/FilePondUploadDialog.vue'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 interface Props {

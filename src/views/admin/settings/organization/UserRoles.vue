@@ -110,7 +110,7 @@ import {
   ASSIGNABLE_ROLES,
   type UserRole,
 } from '@/features/roles/role.model.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { authService } from '@/features/auth/service.ts'
 

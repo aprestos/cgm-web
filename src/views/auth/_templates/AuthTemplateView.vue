@@ -34,5 +34,5 @@
 
 <script lang="ts" setup>
 // Auth template component - provides common layout structure for all auth pages
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 </script>

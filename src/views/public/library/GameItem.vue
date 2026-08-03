@@ -10,7 +10,7 @@ import {
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { HandRaisedIcon } from '@heroicons/vue/24/outline'
 import CButton from '@/components/CButton.vue'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 
 interface Props {
   game?: LibraryGame

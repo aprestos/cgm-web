@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { CalendarDaysIcon } from '@heroicons/vue/24/outline'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import DashboardNavigation from '@/components/navigation/DashboardNavigation.vue'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames.ts'
@@ -37,7 +37,7 @@ import type { User } from '@/features/auth/user.model.ts'
 const userEmail = ref<string | null>(null)
 const user = ref<User | null>(null)
 
-const navigation = ref([
+const navigation = computed(() => [
   {
     id: 'dashboard',
     routeName: RouteNames.admin.dashboard,
@@ -82,23 +82,25 @@ const navigation = ref([
   },
 ])
 
-const bottomNavigation = ref([
+const bottomNavigation = computed(() => [
   {
     id: 'settings',
     routeName: RouteNames.admin.settings,
     icon: IconSettings,
-    enabled: false, // Will be set in onMounted
+    enabled: user.value
+      ? authService.hasAnyOfTheRoles(user.value, ['admin'])
+      : false,
   },
 ])
 
-const publicPages = [
+const publicPages = computed(() => [
   {
     id: 'library',
     routeName: RouteNames.public.library,
     initial: 'L',
     enabled: settingsStore?.value?.library?.enabled ?? false,
   },
-]
+])
 
 const sidebarOpen = ref(false)
 
@@ -110,14 +112,6 @@ onMounted(async () => {
     if (userResponse) {
       userEmail.value = userResponse.email || ''
       user.value = userResponse
-
-      // Set bottom navigation enabled state based on user role
-      if (bottomNavigation.value[0]) {
-        bottomNavigation.value[0].enabled = authService.hasAnyOfTheRoles(
-          userResponse,
-          ['admin'],
-        )
-      }
     }
   } catch (error) {
     console.error('Error loading user email:', error)

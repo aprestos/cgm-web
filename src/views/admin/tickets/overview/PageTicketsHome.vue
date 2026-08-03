@@ -2,14 +2,14 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { editionStore } from '@/stores/edition'
+import { editionStore } from '@/features/events/edition.store'
 import ticketService from '@/features/tickets/service'
 import type {
   Ticket,
   TicketDay,
   TicketGroup,
 } from '@/features/tickets/ticket.model'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { getTicketTitle } from '@/utils/ticket'
 import { formatPrice } from '@/utils/price'

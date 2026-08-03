@@ -1,4 +1,4 @@
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 
 export const formatPrice = (price: number, locale?: string): string => {
   const resolvedLocale: string | undefined =
