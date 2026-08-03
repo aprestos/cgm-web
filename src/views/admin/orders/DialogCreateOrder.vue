@@ -9,12 +9,12 @@ import orderService from '@/features/orders/service'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { tenantStore } from '@/stores/tenant'
 import { editionStore } from '@/stores/edition'
-import { formatRange } from '@/utils/date'
 import logger from '@/lib/logger'
 import StepSelectTickets from './StepSelectTickets.vue'
 import StepTicketHolders from './StepTicketHolders.vue'
 import type { HolderEntry } from './createOrder.types'
 import { userService } from '@/features/users/service.ts'
+import { getTicketTitle } from '@/utils/ticket.ts'
 
 const props = defineProps<{ open: boolean }>()
 
@@ -61,12 +61,13 @@ watch(
   },
 )
 
-function groupLabel(ticket: Ticket): string {
-  return t(`admin.tickets.group.${ticket.group}`)
-}
-
 function ticketLabel(ticket: Ticket): string {
-  return `${groupLabel(ticket)} · ${formatRange(ticket.validFrom ?? '', ticket.validUntil ?? '', locale.value)}`
+  const { weekday, displayDate } = getTicketTitle(
+    ticket.accessDays,
+    locale.value,
+    t('landing.tickets.weekend'),
+  )
+  return `${weekday} · ${displayDate}`
 }
 
 const selectedTickets = computed(() =>

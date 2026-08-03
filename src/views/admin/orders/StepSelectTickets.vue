@@ -5,7 +5,7 @@ import { IconMinus, IconPlus, IconTicket } from '@tabler/icons-vue'
 import CInput from '@/components/CInput.vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { formatPrice } from '@/utils/price'
-import { formatRange } from '@/utils/date'
+import { getTicketTitle } from '@/utils/ticket.ts'
 
 const props = defineProps<{
   tickets: Ticket[]
@@ -60,17 +60,16 @@ const total = computed(() =>
   props.tickets.reduce((sum, tk) => sum + tk.price * getQty(tk.id), 0),
 )
 
-function groupLabel(ticket: Ticket): string {
-  return t(`admin.tickets.group.${ticket.group}`)
-}
-
-function validityLabel(ticket: Ticket): string {
-  return formatRange(
-    ticket.validFrom ?? '',
-    ticket.validUntil ?? '',
-    locale.value,
-  )
-}
+const ticketRows = computed(() =>
+  props.tickets.map((ticket) => ({
+    ticket,
+    title: getTicketTitle(
+      ticket.accessDays,
+      locale.value,
+      t('landing.tickets.weekend'),
+    ),
+  })),
+)
 </script>
 
 <template>
@@ -129,7 +128,7 @@ function validityLabel(ticket: Ticket): string {
       <!-- Ticket rows -->
       <div v-else class="space-y-2">
         <div
-          v-for="ticket in tickets"
+          v-for="{ ticket, title } in ticketRows"
           :key="ticket.id"
           class="flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors"
           :class="
@@ -144,10 +143,10 @@ function validityLabel(ticket: Ticket): string {
               <span
                 class="rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
               >
-                {{ groupLabel(ticket) }}
+                {{ title.weekday }}
               </span>
               <span class="text-sm font-medium text-gray-900 dark:text-white">
-                {{ validityLabel(ticket) }}
+                {{ title.displayDate }}
               </span>
             </div>
             <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">

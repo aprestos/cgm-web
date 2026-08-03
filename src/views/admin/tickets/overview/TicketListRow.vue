@@ -22,6 +22,35 @@ const title = computed(() =>
     t('landing.tickets.weekend'),
   ),
 )
+
+const status = computed(() => {
+  let color:
+    | 'green'
+    | 'gray'
+    | 'red'
+    | 'yellow'
+    | 'blue'
+    | 'indigo'
+    | 'purple'
+    | 'pink'
+    | undefined
+  switch (props.ticket.status) {
+    case 'active':
+      color = 'green'
+      break
+    case 'inactive':
+      color = 'yellow'
+      break
+    default:
+      color = 'gray'
+      break
+  }
+
+  return {
+    name: t(`admin.tickets.status.${props.ticket.status}`),
+    color,
+  }
+})
 </script>
 
 <template>
@@ -48,11 +77,7 @@ const title = computed(() =>
       </p>
     </div>
     <div class="flex shrink-0 flex-col items-end gap-1">
-      <CBadge
-        :type="ticket.status === 'active' ? 'green' : 'gray'"
-        size="sm"
-        :text="t(`admin.tickets.status.${ticket.status}`)"
-      />
+      <CBadge :type="status.color" size="sm" :text="status.name" />
     </div>
   </div>
 </template>

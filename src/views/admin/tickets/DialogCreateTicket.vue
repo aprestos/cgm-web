@@ -106,12 +106,12 @@
             <label
               id="availability-label"
               class="text-sm/6 font-medium text-gray-900 dark:text-white"
-              >Popular choice</label
+              >{{ t('admin.tickets.popularChoice') }}</label
             >
             <span
               id="availability-description"
               class="text-sm text-gray-500 dark:text-gray-400"
-              >When selected the ticket will be shown as popular</span
+              >{{ t('admin.tickets.popularChoiceDescription') }}</span
             >
           </span>
           <div
