@@ -1,7 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconEdit, IconTicket, IconTrash } from '@tabler/icons-vue'
+import {
+  IconEdit,
+  IconStarFilled,
+  IconTicket,
+  IconTrash,
+} from '@tabler/icons-vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import CBadge from '@/components/CBadge.vue'
 import { formatPrice } from '@/utils/price'
@@ -30,6 +35,29 @@ const title = computed(() =>
       )
     : null,
 )
+
+const status = computed(() => {
+  const ticket = props.ticket
+  if (!ticket) return null
+
+  let color: 'green' | 'yellow' | 'gray'
+  switch (ticket.status) {
+    case 'active':
+      color = 'green'
+      break
+    case 'inactive':
+      color = 'yellow'
+      break
+    default:
+      color = 'gray'
+      break
+  }
+
+  return {
+    name: t(`admin.tickets.status.${ticket.status ?? 'draft'}`),
+    color,
+  }
+})
 </script>
 
 <template>
@@ -52,13 +80,34 @@ const title = computed(() =>
   <div v-else class="space-y-6">
     <!-- Header -->
     <div class="flex items-start justify-between gap-4">
-      <div>
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-          {{ ticket.name || title?.displayDate }}
-        </h3>
-        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-          {{ title?.displayDate }}
-        </p>
+      <div class="flex min-w-0 items-start gap-3">
+        <div
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+        >
+          <IconTicket class="h-6 w-6" stroke="1.5" />
+        </div>
+        <div class="min-w-0">
+          <h3
+            class="truncate text-lg font-semibold text-gray-900 dark:text-white"
+          >
+            {{ ticket.name || title?.displayDate }}
+          </h3>
+          <p class="mt-0.5 text-sm text-gray-500 dark:text-gray-400">
+            {{ title?.displayDate }}
+          </p>
+          <div class="mt-2 flex flex-wrap items-center gap-2">
+            <CBadge
+              v-if="status"
+              :type="status.color"
+              size="sm"
+              :text="status.name"
+            />
+            <CBadge v-if="ticket.isPopular" type="yellow" size="sm">
+              <IconStarFilled class="mr-1 h-3 w-3" />
+              {{ t('landing.tickets.popular') }}
+            </CBadge>
+          </div>
+        </div>
       </div>
       <div class="flex shrink-0 items-center gap-2">
         <button
@@ -82,53 +131,48 @@ const title = computed(() =>
       </div>
     </div>
 
-    <!-- Details grid -->
-    <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      <div>
-        <dt
-          class="text-xs font-medium uppercase text-gray-400 dark:text-gray-500"
-        >
+    <!-- Details -->
+    <dl
+      class="divide-y divide-gray-100 overflow-hidden rounded-xl border border-gray-200 dark:divide-white/5 dark:border-white/10"
+    >
+      <div class="flex items-center justify-between gap-4 px-4 py-3">
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
           {{ t('admin.tickets.price') }}
         </dt>
-        <dd class="mt-1 text-sm font-semibold text-gray-900 dark:text-white">
+        <dd class="text-sm font-semibold text-gray-900 dark:text-white">
           {{ formatPrice(ticket.price) }}
         </dd>
       </div>
-      <div>
-        <dt
-          class="text-xs font-medium uppercase text-gray-400 dark:text-gray-500"
-        >
+      <div class="flex items-center justify-between gap-4 px-4 py-3">
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
           {{ t('admin.tickets.quantity') }}
         </dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+        <dd class="text-sm text-gray-900 dark:text-white">
           {{ ticket.quantity || 0 }}
         </dd>
       </div>
-      <div>
-        <dt
-          class="text-xs font-medium uppercase text-gray-400 dark:text-gray-500"
-        >
-          {{ t('admin.tickets.statusLabel') }}
+      <div class="flex items-center justify-between gap-4 px-4 py-3">
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
+          {{ t('landing.tickets.popular') }}
         </dt>
-        <dd class="mt-1">
-          <CBadge
-            :type="ticket.active ? 'green' : 'gray'"
-            size="sm"
-            :text="
-              ticket.active
-                ? t('admin.tickets.status.active')
-                : t('admin.tickets.status.inactive')
-            "
-          />
+        <dd class="text-sm font-medium text-gray-900 dark:text-white">
+          <span
+            v-if="ticket.isPopular"
+            class="inline-flex items-center gap-1 text-yellow-600 dark:text-yellow-400"
+          >
+            <IconStarFilled class="h-4 w-4" />
+            {{ t('common.state.yes') }}
+          </span>
+          <span v-else class="text-gray-500 dark:text-gray-400">
+            {{ t('common.state.no') }}
+          </span>
         </dd>
       </div>
-      <div class="sm:col-span-2">
-        <dt
-          class="text-xs font-medium uppercase text-gray-400 dark:text-gray-500"
-        >
+      <div class="flex items-center justify-between gap-4 px-4 py-3">
+        <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">
           {{ t('admin.tickets.salePeriod') }}
         </dt>
-        <dd class="mt-1 text-sm text-gray-900 dark:text-white">
+        <dd class="text-right text-sm text-gray-900 dark:text-white">
           {{ formatDateRange(ticket.saleFrom, ticket.saleUntil, locale) }}
         </dd>
       </div>
