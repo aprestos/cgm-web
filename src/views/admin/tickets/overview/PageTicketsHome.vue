@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
+import { IconTicket } from '@tabler/icons-vue'
 import { editionStore } from '@/features/events/edition.store'
 import ticketService from '@/features/tickets/service'
 import type {
@@ -160,9 +161,13 @@ onMounted(async () => {
   <PageHeader
     :title="t('admin.tickets.title')"
     :description="t('admin.tickets.description')"
-    class="p-6 sm:p-0 hidden lg:block"
+    :action-label="t('admin.tickets.button.add')"
+    class="p-6 sm:p-0"
     @action="handleAdd"
   >
+    <template #action-icon>
+      <IconTicket class="size-5" stroke="2" />
+    </template>
   </PageHeader>
 
   <!-- Daily people limits -->

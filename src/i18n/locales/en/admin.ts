@@ -124,6 +124,58 @@ export default {
       lastUpdated: 'Last updated',
     },
   },
+  tournaments: {
+    title: 'Tournaments',
+    description: 'Organize and manage your convention tournaments',
+    newTournament: 'New Tournament',
+    createTournament: 'Create Tournament',
+    createSuccess: 'Tournament "{title}" created',
+    empty: 'No tournaments yet',
+    emptyDescription: 'Create your first tournament to get started.',
+    participants: 'participants',
+    stats: {
+      total: 'Total',
+      upcoming: 'Upcoming',
+      ongoing: 'Ongoing',
+      completed: 'Completed',
+    },
+    status: {
+      scheduled: 'Scheduled',
+      finished: 'Finished',
+      ongoing: 'Ongoing',
+      cancelled: 'Cancelled',
+    },
+    format: {
+      swiss: 'Swiss',
+      'single-elimination': 'Single Elimination',
+      'double-elimination': 'Double Elimination',
+      'round-robin': 'Round Robin',
+    },
+    // Enum-label map — keys match TournamentType values verbatim
+    type: {
+      'single-elimination': 'Single Elimination',
+      'double-elimination': 'Double Elimination',
+      consolation: 'Consolation',
+    },
+    // Enum-label map — keys match TournamentPrizeType values verbatim
+    prize: {
+      first: '1st place',
+      second: '2nd place',
+      third: '3rd place',
+      all: 'All participants',
+      others: 'Other places',
+    },
+    form: {
+      title: 'Name',
+      place: 'Place',
+      organizer: 'Organizer',
+      startsAt: 'Starts at',
+      maxParticipants: 'Max participants',
+      type: 'Format',
+      description: 'Description',
+      prizes: 'Prizes',
+    },
+  },
   tickets: {
     title: 'Tickets Management',
     description: 'Manage ticket types, pricing, and availability',
@@ -168,7 +220,8 @@ export default {
     saleFrom: 'Sale From',
     saleUntil: 'Sale Until',
     popularChoice: 'Popular choice',
-    popularChoiceDescription: 'When selected the ticket will be shown as popular',
+    popularChoiceDescription:
+      'When selected the ticket will be shown as popular',
     validFrom: 'Valid From',
     validUntil: 'Valid Until',
     validDate: 'Valid Date',

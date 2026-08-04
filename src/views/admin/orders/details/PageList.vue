@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useDebounceFn } from '@vueuse/core'
+import { IconShoppingBagPlus } from '@tabler/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import SearchInput from '@/components/SearchInput.vue'
 import orderService from '@/features/orders/service'
@@ -10,6 +11,7 @@ import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
 import OrdersDataTable from './OrdersDataTable.vue'
 import DialogOrderDetails from './DialogOrderDetails.vue'
+import DialogCreateOrder from '../DialogCreateOrder.vue'
 import type { RecentOrder } from '@/views/admin/orders/overview/orders.types.ts'
 
 const { t } = useI18n()
@@ -18,6 +20,7 @@ const router = useRouter()
 
 const selectedOrderId = ref<string | null>(null)
 const detailsOpen = ref(false)
+const createOrderOpen = ref(false)
 
 watch(
   () => route.query.order,
@@ -72,8 +75,13 @@ onMounted(() => void loadRecentOrders())
   <PageHeader
     :title="t('admin.orders.list.title')"
     :description="t('admin.orders.list.description')"
-    class="hidden lg:block"
-  />
+    :action-label="t('admin.orders.newOrder')"
+    @action="createOrderOpen = true"
+  >
+    <template #action-icon>
+      <IconShoppingBagPlus class="size-5" stroke="2" />
+    </template>
+  </PageHeader>
 
   <SearchInput
     :model-value="emailSearch"
@@ -91,5 +99,11 @@ onMounted(() => void loadRecentOrders())
     :open="detailsOpen"
     :order-id="selectedOrderId"
     @close="closeDetails"
+  />
+
+  <DialogCreateOrder
+    :open="createOrderOpen"
+    @close="createOrderOpen = false"
+    @created="createOrderOpen = false"
   />
 </template>

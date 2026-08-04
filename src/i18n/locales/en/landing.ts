@@ -97,6 +97,7 @@ export default {
     copyright: '© {year} {name}. All rights reserved.',
   },
   header: {
+    dashboard: 'Dashboard',
     logoAltFallback: 'Logo',
     primaryNavAriaLabel: 'Primary navigation',
     mobileNavAriaLabel: 'Mobile navigation',

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { IconShoppingBagPlus } from '@tabler/icons-vue'
 import type {
   OrdersOverTimeEntry,
   TicketsStats,
@@ -18,10 +19,12 @@ import type {
 } from '@/views/admin/orders/overview/orders.types.ts'
 import PageHeader from '@/components/PageHeader.vue'
 import TicketsDistributionCard from '@/views/admin/orders/overview/TicketsDistributionCard.vue'
+import DialogCreateOrder from '@/views/admin/orders/DialogCreateOrder.vue'
 
 const { t, locale } = useI18n()
 
 const selectedPeriod = ref<Period>('1m')
+const createOrderOpen = ref(false)
 
 const loading = ref(true)
 const chartEntries = ref<OrdersOverTimeEntry[]>([])
@@ -130,7 +133,13 @@ onMounted(() => {
   <PageHeader
     :title="t('admin.orders.overview.title')"
     :description="t('admin.orders.overview.description')"
-  />
+    :action-label="t('admin.orders.newOrder')"
+    @action="createOrderOpen = true"
+  >
+    <template #action-icon>
+      <IconShoppingBagPlus class="size-5" stroke="2" />
+    </template>
+  </PageHeader>
   <OrdersStatsGrid
     :orders-count="ordersCount"
     :orders-revenue="ordersRevenue"
@@ -148,5 +157,11 @@ onMounted(() => {
     :total="ticketStats.total"
     :entries="ticketStats.distribution"
     :loading="loading"
+  />
+
+  <DialogCreateOrder
+    :open="createOrderOpen"
+    @close="createOrderOpen = false"
+    @created="createOrderOpen = false"
   />
 </template>

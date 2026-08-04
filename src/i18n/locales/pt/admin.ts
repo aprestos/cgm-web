@@ -129,6 +129,58 @@ export default {
       lastUpdated: 'Última atualização',
     },
   },
+  tournaments: {
+    title: 'Torneios',
+    description: 'Organize e faça a gestão dos torneios do seu evento',
+    newTournament: 'Novo Torneio',
+    createTournament: 'Criar Torneio',
+    createSuccess: 'Torneio "{title}" criado',
+    empty: 'Ainda não há torneios',
+    emptyDescription: 'Crie o seu primeiro torneio para começar.',
+    participants: 'participantes',
+    stats: {
+      total: 'Total',
+      upcoming: 'Por começar',
+      ongoing: 'A decorrer',
+      completed: 'Concluídos',
+    },
+    status: {
+      scheduled: 'Agendado',
+      finished: 'Concluído',
+      ongoing: 'A decorrer',
+      cancelled: 'Cancelado',
+    },
+    format: {
+      swiss: 'Suíço',
+      'single-elimination': 'Eliminação Simples',
+      'double-elimination': 'Eliminação Dupla',
+      'round-robin': 'Todos contra Todos',
+    },
+    // Enum-label map — keys match TournamentType values verbatim
+    type: {
+      'single-elimination': 'Eliminação Simples',
+      'double-elimination': 'Eliminação Dupla',
+      consolation: 'Consolação',
+    },
+    // Enum-label map — keys match TournamentPrizeType values verbatim
+    prize: {
+      first: '1.º lugar',
+      second: '2.º lugar',
+      third: '3.º lugar',
+      all: 'Todos os participantes',
+      others: 'Outros lugares',
+    },
+    form: {
+      title: 'Nome',
+      place: 'Local',
+      organizer: 'Organizador',
+      startsAt: 'Começa a',
+      maxParticipants: 'Máx. de participantes',
+      type: 'Formato',
+      description: 'Descrição',
+      prizes: 'Prémios',
+    },
+  },
   tickets: {
     title: 'Gestão de Bilhetes',
     description: 'Gerir tipos de bilhetes, preços e disponibilidade',
@@ -171,7 +223,8 @@ export default {
     saleFrom: 'Venda Desde',
     saleUntil: 'Venda Até',
     popularChoice: 'Escolha popular',
-    popularChoiceDescription: 'Quando selecionado, o bilhete será apresentado como popular',
+    popularChoiceDescription:
+      'Quando selecionado, o bilhete será apresentado como popular',
     validFrom: 'Válido Desde',
     validUntil: 'Válido Até',
     validDate: 'Data de Validade',
