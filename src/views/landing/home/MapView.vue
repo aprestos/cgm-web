@@ -41,7 +41,14 @@ const mapEmbedUrl = computed(() => {
 })
 
 const directionsUrl = computed(() => {
-  if (locationUrl.value && !isEmbedUrl.value) return locationUrl.value
+  if (locationUrl.value && !isEmbedUrl.value) {
+    try {
+      const url = new URL(locationUrl.value)
+      if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString()
+    } catch {
+      // fall through to search URL
+    }
+  }
   if (!locationTitle.value) return ''
 
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationTitle.value)}`
