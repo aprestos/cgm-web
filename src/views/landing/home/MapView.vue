@@ -1,20 +1,63 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { IconMapPin } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
+import { editionStore } from '@/stores/edition.js'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
-interface Props {
-  locationTitle: string
-  locationUrl?: string
-  mapEmbedUrl: string | null
-}
+const embedApiKey = import.meta.env.VITE_GOOGLE_MAPS_EMBED_KEY as string
 
-defineProps<Props>()
+const locationTitle = computed(() => editionStore.value?.location?.title ?? '')
+const locationUrl = computed(() => editionStore.value?.location?.url ?? '')
+
+// Google only allows framing its /maps/embed endpoints. A shared place link
+// (maps.app.goo.gl/…, /maps/place/…) is refused by X-Frame-Options, so anything
+// that isn't already an embed URL is rebuilt through the Maps Embed API.
+const isEmbedUrl = computed(() => {
+  try {
+    const url = new URL(locationUrl.value)
+    return (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      url.pathname.includes('/maps/embed')
+    )
+  } catch {
+    return false
+  }
+})
+
+const mapEmbedUrl = computed(() => {
+  if (isEmbedUrl.value) return locationUrl.value
+  if (!embedApiKey || !locationTitle.value) return null
+
+  const params = new URLSearchParams({
+    key: embedApiKey,
+    q: locationTitle.value,
+    zoom: '16',
+    language: locale.value,
+  })
+
+  return `https://www.google.com/maps/embed/v1/place?${params.toString()}`
+})
+
+const directionsUrl = computed(() => {
+  if (locationUrl.value && !isEmbedUrl.value) {
+    try {
+      const url = new URL(locationUrl.value)
+      if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString()
+    } catch {
+      // fall through to search URL
+    }
+  }
+  if (!locationTitle.value) return ''
+
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationTitle.value)}`
+})
 </script>
 
 <template>
   <section
+    v-if="locationTitle"
     id="location"
     class="relative overflow-hidden bg-gray-50 py-8 dark:bg-gray-950 sm:py-16 lg:py-28"
   >
@@ -61,8 +104,8 @@ defineProps<Props>()
                 {{ locationTitle }}
               </p>
               <a
-                v-if="locationUrl"
-                :href="locationUrl"
+                v-if="directionsUrl"
+                :href="directionsUrl"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="inline-flex items-center rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-emerald-500"

@@ -72,7 +72,8 @@
           type="text"
           name="location-url"
           class="sm:col-span-6"
-          placeholder="e.g., https://maps.google.com/..."
+          placeholder="e.g., https://maps.app.goo.gl/..."
+          helper-text="Optional. Share link used for directions — the map itself is rendered from the location name."
         />
       </div>
     </SettingsSection>

@@ -159,9 +159,7 @@ const getKey = (item: T, index: number): string | number => {
   }
   return (
     ((item as Record<string, unknown>)[props.rowKey] as
-      | string
-      | number
-      | undefined) ?? index
+      string | number | undefined) ?? index
   )
 }
 

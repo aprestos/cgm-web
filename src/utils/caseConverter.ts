@@ -30,9 +30,9 @@ export type CamelCaseKeys<T> =
     ? Array<CamelCaseKeys<U>>
     : T extends Record<string, unknown>
       ? {
-          [K in keyof T as K extends string
-            ? SnakeToCamel<K>
-            : K]: CamelCaseKeys<T[K]>
+          [
+            K in keyof T as K extends string ? SnakeToCamel<K> : K
+          ]: CamelCaseKeys<T[K]>
         }
       : T
 
@@ -42,9 +42,9 @@ export type SnakeCaseKeys<T> =
     ? Array<SnakeCaseKeys<U>>
     : T extends Record<string, unknown>
       ? {
-          [K in keyof T as K extends string
-            ? CamelToSnake<K>
-            : K]: SnakeCaseKeys<T[K]>
+          [
+            K in keyof T as K extends string ? CamelToSnake<K> : K
+          ]: SnakeCaseKeys<T[K]>
         }
       : T
 

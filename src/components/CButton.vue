@@ -36,12 +36,7 @@ import { computed } from 'vue'
 
 interface Props {
   variant?:
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'yellow'
-    | 'danger'
-    | 'transparent'
+    'primary' | 'secondary' | 'tertiary' | 'yellow' | 'danger' | 'transparent'
   size?: 'sm' | 'md' | 'lg' | 'xl'
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean

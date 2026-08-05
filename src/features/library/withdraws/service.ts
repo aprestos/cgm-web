@@ -146,12 +146,13 @@ export const libraryWithdrawService = {
       .eq('tenant_id', tenantStore.value?.id)
       .eq('edition_id', editionStore.value?.id)
       .order('started_at', { ascending: false })
+      .overrideTypes<LibraryWithdraw[]>()
 
     if (error) {
       logger.error('Failed to withdraws by library game id', { error })
       return []
     }
-    return data as unknown as LibraryWithdraw[]
+    return data ?? []
   },
 } as const
 
