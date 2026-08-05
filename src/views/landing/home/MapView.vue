@@ -14,7 +14,17 @@ const locationUrl = computed(() => editionStore.value?.location?.url ?? '')
 // Google only allows framing its /maps/embed endpoints. A shared place link
 // (maps.app.goo.gl/…, /maps/place/…) is refused by X-Frame-Options, so anything
 // that isn't already an embed URL is rebuilt through the Maps Embed API.
-const isEmbedUrl = computed(() => locationUrl.value.includes('/maps/embed'))
+const isEmbedUrl = computed(() => {
+  try {
+    const url = new URL(locationUrl.value)
+    return (
+      (url.protocol === 'http:' || url.protocol === 'https:') &&
+      url.pathname.includes('/maps/embed')
+    )
+  } catch {
+    return false
+  }
+})
 
 const mapEmbedUrl = computed(() => {
   if (isEmbedUrl.value) return locationUrl.value
