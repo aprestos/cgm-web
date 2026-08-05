@@ -54,10 +54,15 @@ const handleCreated = async (tournament: CreateTournament): Promise<void> => {
 async function loadTournaments(): Promise<void> {
   if (!tenantStore.value || !editionStore.value) return
 
-  tournaments.value = await tournamentService.getAll(
-    tenantStore.value.id,
-    editionStore.value.id,
-  )
+  try {
+    tournaments.value = await tournamentService.getAll(
+      tenantStore.value.id,
+      editionStore.value.id,
+    )
+  } catch (error) {
+    console.error('Failed to load tournaments:', error)
+    toast.error('Failed to load tournaments')
+  }
 }
 
 onMounted(async () => {
