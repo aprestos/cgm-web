@@ -5,7 +5,7 @@ import { IconArrowLeft } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
 import type { User } from '@/features/auth/user.model'
 import { authService } from '@/features/auth/service'
-import { type CartItem, useCart } from '@/stores/cart.store'
+import { type CartItem, useCart } from '@/features/cart/cart.store'
 import ProgressView from '@/views/landing/checkout/ProgressView.vue'
 import AccountStep from '@/views/landing/checkout/AccountStep.vue'
 import TicketsStep from '@/views/landing/checkout/TicketsStep.vue'
@@ -32,7 +32,7 @@ import paymentsService from '@/features/payments/service.ts'
 import { toast } from 'vue-sonner'
 import logger from '@/lib/logger.ts'
 import type { Order } from '@/features/orders/order.model.ts'
-import { getTenantEmail } from '@/stores/tenant.ts'
+import { getTenantEmail } from '@/features/tenant/tenant.store'
 
 const { t, locale } = useI18n()
 

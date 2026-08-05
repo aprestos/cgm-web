@@ -5,9 +5,9 @@ import { Toaster } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
 import { useHead } from '@unhead/vue'
-import { tenantStore } from './stores/tenant'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import { useFavicon } from '@vueuse/core'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 import { ref } from 'vue'
 
 if (tenantStore?.value?.logo) {

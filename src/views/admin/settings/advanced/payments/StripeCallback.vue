@@ -10,7 +10,7 @@ import { useRoute, useRouter } from 'vue-router'
 import type { LocationQueryValue } from 'vue-router'
 import { RouteNames } from '@/router/routeNames.ts'
 import { stripeService } from '@/features/settings/stripe.service.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 
 const router = useRouter()
 const route = useRoute()

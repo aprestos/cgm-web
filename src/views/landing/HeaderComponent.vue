@@ -9,14 +9,15 @@ import {
   IconX,
 } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { RouteNames } from '@/router/routeNames'
-import { useCart } from '@/stores/cart.store'
+import { useCart } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
-import { getTenantLogo, tenantStore } from '@/stores/tenant'
+import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
+import CButton from '@/components/CButton.vue'
 
 interface Props {
   sections?: string[]
@@ -51,6 +52,10 @@ const heroResizeObserver = ref<ResizeObserver | null>(null)
 
 const hasItems = computed(() => totalItems.value > 0)
 const isAuthenticated = computed<boolean>(() => user.value !== null)
+const canAccessDashboard = computed<boolean>(
+  () =>
+    !!user.value && authService.hasAnyOfTheRoles(user.value, ['staff', 'admin']),
+)
 const displayName = computed<string>(
   () => user.value?.name || t('landing.header.accountFallbackName'),
 )
@@ -116,6 +121,12 @@ async function handleAccountClick(): Promise<void> {
 
   isAccountMenuOpen.value = !isAccountMenuOpen.value
   isMobileMenuOpen.value = false
+}
+
+async function handleDashboardClick(): Promise<void> {
+  isMobileMenuOpen.value = false
+  isAccountMenuOpen.value = false
+  await router.push({ name: RouteNames.admin.library })
 }
 
 async function handleSignOut(): Promise<void> {
@@ -226,6 +237,15 @@ onUnmounted(() => {
       </nav>
 
       <div class="relative col-start-3 flex items-center justify-end gap-2">
+        <CButton
+          v-if="canAccessDashboard"
+          size="md"
+          variant="secondary"
+          @click="handleDashboardClick"
+        >
+          {{ t('landing.header.dashboard') }}
+        </CButton>
+
         <Transition
           enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           enter-from-class="translate-x-8 scale-50 opacity-0 blur-sm"

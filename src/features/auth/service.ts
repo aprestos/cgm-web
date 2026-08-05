@@ -1,6 +1,6 @@
 import type { Access, TenantAccess } from '@/features/auth/access.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import type { User } from '@/features/auth/user.model.ts'
 import logger from '@/lib/logger.ts'
 

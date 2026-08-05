@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/stores/edition'
-import { tenantStore } from '@/stores/tenant.ts'
+import { editionStore } from '@/features/events/edition.store'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import logger from '@/lib/logger.ts'
 

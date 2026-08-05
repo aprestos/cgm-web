@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/stores/tenant.ts'
-import { editionStore } from '@/stores/edition.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
+import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import { toSnakeCase } from '@/utils/caseConverter.ts'
 

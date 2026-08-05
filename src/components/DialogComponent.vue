@@ -36,22 +36,25 @@
                 ]"
               >
                 <div
-                  class="flex items-start justify-between gap-4 px-4 pt-5 pb-4 sm:px-6 border-b border-gray-100 dark:border-white/10"
+                  class="border-b border-gray-100 dark:border-white/10 px-4 pt-5 pb-4 sm:px-6"
                 >
-                  <h3
-                    v-if="title"
-                    class="font-display text-xl font-bold text-gray-900 dark:text-white"
-                  >
-                    {{ title }}
-                  </h3>
-                  <button
-                    type="button"
-                    class="ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
-                    @click="closeDialog"
-                  >
-                    <span class="sr-only">Close</span>
-                    <IconX class="h-5 w-5" aria-hidden="true" />
-                  </button>
+                  <div class="flex items-start justify-between gap-4">
+                    <h3
+                      v-if="title"
+                      class="font-display text-xl font-bold text-gray-900 dark:text-white"
+                    >
+                      {{ title }}
+                    </h3>
+                    <button
+                      type="button"
+                      class="ml-auto cursor-pointer grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                      @click="closeDialog"
+                    >
+                      <span class="sr-only">Close</span>
+                      <IconX class="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                  <slot name="header-sub-content"></slot>
                 </div>
 
                 <div class="px-4 py-5 sm:p-6">

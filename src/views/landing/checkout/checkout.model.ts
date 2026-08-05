@@ -1,4 +1,4 @@
-import type { CartItem } from '@/stores/cart.store'
+import type { CartItem } from '@/features/cart/cart.store'
 
 export type CheckoutStepId = 'account' | 'tickets' | 'payment' | 'completed'
 

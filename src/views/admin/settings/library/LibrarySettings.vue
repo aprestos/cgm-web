@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { toast } from 'vue-sonner'
 import SettingsSection from '@/components/SettingsSection.vue'
 import CButton from '@/components/CButton.vue'
@@ -7,17 +7,17 @@ import CInput from '@/components/CInput.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import DialogComponent from '@/components/DialogComponent.vue'
 import {
+  IconEdit,
+  IconMapPin,
   IconPlus,
   IconTrash,
-  IconMapPin,
   IconUpload,
-  IconEdit,
 } from '@tabler/icons-vue'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import { queueService } from '@/features/queues/queue.service.ts'
-import { tenantStore } from '@/stores/tenant.ts'
-import { editionStore } from '@/stores/edition.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
+import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 
 const locations = ref<LibraryLocation[]>([])
@@ -43,8 +43,7 @@ onMounted(async () => {
 const loadLocations = async (): Promise<void> => {
   try {
     isLoading.value = true
-    const data = await libraryLocationService.get()
-    locations.value = data
+    locations.value = await libraryLocationService.get()
   } catch (error) {
     console.error('Error loading locations:', error)
     toast.error('Failed to load locations')

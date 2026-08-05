@@ -8,9 +8,9 @@ import {
   IconSparkles,
 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
-import { tenantStore } from '@/stores/tenant.js'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import { useI18n } from 'vue-i18n'
-import { editionStore } from '@/stores/edition.js'
+import { editionStore } from '@/features/events/edition.store'
 import PosterView from './PosterView.vue'
 import { formatDateRange } from '@/utils/date.js'
 

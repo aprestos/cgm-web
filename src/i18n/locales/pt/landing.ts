@@ -100,9 +100,10 @@ export default {
     copyright: '© {year} {name}. Todos os direitos reservados.',
   },
   header: {
+    dashboard: 'Painel de administração',
     logoAltFallback: 'Logotipo',
-    primaryNavAriaLabel: 'Navegacao principal',
-    mobileNavAriaLabel: 'Navegacao mobile',
+    primaryNavAriaLabel: 'Navegação principal',
+    mobileNavAriaLabel: 'Navegação mobile',
     openMenu: 'Abrir menu',
     closeMenu: 'Fechar menu',
     accountMenu: 'Menu da conta',

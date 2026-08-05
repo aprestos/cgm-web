@@ -9,7 +9,7 @@ import {
 import { RouterLink } from 'vue-router'
 import { RouteNames } from '@/router/routeNames.js'
 import { useI18n } from 'vue-i18n'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 
 const { t } = useI18n()
 </script>

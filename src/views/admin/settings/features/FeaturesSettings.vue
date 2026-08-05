@@ -82,7 +82,21 @@
       </div>
     </div>
   </div>
-  <SettingsBottomBar :loading="isSaving" @save="saveFeatures" />
+  <SettingsBottomBar>
+    <CButton
+      size="lg"
+      type="button"
+      :loading="isSaving"
+      loading-text="Saving..."
+      class="shadow-lg shadow-black/10 dark:shadow-black/30 ring-1 ring-black/5 dark:ring-white/10"
+      @click="saveFeatures"
+    >
+      <template #icon-left>
+        <IconDeviceFloppy class="h-4 w-4" aria-hidden="true" />
+      </template>
+      Save
+    </CButton>
+  </SettingsBottomBar>
 </template>
 
 <script setup lang="ts">
@@ -96,9 +110,11 @@ import {
   IconTicket,
   IconShoppingCart,
   IconRocket,
+  IconDeviceFloppy,
 } from '@tabler/icons-vue'
 import FeatureCard from '@/components/FeatureCard.vue'
 import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
+import CButton from '@/components/CButton.vue'
 import {
   saveEnabledFeatures,
   settingsStore,

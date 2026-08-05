@@ -193,7 +193,7 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { authService } from '@/features/auth/service.ts'
-import { getTenantLogo, tenantStore } from '@/stores/tenant.ts'
+import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { RouteNames } from '@/router/routeNames'
 import type { User } from '@/features/auth/user.model.ts'

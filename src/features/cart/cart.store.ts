@@ -2,7 +2,7 @@ import { ref, computed, type ComputedRef } from 'vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { cartService } from '@/features/cart/service.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { ticketService } from '@/features/tickets/service.ts'
 

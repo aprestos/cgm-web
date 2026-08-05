@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import type { CartItem } from '@/stores/cart.store'
+import type { CartItem } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
 import { formatWeekday } from '@/utils/date.ts'
 

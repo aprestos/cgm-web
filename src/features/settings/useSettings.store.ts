@@ -1,8 +1,8 @@
 import { ref } from 'vue'
 import type { Setting, Settings } from '@/features/settings/setting.model'
 import { settingsService } from './service'
-import { tenantStore } from '@/stores/tenant'
-import { editionStore } from '@/stores/edition'
+import { tenantStore } from '@/features/tenant/tenant.store'
+import { editionStore } from '@/features/events/edition.store'
 
 export const settingsStore = ref<Settings | null>(null)
 
@@ -22,7 +22,7 @@ export const saveEnabledFeatures = async (
         key,
         value,
       )
-      if (settingsStore.value)
+      if (settingsStore.value && response)
         (settingsStore.value[key as keyof Settings] as Setting<unknown>) =
           response
     },

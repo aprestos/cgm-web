@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { IconMapPin } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { editionStore } from '@/stores/edition.js'
+import { editionStore } from '@/features/events/edition.store.ts'
 
 const { t, locale } = useI18n()
 
@@ -44,7 +44,8 @@ const directionsUrl = computed(() => {
   if (locationUrl.value && !isEmbedUrl.value) {
     try {
       const url = new URL(locationUrl.value)
-      if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString()
+      if (url.protocol === 'http:' || url.protocol === 'https:')
+        return url.toString()
     } catch {
       // fall through to search URL
     }

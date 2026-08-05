@@ -1,24 +1,22 @@
 <template>
   <div class="flex flex-col min-h-screen space-y-6 p-0 sm:p-6">
     <!-- Page Header -->
-    <div class="hidden lg:block p-6 sm:p-0">
-      <PageHeader
-        class="hidden lg:block"
-        :title="t('admin.library.title')"
-        :description="
-          t(
-            'admin.library.description',
-            'Manage games, locations, and reservations',
-          )
-        "
-        :action-label="t('admin.library.addGame')"
-        @action="() => openDialog(Dialog.add)"
-      >
-        <template #action-icon>
-          <IconPlus class="size-5" stroke="2" />
-        </template>
-      </PageHeader>
-    </div>
+    <PageHeader
+      class="p-6 sm:p-0"
+      :title="t('admin.library.title')"
+      :description="
+        t(
+          'admin.library.description',
+          'Manage games, locations, and reservations',
+        )
+      "
+      :action-label="t('admin.library.addGame')"
+      @action="() => openDialog(Dialog.add)"
+    >
+      <template #action-icon>
+        <IconPlus class="size-5" stroke="2" />
+      </template>
+    </PageHeader>
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 sm:gap-4 mb-4">
@@ -202,12 +200,6 @@
         </template>
       </DataTable>
     </BaseCard>
-    <SettingsBottomBar>
-      <CButton size="xl" @click="() => openDialog(Dialog.add)">
-        <slot name="action-icon" />
-        <IconPlus /> {{ t('admin.library.addGame') }}
-      </CButton></SettingsBottomBar
-    >
   </div>
 
   <!-- Dialogs -->
@@ -295,8 +287,6 @@ import DialogEditGame from '@/views/admin/library/DialogEditGame.vue'
 import libraryService from '@/features/library/games/service.ts'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseCard from '@/components/BaseCard.vue'
-import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
-import CButton from '@/components/CButton.vue'
 
 const { t } = useI18n()
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getTenantLogo, tenantStore } from '@/stores/tenant.ts'
+import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
 import { useRoute } from 'vue-router'
 import type { User } from '@/features/auth/user.model.ts'
 import {
@@ -15,7 +15,7 @@ import SidebarUserProfile from '@/components/navigation/SidebarUserProfile.vue'
 import { useI18n } from 'vue-i18n'
 import type { NavigationItem } from '@/navigation/navigation.model.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 import { formatDateRange } from '@/utils/date.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 

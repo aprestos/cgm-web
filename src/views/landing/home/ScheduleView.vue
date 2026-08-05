@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import type { Schedule } from '@/features/events/event.model.ts'
+import type { Schedule } from '@/features/events/edition.model.ts'
 
 interface Props {
   images: Schedule

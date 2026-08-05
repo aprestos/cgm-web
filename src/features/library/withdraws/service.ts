@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/stores/edition'
-import { tenantStore } from '@/stores/tenant.ts'
+import { editionStore } from '@/features/events/edition.store'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 export interface LibraryWithdraw {

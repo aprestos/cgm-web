@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { LibraryWithdraw } from '@/features/library/withdraws/service.ts'
 import libraryWithdrawService from '@/features/library/withdraws/service.ts'
@@ -7,7 +7,7 @@ import { DateTime } from 'luxon'
 import { IconCalendar, IconCircleCheck } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
 import WithdrawTimeline from './WithdrawTimeline.vue'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
 
@@ -45,8 +45,9 @@ onMounted(async () => {
   if (props.userId) {
     isLoadingLocal.value = true
     try {
-      const data = await libraryWithdrawService.getByUserId(props.userId)
-      localWithdraws.value = data
+      localWithdraws.value = await libraryWithdrawService.getByUserId(
+        props.userId,
+      )
     } catch (error) {
       console.error('Failed to load withdrawal history:', error)
       toast.error('Failed to load withdrawal history')

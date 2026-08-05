@@ -4,7 +4,7 @@ import { settingsStore } from '@/features/settings/useSettings.store'
 // Components
 import HeaderComponent from './HeaderComponent.vue'
 import CartDrawer from '@/views/landing/CartDrawer.vue'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 
 // Stores
 const settings = computed(() => settingsStore.value)

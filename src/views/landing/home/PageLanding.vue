@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { editionStore } from '@/stores/edition.js'
+import { editionStore } from '@/features/events/edition.store'
 import { settingsStore } from '@/features/settings/useSettings.store.js'
 import { IconBooks, IconTicket, IconUsers } from '@tabler/icons-vue'
 import { RouteNames } from '@/router/routeNames.js'
-import { tenantStore } from '@/stores/tenant.js'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import { useI18n } from 'vue-i18n'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
@@ -21,7 +21,7 @@ import CtaView from './CtaView.vue'
 import FooterView from './FooterView.vue'
 import MapView from '@/views/landing/home/MapView.vue'
 import ScheduleView from './ScheduleView.vue'
-import type { Schedule } from '@/features/events/event.model.ts'
+import type { Schedule } from '@/features/events/edition.model.ts'
 
 const { t } = useI18n()
 

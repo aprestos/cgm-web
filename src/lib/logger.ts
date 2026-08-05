@@ -1,5 +1,5 @@
 import { Logtail } from '@logtail/browser'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 
 const isDevelopment =
   import.meta.env.VITE_ENVIRONMENT === 'development' || false

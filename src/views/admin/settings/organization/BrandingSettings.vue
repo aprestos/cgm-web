@@ -257,7 +257,7 @@ import FilePondUploadDialog from '@/components/FilePondUploadDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import tenantService from '@/features/tenant/service.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { tenantStore } from '@/stores/tenant.ts'
+import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 // Logo state

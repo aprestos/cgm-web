@@ -7,8 +7,8 @@ import CButton from '@/components/CButton.vue'
 import ticketService from '@/features/tickets/service'
 import orderService from '@/features/orders/service'
 import type { Ticket } from '@/features/tickets/ticket.model'
-import { tenantStore } from '@/stores/tenant'
-import { editionStore } from '@/stores/edition'
+import { tenantStore } from '@/features/tenant/tenant.store'
+import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import StepSelectTickets from './StepSelectTickets.vue'
 import StepTicketHolders from './StepTicketHolders.vue'
@@ -149,38 +149,40 @@ async function submit(): Promise<void> {
     size="md"
     @close="emit('close')"
   >
-    <!-- Step indicator -->
-    <div class="flex items-center gap-2 mb-6">
-      <div v-for="n in 2" :key="n" class="flex items-center gap-2">
-        <div
-          class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-colors"
-          :class="
-            n === step
-              ? 'bg-indigo-600 text-white'
-              : n < step
-                ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
-                : 'bg-gray-100 text-gray-400 dark:bg-white/10 dark:text-gray-500'
-          "
-        >
-          {{ n }}
+    <template #header-sub-content>
+      <!-- Step indicator -->
+      <div class="flex items-center gap-2 mb-2 mt-4">
+        <div v-for="n in 2" :key="n" class="flex items-center gap-2">
+          <div
+            class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-colors"
+            :class="
+              n === step
+                ? 'bg-indigo-600 text-white'
+                : n < step
+                  ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
+                  : 'bg-gray-100 text-gray-400 dark:bg-white/10 dark:text-gray-500'
+            "
+          >
+            {{ n }}
+          </div>
+          <span
+            class="text-xs font-medium transition-colors"
+            :class="
+              n === step
+                ? 'text-gray-900 dark:text-white'
+                : 'text-gray-400 dark:text-gray-500'
+            "
+          >
+            {{
+              n === 1
+                ? t('admin.orders.create.stepTickets')
+                : t('admin.orders.create.stepHolders')
+            }}
+          </span>
+          <div v-if="n < 2" class="h-px w-6 bg-gray-200 dark:bg-white/10" />
         </div>
-        <span
-          class="text-xs font-medium transition-colors"
-          :class="
-            n === step
-              ? 'text-gray-900 dark:text-white'
-              : 'text-gray-400 dark:text-gray-500'
-          "
-        >
-          {{
-            n === 1
-              ? t('admin.orders.create.stepTickets')
-              : t('admin.orders.create.stepHolders')
-          }}
-        </span>
-        <div v-if="n < 2" class="h-px w-6 bg-gray-200 dark:bg-white/10" />
       </div>
-    </div>
+    </template>
 
     <StepSelectTickets
       v-if="step === 1"

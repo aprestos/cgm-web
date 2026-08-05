@@ -23,7 +23,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import CInput from '@/components/CInput.vue'
-import { editionStore } from '@/stores/edition.ts'
+import { editionStore } from '@/features/events/edition.store'
 import { getCurrencyIcon } from '@/composables/useCurrency.ts'
 
 interface Props {
