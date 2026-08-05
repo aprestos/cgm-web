@@ -44,11 +44,11 @@ const handleCreate = (): void => {
   isCreateDialogOpen.value = true
 }
 
-// No tournaments service yet — surface the payload until persistence lands.
-const handleCreated = (tournament: CreateTournament): void => {
+const handleCreated = async (tournament: CreateTournament): Promise<void> => {
   toast.success(
     t('admin.tournaments.createSuccess', { title: tournament.title }),
   )
+  await loadTournaments()
 }
 
 async function loadTournaments(): Promise<void> {

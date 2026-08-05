@@ -5,7 +5,7 @@
     size="lg"
     @close="emit('close')"
   >
-    <form>
+    <form @submit.prevent="submit">
       <div class="space-y-6 mx-auto max-w-7xl">
         <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
           <CInput
@@ -291,7 +291,8 @@ const submit = async (): Promise<void> => {
       emit('created', tournament)
       resetForm()
       emit('close')
-    } catch {
+    } catch (error) {
+      logger.error('Unable to create tournament', { error })
       toast.error('Unable to create tournament. Try again later')
     }
   } finally {
