@@ -152,7 +152,7 @@ export const libraryWithdrawService = {
       logger.error('Failed to withdraws by library game id', { error })
       return []
     }
-    return data
+    return data ?? []
   },
 } as const
 

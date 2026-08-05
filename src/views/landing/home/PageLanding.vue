@@ -277,10 +277,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       :is-tournaments-enabled="isTournamentsEnabled"
     />
 
-    <MapView
-      :location-title="editionStore?.location?.title as string"
-      :map-embed-url="editionStore?.location?.url as string"
-    />
+    <MapView />
 
     <!-- Countdown Section -->
     <CountdownView
