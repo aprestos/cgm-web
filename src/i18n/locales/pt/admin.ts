@@ -151,16 +151,11 @@ export default {
       cancelled: 'Cancelado',
     },
     format: {
-      swiss: 'Suíço',
-      'single-elimination': 'Eliminação Simples',
-      'double-elimination': 'Eliminação Dupla',
+      swiss: 'Sistema suíço',
+      'single-elimination': 'Eliminação direta',
+      'double-elimination': 'Dupla eliminação',
       'round-robin': 'Todos contra Todos',
-    },
-    // Enum-label map — keys match TournamentType values verbatim
-    type: {
-      'single-elimination': 'Eliminação Simples',
-      'double-elimination': 'Eliminação Dupla',
-      consolation: 'Consolação',
+      consolation: 'Quadro de consolação',
     },
     // Enum-label map — keys match TournamentPrizeType values verbatim
     prize: {

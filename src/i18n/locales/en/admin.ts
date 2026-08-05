@@ -150,11 +150,6 @@ export default {
       'single-elimination': 'Single Elimination',
       'double-elimination': 'Double Elimination',
       'round-robin': 'Round Robin',
-    },
-    // Enum-label map — keys match TournamentType values verbatim
-    type: {
-      'single-elimination': 'Single Elimination',
-      'double-elimination': 'Double Elimination',
       consolation: 'Consolation',
     },
     // Enum-label map — keys match TournamentPrizeType values verbatim
