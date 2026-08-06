@@ -10,17 +10,19 @@ import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
 import type { Ticket } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
+import type { Tournament } from '@/features/tournaments/model.ts'
+import { tournamentService } from '@/features/tournaments/service.ts'
 
 // Components
 import HeroView from './HeroView.vue'
 import GalleryView from './GalleryView.vue'
 import TicketsView from './TicketsView.vue'
-import CountdownView from './CountdownView.vue'
 import LibraryView from './LibraryView.vue'
 import CtaView from './CtaView.vue'
 import FooterView from './FooterView.vue'
 import MapView from '@/views/landing/home/MapView.vue'
 import ScheduleView from './ScheduleView.vue'
+import TournamentsView from './TournamentsView.vue'
 import type { Schedule } from '@/features/events/edition.model.ts'
 
 const { t } = useI18n()
@@ -43,6 +45,7 @@ const scheduleImages = computed<Schedule>(() => edition.value?.schedule ?? {})
 // Data
 const trendingGames = ref<LibraryGame[]>([])
 const availableTickets = ref<Ticket[]>([])
+const tournaments = ref<Tournament[]>([])
 const isLoadingGames = ref<boolean>(true)
 const scrollY = ref<number>(0)
 const activeSection = ref<string>('hero')
@@ -56,6 +59,9 @@ const isLibraryEnabled = computed(
 )
 const isTournamentsEnabled = computed(
   () => settings.value?.tournaments?.enabled ?? false,
+)
+const hasTournaments = computed(
+  () => isTournamentsEnabled.value && tournaments.value.length > 0,
 )
 
 // Convention status
@@ -157,6 +163,10 @@ const navigationSections = computed(() => {
     sections.push('library')
   }
 
+  if (hasTournaments.value) {
+    sections.push('tournaments')
+  }
+
   return sections
 })
 
@@ -193,6 +203,10 @@ onMounted(async () => {
   if (isTicketsEnabled.value) {
     await loadTickets()
   }
+
+  if (isTournamentsEnabled.value) {
+    await loadTournaments()
+  }
 })
 
 onUnmounted(() => {
@@ -224,6 +238,19 @@ async function loadTickets(): Promise<void> {
   }
 }
 
+async function loadTournaments(): Promise<void> {
+  try {
+    if (tenant.value?.id && edition.value?.id) {
+      tournaments.value = await tournamentService.getAll(
+        tenant.value.id,
+        edition.value.id,
+      )
+    }
+  } catch {
+    tournaments.value = []
+  }
+}
+
 function getRandomItems<T>(items: T[], count: number): T[] {
   const itemsToShuffle = [...items]
   const shuffled: T[] = []
@@ -240,9 +267,8 @@ function getRandomItems<T>(items: T[], count: number): T[] {
 </script>
 
 <template>
-  <div
-    class="relative bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-white overflow-x-hidden"
-  >
+  <!-- Background lives on BaseLandingPage so every section can stay transparent -->
+  <div class="relative overflow-x-hidden">
     <!-- Hero Section -->
     <HeroView
       class="min-h-screen"
@@ -254,12 +280,7 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       @scroll-to="scrollToSection"
     />
 
-    <!-- Gallery Section - Convention Photos -->
-    <GalleryView
-      v-if="galleryImages.length > 0"
-      id="gallery"
-      :images="galleryImages"
-    />
+    <MapView />
 
     <ScheduleView
       v-if="
@@ -277,21 +298,22 @@ function getRandomItems<T>(items: T[], count: number): T[] {
       :is-tournaments-enabled="isTournamentsEnabled"
     />
 
-    <MapView />
-
-    <!-- Countdown Section -->
-    <CountdownView
-      v-if="countdown && conventionStatus === 'upcoming'"
-      :countdown="countdown"
-      :start-date="edition?.start_date"
-    />
-
     <!-- Games Preview Section -->
     <LibraryView
       v-if="isLibraryEnabled && trendingGames.length > 0"
       class="min-h-screen"
       section-id="library"
       :games="trendingGames"
+    />
+
+    <!-- Tournaments Section -->
+    <TournamentsView v-if="hasTournaments" :tournaments="tournaments" />
+
+    <!-- Gallery Section - Convention Photos -->
+    <GalleryView
+      v-if="galleryImages.length > 0"
+      id="gallery"
+      :images="galleryImages"
     />
 
     <!-- Final CTA Section -->

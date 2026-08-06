@@ -82,13 +82,10 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
 </script>
 
 <template>
-  <section
-    id="tickets"
-    class="relative overflow-hidden bg-gray-50 py-32 dark:bg-gray-950"
-  >
+  <section id="tickets" class="relative overflow-hidden py-32">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-linear-to-b from-gray-50 via-indigo-100/40 to-gray-50 dark:from-gray-950 dark:via-indigo-950/35 dark:to-gray-950"
+      class="absolute inset-0 bg-linear-to-b from-transparent via-indigo-100/40 to-transparent dark:via-indigo-950/35"
     />
     <div
       class="absolute left-0 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-600/30 blur-3xl"

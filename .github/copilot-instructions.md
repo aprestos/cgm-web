@@ -47,7 +47,7 @@ This is a Vue 3 application built with TypeScript, Vite, and Tailwind CSS. The p
 ### Styling
 
 - Use **Tailwind CSS** utility classes primarily
-- Follow the custom theme defined in `tailwind.config.js`
+- Follow the custom theme defined in the `@theme` block of `src/index.css` (Tailwind v4 is CSS-first; there is no `tailwind.config.js`)
 - Use `primary`, `surface`, and `highlight` custom color scales
 - Support both light and dark modes via `dark:` variants
 - Use CSS custom properties (CSS variables) from the theme

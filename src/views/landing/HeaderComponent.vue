@@ -54,7 +54,8 @@ const hasItems = computed(() => totalItems.value > 0)
 const isAuthenticated = computed<boolean>(() => user.value !== null)
 const canAccessDashboard = computed<boolean>(
   () =>
-    !!user.value && authService.hasAnyOfTheRoles(user.value, ['staff', 'admin']),
+    !!user.value &&
+    authService.hasAnyOfTheRoles(user.value, ['staff', 'admin']),
 )
 const displayName = computed<string>(
   () => user.value?.name || t('landing.header.accountFallbackName'),
@@ -88,6 +89,10 @@ const accountButtonAriaLabel = computed<string>(() =>
 
 function getSectionLabel(section: string): string {
   return t(`landing.nav.${section}`)
+}
+
+function isSectionActive(section: string): boolean {
+  return props.activeSection === section
 }
 
 function handleNavigationClick(section: string): void {
@@ -228,8 +233,13 @@ onUnmounted(() => {
           v-for="section in desktopSections"
           :key="section"
           type="button"
-          class="text-sm uppercase font-semibold transition-colors duration-200 cursor-pointer text-gray-700 hover:text-indigo-700 dark:text-gray-200 dark:hover:text-white"
-          :aria-current="props.activeSection === section ? 'page' : undefined"
+          class="cursor-pointer pb-1 text-sm font-semibold transition-colors duration-200"
+          :class="
+            isSectionActive(section)
+              ? 'border-primary text-primary dark:border-primary-400 dark:text-primary-400'
+              : 'border-transparent text-gray-700 hover:text-primary dark:text-gray-200 dark:hover:text-primary-400'
+          "
+          :aria-current="isSectionActive(section) ? 'page' : undefined"
           @click="handleNavigationClick(section)"
         >
           {{ getSectionLabel(section) }}
@@ -375,7 +385,13 @@ onUnmounted(() => {
                 v-for="section in props.sections"
                 :key="section"
                 type="button"
-                class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10"
+                class="flex w-full items-center justify-between rounded-xl border-b-2 px-4 py-3 text-left text-sm font-medium transition-colors"
+                :class="
+                  isSectionActive(section)
+                    ? 'border-primary bg-primary/5 font-semibold text-primary dark:border-primary-400 dark:bg-primary-400/10 dark:text-primary-400'
+                    : 'border-transparent text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10'
+                "
+                :aria-current="isSectionActive(section) ? 'page' : undefined"
                 @click="handleNavigationClick(section)"
               >
                 {{ getSectionLabel(section) }}

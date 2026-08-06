@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col min-h-screen space-y-6 p-0 sm:p-6">
+  <div class="p-4 gap-4 md:p-6 md:gap-6 flex flex-col">
     <!-- Page Header -->
     <PageHeader
       class="p-6 sm:p-0"
@@ -19,7 +19,7 @@
     </PageHeader>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 sm:gap-4 mb-4">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <!-- Loading skeletons -->
       <template v-if="loading">
         <div

@@ -2,6 +2,7 @@
 export default {
   navigation: {
     library: 'Library',
+    tournaments: 'Tournaments',
     tickets: 'Tickets',
     admin: 'Admin',
     profile: 'Profile',
@@ -68,6 +69,52 @@ export default {
       newest: 'Newest',
       name: 'Name',
       trending: 'Trending',
+    },
+  },
+  tournaments: {
+    title: 'Tournaments',
+    description:
+      'Browse every tournament of the convention and grab your spot before it is gone.',
+    search: 'Search tournaments...',
+    organizedBy: 'by {name}',
+    date: 'Date',
+    place: 'Place',
+    slotsLeft: '{count} spots left',
+    full: 'Full',
+    closed: 'Sign-ups closed',
+    join: 'Join tournament',
+    joinSuccess: 'You\'re on the list for "{title}"',
+    loadError: 'Unable to load tournaments',
+    empty: 'No tournaments found',
+    emptyDescription: 'Try adjusting your search or filters.',
+    // Enum-label map — keys match the status tab ids verbatim
+    tabs: {
+      all: 'All',
+      scheduled: 'Upcoming',
+      ongoing: 'Ongoing',
+      finished: 'Finished',
+    },
+    // Enum-label map — keys match TournamentStatus values verbatim
+    status: {
+      scheduled: 'Upcoming',
+      ongoing: 'Ongoing',
+      finished: 'Finished',
+      cancelled: 'Cancelled',
+    },
+    // Enum-label map — keys match TournamentFormat values verbatim
+    format: {
+      swiss: 'Swiss',
+      'single-elimination': 'Single Elimination',
+      'double-elimination': 'Double Elimination',
+      'round-robin': 'Round Robin',
+      consolation: 'Consolation',
+    },
+    // Enum-label map — keys match SortOption values verbatim
+    sort: {
+      sortBy: 'Sort by',
+      soonest: 'Starting soonest',
+      slots: 'Most spots left',
+      name: 'Name',
     },
   },
   reservation: {

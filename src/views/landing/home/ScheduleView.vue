@@ -14,12 +14,17 @@ const { t } = useI18n()
 <template>
   <section
     id="schedule"
-    class="relative overflow-hidden bg-gray-50 py-12 dark:bg-gray-950 sm:py-16 lg:py-24"
+    class="relative overflow-hidden py-12 sm:py-16 lg:py-24"
   >
+    <!-- Background -->
+    <div
+      class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.08),transparent_55%)] dark:bg-[radial-gradient(ellipse_at_top,rgba(14,165,233,0.12),transparent_55%)]"
+    />
+
     <div class="relative z-10 mx-auto max-w-7xl px-4">
       <div class="text-center">
         <h2
-          class="text-xs font-semibold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 sm:text-sm"
+          class="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600 dark:text-sky-400 sm:text-sm"
         >
           {{ t('landing.schedule.sectionTitle') }}
         </h2>

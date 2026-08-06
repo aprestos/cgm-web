@@ -4,6 +4,7 @@ import type enPublic from '../en/public'
 export default {
   navigation: {
     library: 'Ludoteca',
+    tournaments: 'Torneios',
     tickets: 'Bilhetes',
     admin: 'Admin',
     profile: 'Perfil',
@@ -65,6 +66,48 @@ export default {
       newest: 'Mais Recentes',
       name: 'Nome',
       trending: 'Popularidade',
+    },
+  },
+  tournaments: {
+    title: 'Torneios',
+    description:
+      'Vê todos os torneios do evento e garante o teu lugar antes que esgote.',
+    search: 'Pesquisar torneios...',
+    organizedBy: 'por {name}',
+    date: 'Data',
+    place: 'Local',
+    slotsLeft: '{count} vagas',
+    full: 'Esgotado',
+    closed: 'Inscrições fechadas',
+    join: 'Inscrever-me',
+    joinSuccess: 'Estás na lista de "{title}"',
+    loadError: 'Não foi possível carregar os torneios',
+    empty: 'Nenhum torneio encontrado',
+    emptyDescription: 'Tenta ajustar a pesquisa ou os filtros.',
+    tabs: {
+      all: 'Todos',
+      scheduled: 'Por começar',
+      ongoing: 'A decorrer',
+      finished: 'Concluídos',
+    },
+    status: {
+      scheduled: 'Por começar',
+      ongoing: 'A decorrer',
+      finished: 'Concluído',
+      cancelled: 'Cancelado',
+    },
+    format: {
+      swiss: 'Sistema suíço',
+      'single-elimination': 'Eliminação direta',
+      'double-elimination': 'Dupla eliminação',
+      'round-robin': 'Todos contra Todos',
+      consolation: 'Quadro de consolação',
+    },
+    sort: {
+      sortBy: 'Ordenar por',
+      soonest: 'A começar mais cedo',
+      slots: 'Mais vagas',
+      name: 'Nome',
     },
   },
   reservation: {
