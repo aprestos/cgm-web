@@ -70,11 +70,6 @@ function getImage(tournament: Tournament): string | null {
         >
           {{ t('landing.tournaments.sectionSubtitle') }}
         </p>
-        <p
-          class="mx-auto mt-4 max-w-2xl text-base text-gray-600 dark:text-white/60"
-        >
-          {{ t('landing.tournaments.sectionDescription') }}
-        </p>
       </div>
 
       <!-- Tournaments Grid -->
