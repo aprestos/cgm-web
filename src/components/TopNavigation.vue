@@ -214,8 +214,6 @@ const isAuthenticated = ref(false)
 const route = useRoute()
 
 const isActive = (routeName: string): boolean => {
-  console.log(routeName)
-  console.log(route.matched)
   return route.matched.some((r) => r.name === routeName)
 }
 

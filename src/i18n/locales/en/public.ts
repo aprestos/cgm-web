@@ -101,7 +101,7 @@ export default {
       finished: 'Finished',
       cancelled: 'Cancelled',
     },
-    // Enum-label map — keys match TournamentFormat values verbatim
+    // Format labels — keys are string ids used by tournament.format
     format: {
       swiss: 'Swiss',
       'single-elimination': 'Single Elimination',
