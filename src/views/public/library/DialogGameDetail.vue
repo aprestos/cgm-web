@@ -1,5 +1,10 @@
 <template>
-  <DialogComponent title="" size="lg" :open="open" @close="closeModal">
+  <DialogComponent
+    :title="game?.game?.name ?? ''"
+    size="lg"
+    :open="open"
+    @close="closeModal"
+  >
     <!-- Loading SkeletonLoader -->
     <div
       v-if="!game"
@@ -70,7 +75,9 @@
         />
       </div>
       <div class="sm:col-span-8 lg:col-span-7">
-        <h2 class="text-2xl font-bold text-gray-900 dark:text-white sm:pr-12">
+        <h2
+          class="hidden text-2xl font-bold text-gray-900 dark:text-white sm:pr-12"
+        >
           {{ game?.game?.name }}
         </h2>
 
@@ -210,16 +217,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogComponent from '@/components/DialogComponent.vue'
 import {
-  UsersIcon,
-  ClockIcon,
   CalendarIcon,
+  ClockIcon,
   DocumentTextIcon,
+  UsersIcon,
 } from '@heroicons/vue/20/solid'
-import { IconWorld, IconUsers } from '@tabler/icons-vue'
+import { IconUsers, IconWorld } from '@tabler/icons-vue'
 import libraryService from '@/features/library/games/service.ts'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'

@@ -109,7 +109,7 @@ onBeforeUnmount(() => {
   <section
     v-if="displayImages.length > 0"
     :id="id || undefined"
-    class="relative overflow-hidden bg-gray-50 dark:bg-gray-950"
+    class="relative overflow-hidden"
   >
     <!-- Section Header (optional) -->
     <div class="relative z-10 pt-16 pb-8 text-center px-4">

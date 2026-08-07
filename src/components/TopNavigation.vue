@@ -29,7 +29,6 @@
               </RouterLink>
             </div>
 
-            <!-- Flyout menus -->
             <PopoverGroup
               class="absolute inset-x-0 bottom-0 sm:static sm:flex-1 sm:self-stretch"
             >
@@ -37,10 +36,15 @@
                 class="flex h-14 space-x-8 overflow-x-auto border-t border-gray-200 dark:border-white/5 px-4 pb-px sm:h-full sm:justify-center sm:overflow-visible sm:border-t-0 sm:pb-0"
               >
                 <RouterLink
-                  v-for="page in navigation"
-                  :key="page.name"
-                  :to="page.href"
-                  class="text-nowrap flex items-center text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+                  v-for="page in enabledNavigation"
+                  :key="page.route"
+                  :to="{ name: page.route }"
+                  class="text-nowrap flex items-center -mb-px border-b-2 text-sm font-semibold transition-colors"
+                  :class="
+                    isActive(page.route)
+                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
+                  "
                 >
                   {{ page.name }}
                 </RouterLink>
@@ -189,7 +193,7 @@ import {
   PopoverGroup,
 } from '@headlessui/vue'
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { authService } from '@/features/auth/service.ts'
@@ -199,11 +203,19 @@ import { RouteNames } from '@/router/routeNames'
 import type { User } from '@/features/auth/user.model.ts'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
+import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { useRoute } from 'vue-router'
 
 const { t } = useI18n()
 const user = ref<User | null>(null)
 const isStaffOrAdmin = ref(false)
 const isAuthenticated = ref(false)
+
+const route = useRoute()
+
+const isActive = (routeName: string): boolean => {
+  return route.matched.some((r) => r.name === routeName)
+}
 
 // Load user email and check admin role on component mount
 onMounted(async () => {
@@ -237,23 +249,26 @@ const handleSignOut = async (): Promise<void> => {
   }
 }
 
-interface Category {
-  name: string
-}
-
 interface NavigationItem {
   name: string
-  href: string
-  current: boolean
-  categories: Category[]
+  route: string
+  enabled: boolean
 }
 
 const navigation = ref<NavigationItem[]>([
   {
     name: t('public.navigation.library'),
-    href: '/library',
-    current: true,
-    categories: [{ name: 'Popular' }, { name: 'New' }, { name: 'All' }],
+    route: RouteNames.public.library,
+    enabled: settingsStore.value?.library?.enabled ?? false,
+  },
+  {
+    name: t('public.navigation.tournaments'),
+    route: RouteNames.public.tournaments,
+    enabled: settingsStore.value?.tournaments?.enabled ?? false,
   },
 ])
+
+const enabledNavigation = computed(() => {
+  return (navigation?.value ?? []).filter((item) => item.enabled)
+})
 </script>

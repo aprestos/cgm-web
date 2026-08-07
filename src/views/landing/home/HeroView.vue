@@ -97,7 +97,7 @@ function scrollToMap(): void {
 <template>
   <section
     id="hero"
-    class="relative flex min-h-svh items-center justify-center overflow-hidden bg-gray-50 px-0 pb-16 pt-28 dark:bg-gray-950 sm:pb-20 sm:pt-32"
+    class="relative flex min-h-svh items-center justify-center overflow-hidden px-0 pb-16 pt-28 sm:pb-20 sm:pt-32"
   >
     <!-- Animated Background -->
     <div class="absolute inset-0">
@@ -469,10 +469,21 @@ function scrollToMap(): void {
         <div
           :class="[
             posterUrl
-              ? 'text-center lg:text-left lg:flex-1'
-              : 'text-center w-full',
+              ? 'text-center lg:flex-1 lg:text-left'
+              : 'w-full text-center',
           ]"
         >
+          <!-- Poster (below lg) — sits above the edition title -->
+          <div
+            v-if="posterUrl"
+            class="mx-auto mb-8 w-64 shrink-0 sm:w-80 lg:hidden"
+          >
+            <PosterView
+              :poster-url="posterUrl"
+              :edition-name="editionStore?.name"
+            />
+          </div>
+
           <!-- Live Badge -->
           <div
             v-if="conventionStatus === 'happening'"
@@ -563,14 +574,6 @@ function scrollToMap(): void {
             </button>
           </div>
 
-          <!-- Poster (mobile/tablet, before CTA) -->
-          <div v-if="posterUrl" class="mt-8 w-56 shrink-0 sm:w-72 lg:hidden">
-            <PosterView
-              :poster-url="posterUrl"
-              :edition-name="editionStore?.name"
-            />
-          </div>
-
           <!-- Primary CTA -->
           <div
             class="mt-10 flex w-full flex-col items-center gap-4 sm:mt-12 sm:flex-row"
@@ -610,11 +613,8 @@ function scrollToMap(): void {
           </div>
         </div>
 
-        <!-- Poster (right side on lg, below CTA on mobile) -->
-        <div
-          v-if="posterUrl"
-          class="hidden w-56 shrink-0 sm:w-72 lg:block lg:w-72 xl:w-80"
-        >
+        <!-- Poster (lg+) — right side column -->
+        <div v-if="posterUrl" class="hidden shrink-0 lg:block lg:w-80 xl:w-96">
           <PosterView
             :poster-url="posterUrl"
             :edition-name="editionStore?.name"

@@ -1,8 +1,49 @@
 @import 'tailwindcss';
 
+/*
+ * Tailwind configuration.
+ * Tailwind v4 is CSS-first: @tailwindcss/vite reads this file and never looks
+ * for a tailwind.config.js. This @theme block is the single source of truth for
+ * design tokens — anything declared elsewhere generates no utilities.
+ */
 @theme {
-  --font-sans: 'InterVariable', 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans:
+    'InterVariable', 'Inter', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, sans-serif;
+  --font-display:
+    'Space Grotesk', ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, sans-serif;
+
+  /* Brand palette - blue instead of Volt's default green.
+     Bare `primary` (text-primary, bg-primary) resolves to 500. */
+  --color-primary-50: var(--color-blue-50);
+  --color-primary-100: var(--color-blue-100);
+  --color-primary-200: var(--color-blue-200);
+  --color-primary-300: var(--color-blue-300);
+  --color-primary-400: var(--color-blue-400);
+  --color-primary-500: var(--color-blue-500);
+  --color-primary-600: var(--color-blue-600);
+  --color-primary-700: var(--color-blue-700);
+  --color-primary-800: var(--color-blue-800);
+  --color-primary-900: var(--color-blue-900);
+  --color-primary-950: var(--color-blue-950);
+  --color-primary: var(--color-blue-500);
+
+  /* Surface + highlight point at the runtime variables below, which invert in
+     dark mode - @theme itself cannot express a media-conditional value. */
+  --color-surface-0: rgb(var(--surface-0));
+  --color-surface-50: rgb(var(--surface-50));
+  --color-surface-100: rgb(var(--surface-100));
+  --color-surface-200: rgb(var(--surface-200));
+  --color-surface-300: rgb(var(--surface-300));
+  --color-surface-400: rgb(var(--surface-400));
+  --color-surface-500: rgb(var(--surface-500));
+  --color-surface-600: rgb(var(--surface-600));
+  --color-surface-700: rgb(var(--surface-700));
+  --color-surface-800: rgb(var(--surface-800));
+  --color-surface-900: rgb(var(--surface-900));
+  --color-surface-950: rgb(var(--surface-950));
+  --color-highlight: rgb(var(--highlight));
 }
 
 @layer base {
@@ -21,7 +62,7 @@
   }
 }
 
-/* Surface color tokens for Volt components */
+/* Surface color tokens, consumed by the surface-* utilities defined above */
 @layer base {
   :root {
     /* Light theme surface colors */
@@ -42,38 +83,23 @@
     --highlight: 59 130 246; /* blue-500 */
   }
 
-  .dark {
-    /* Dark theme surface colors - inverted for dark mode */
-    --surface-0: 15 23 42; /* slate-900 */
-    --surface-50: 30 41 59; /* slate-800 */
-    --surface-100: 51 65 85; /* slate-700 */
-    --surface-200: 71 85 105; /* slate-600 */
-    --surface-300: 100 116 139; /* slate-500 */
-    --surface-400: 148 163 184; /* slate-400 */
-    --surface-500: 203 213 225; /* slate-300 */
-    --surface-600: 226 232 240; /* slate-200 */
-    --surface-700: 241 245 249; /* slate-100 */
-    --surface-800: 248 250 252; /* slate-50 */
-    --surface-900: 255 255 255; /* white */
-    --surface-950: 255 255 255; /* white */
-
-    /* Highlight color for dark theme */
-    --highlight: 59 130 246; /* blue-500 */
-  }
-
-  /* Primary colors for Volt components - using blue instead of green */
-  :root {
-    --primary-50: 239 246 255; /* blue-50 */
-    --primary-100: 219 234 254; /* blue-100 */
-    --primary-200: 191 219 254; /* blue-200 */
-    --primary-300: 147 197 253; /* blue-300 */
-    --primary-400: 96 165 250; /* blue-400 */
-    --primary-500: 59 130 246; /* blue-500 */
-    --primary-600: 37 99 235; /* blue-600 */
-    --primary-700: 29 78 216; /* blue-700 */
-    --primary-800: 30 64 175; /* blue-800 */
-    --primary-900: 30 58 138; /* blue-900 */
-    --primary-950: 23 37 84; /* blue-950 */
+  /* Matches how the dark: variant resolves everywhere else in the app */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      /* Dark theme surface colors - inverted for dark mode */
+      --surface-0: 15 23 42; /* slate-900 */
+      --surface-50: 30 41 59; /* slate-800 */
+      --surface-100: 51 65 85; /* slate-700 */
+      --surface-200: 71 85 105; /* slate-600 */
+      --surface-300: 100 116 139; /* slate-500 */
+      --surface-400: 148 163 184; /* slate-400 */
+      --surface-500: 203 213 225; /* slate-300 */
+      --surface-600: 226 232 240; /* slate-200 */
+      --surface-700: 241 245 249; /* slate-100 */
+      --surface-800: 248 250 252; /* slate-50 */
+      --surface-900: 255 255 255; /* white */
+      --surface-950: 255 255 255; /* white */
+    }
   }
 
   /* Set background color for body and html to match theme */

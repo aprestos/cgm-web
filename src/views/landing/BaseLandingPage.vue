@@ -10,6 +10,7 @@ import { editionStore } from '@/features/events/edition.store'
 const settings = computed(() => settingsStore.value)
 
 // Data
+const SECTION_ACTIVE_OFFSET = 200
 const scrollY = ref<number>(0)
 const activeSection = ref<string>('hero')
 
@@ -44,16 +45,26 @@ const navigationSections = computed(() => {
 function handleScroll(): void {
   scrollY.value = window.scrollY
 
+  activeSection.value = getVisibleSection() ?? 'hero'
+}
+
+function getVisibleSection(): string | null {
   for (const section of navigationSections.value) {
     const element = document.getElementById(section)
-    if (element) {
-      const rect = element.getBoundingClientRect()
-      if (rect.top <= 200 && rect.bottom >= 200) {
-        activeSection.value = section
-        break
-      }
+    if (!element) {
+      continue
+    }
+
+    const rect = element.getBoundingClientRect()
+    if (
+      rect.top <= SECTION_ACTIVE_OFFSET &&
+      rect.bottom >= SECTION_ACTIVE_OFFSET
+    ) {
+      return section
     }
   }
+
+  return null
 }
 
 function scrollToSection(sectionId: string): void {
@@ -64,6 +75,7 @@ function scrollToSection(sectionId: string): void {
 }
 
 onMounted(() => {
+  handleScroll()
   window.addEventListener('scroll', handleScroll)
 })
 

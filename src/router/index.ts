@@ -55,6 +55,12 @@ const router = createRouter({
             import('@/views/public/library/PageLibraryHome.vue'),
         },
         {
+          path: 'tournaments',
+          name: RouteNames.public.tournaments,
+          component: (): Promise<unknown> =>
+            import('@/views/public/tournaments/HomeView.vue'),
+        },
+        {
           path: 'flea-market',
           name: RouteNames.public.fleaMarket,
           component: (): Promise<unknown> =>

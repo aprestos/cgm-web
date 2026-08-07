@@ -2,6 +2,7 @@
 import type { CSSProperties } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import {
+  IconLayoutDashboard,
   IconLogout,
   IconMenu2,
   IconShoppingCart,
@@ -17,7 +18,6 @@ import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
-import CButton from '@/components/CButton.vue'
 
 interface Props {
   sections?: string[]
@@ -54,7 +54,8 @@ const hasItems = computed(() => totalItems.value > 0)
 const isAuthenticated = computed<boolean>(() => user.value !== null)
 const canAccessDashboard = computed<boolean>(
   () =>
-    !!user.value && authService.hasAnyOfTheRoles(user.value, ['staff', 'admin']),
+    !!user.value &&
+    authService.hasAnyOfTheRoles(user.value, ['staff', 'admin']),
 )
 const displayName = computed<string>(
   () => user.value?.name || t('landing.header.accountFallbackName'),
@@ -88,6 +89,10 @@ const accountButtonAriaLabel = computed<string>(() =>
 
 function getSectionLabel(section: string): string {
   return t(`landing.nav.${section}`)
+}
+
+function isSectionActive(section: string): boolean {
+  return props.activeSection === section
 }
 
 function handleNavigationClick(section: string): void {
@@ -228,8 +233,13 @@ onUnmounted(() => {
           v-for="section in desktopSections"
           :key="section"
           type="button"
-          class="text-sm uppercase font-semibold transition-colors duration-200 cursor-pointer text-gray-700 hover:text-indigo-700 dark:text-gray-200 dark:hover:text-white"
-          :aria-current="props.activeSection === section ? 'page' : undefined"
+          class="cursor-pointer pb-1 text-sm font-semibold transition-colors duration-200"
+          :class="
+            isSectionActive(section)
+              ? 'border-primary text-primary dark:border-primary-400 dark:text-primary-400'
+              : 'border-transparent text-gray-700 hover:text-primary dark:text-gray-200 dark:hover:text-primary-400'
+          "
+          :aria-current="isSectionActive(section) ? 'page' : undefined"
           @click="handleNavigationClick(section)"
         >
           {{ getSectionLabel(section) }}
@@ -237,15 +247,6 @@ onUnmounted(() => {
       </nav>
 
       <div class="relative col-start-3 flex items-center justify-end gap-2">
-        <CButton
-          v-if="canAccessDashboard"
-          size="md"
-          variant="secondary"
-          @click="handleDashboardClick"
-        >
-          {{ t('landing.header.dashboard') }}
-        </CButton>
-
         <Transition
           enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           enter-from-class="translate-x-8 scale-50 opacity-0 blur-sm"
@@ -327,6 +328,21 @@ onUnmounted(() => {
                 </div>
               </div>
 
+              <!-- Dashboard -->
+              <div
+                v-if="canAccessDashboard"
+                class="border-t border-gray-200/70 dark:border-white/10 p-2"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-primary dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-primary-400"
+                  @click="handleDashboardClick"
+                >
+                  <IconLayoutDashboard class="h-4 w-4" aria-hidden="true" />
+                  {{ t('landing.header.dashboard') }}
+                </button>
+              </div>
+
               <!-- Sign out -->
               <div class="border-t border-gray-200/70 dark:border-white/10 p-2">
                 <button
@@ -375,7 +391,13 @@ onUnmounted(() => {
                 v-for="section in props.sections"
                 :key="section"
                 type="button"
-                class="flex w-full items-center justify-between rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10"
+                class="flex w-full items-center justify-between rounded-xl border-b-2 px-4 py-3 text-left text-sm font-medium transition-colors"
+                :class="
+                  isSectionActive(section)
+                    ? 'border-primary bg-primary/5 font-semibold text-primary dark:border-primary-400 dark:bg-primary-400/10 dark:text-primary-400'
+                    : 'border-transparent text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-white/10'
+                "
+                :aria-current="isSectionActive(section) ? 'page' : undefined"
                 @click="handleNavigationClick(section)"
               >
                 {{ getSectionLabel(section) }}

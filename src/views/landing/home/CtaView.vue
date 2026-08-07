@@ -15,10 +15,10 @@ const { t } = useI18n()
 </script>
 
 <template>
-  <section class="relative overflow-hidden bg-gray-50 py-32 dark:bg-gray-950">
+  <section class="relative overflow-hidden py-32">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-linear-to-b from-gray-50 via-indigo-100/40 to-gray-50 dark:from-gray-950 dark:via-indigo-950/35 dark:to-gray-950"
+      class="absolute inset-0 bg-linear-to-b from-transparent via-indigo-100/40 to-transparent dark:via-indigo-950/35"
     />
     <div
       class="absolute bottom-0 left-1/2 h-[600px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-300/30 dark:bg-indigo-600/20 blur-3xl"

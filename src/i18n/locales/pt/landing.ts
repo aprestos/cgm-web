@@ -74,6 +74,13 @@ export default {
     viewAll: 'Ver todos os jogos',
     available: 'Disponível',
   },
+  tournaments: {
+    sectionTitle: 'Torneios',
+    sectionSubtitle: 'Compete pela glória',
+    sectionDescription:
+      'Inscreve-te no local e luta pelo primeiro lugar do pódio.',
+    organizedBy: 'por {name}',
+  },
   map: {
     sectionTitle: 'Localização',
     sectionSubtitle: 'Encontra-nos aqui',
@@ -100,7 +107,7 @@ export default {
     copyright: '© {year} {name}. Todos os direitos reservados.',
   },
   header: {
-    dashboard: 'Painel de administração',
+    dashboard: 'Administração',
     logoAltFallback: 'Logotipo',
     primaryNavAriaLabel: 'Navegação principal',
     mobileNavAriaLabel: 'Navegação mobile',
@@ -129,6 +136,7 @@ export default {
     countdown: 'Contagem',
     features: 'Funcionalidades',
     library: 'Ludoteca',
+    tournaments: 'Torneios',
   },
   checkout: {
     title: 'Finalizar compra',

@@ -71,6 +71,13 @@ export default {
     viewAll: 'View all games',
     available: 'Available',
   },
+  tournaments: {
+    sectionTitle: 'Tournaments',
+    sectionSubtitle: 'Compete for glory',
+    sectionDescription:
+      'Sign up at the venue and battle it out for the top spot.',
+    organizedBy: 'by {name}',
+  },
   map: {
     sectionTitle: 'Location',
     sectionSubtitle: 'Find us here',
@@ -127,6 +134,7 @@ export default {
     countdown: 'Countdown',
     features: 'Features',
     library: 'Library',
+    tournaments: 'Tournaments',
   },
   checkout: {
     title: 'Checkout',
