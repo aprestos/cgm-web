@@ -36,8 +36,8 @@
                 class="flex h-14 space-x-8 overflow-x-auto border-t border-gray-200 dark:border-white/5 px-4 pb-px sm:h-full sm:justify-center sm:overflow-visible sm:border-t-0 sm:pb-0"
               >
                 <RouterLink
-                  v-for="page in navigation"
-                  :key="page.name"
+                  v-for="page in enabledNavigation"
+                  :key="page.route"
                   :to="{ name: page.route }"
                   class="text-nowrap flex items-center -mb-px border-b-2 text-sm font-semibold transition-colors"
                   :class="
@@ -193,7 +193,7 @@ import {
   PopoverGroup,
 } from '@headlessui/vue'
 import { IconLogout, IconSettings, IconUser } from '@tabler/icons-vue'
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { authService } from '@/features/auth/service.ts'
@@ -267,4 +267,8 @@ const navigation = ref<NavigationItem[]>([
     enabled: settingsStore.value?.tournaments?.enabled ?? false,
   },
 ])
+
+const enabledNavigation = computed(() => {
+  return (navigation?.value ?? []).filter((item) => item.enabled)
+})
 </script>
