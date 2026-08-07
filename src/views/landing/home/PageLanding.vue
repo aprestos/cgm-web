@@ -42,6 +42,10 @@ const galleryImages = computed(() => {
 })
 const scheduleImages = computed<Schedule>(() => edition.value?.schedule ?? {})
 
+// The mosaic in LibraryView is built to tile flush with exactly this many
+// cards, so keep it in sync with the pattern in getGameCardClass().
+const TRENDING_GAMES_COUNT = 13
+
 // Data
 const trendingGames = ref<LibraryGame[]>([])
 const availableTickets = ref<Ticket[]>([])
@@ -217,7 +221,7 @@ async function loadTrendingGames(): Promise<void> {
   try {
     isLoadingGames.value = true
     const games = await libraryService.get()
-    trendingGames.value = getRandomItems(games, 10)
+    trendingGames.value = getRandomItems(games, TRENDING_GAMES_COUNT)
   } catch {
     trendingGames.value = []
   } finally {

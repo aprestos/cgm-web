@@ -2,6 +2,7 @@
 import type { CSSProperties } from 'vue'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import {
+  IconLayoutDashboard,
   IconLogout,
   IconMenu2,
   IconShoppingCart,
@@ -17,7 +18,6 @@ import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
-import CButton from '@/components/CButton.vue'
 
 interface Props {
   sections?: string[]
@@ -247,15 +247,6 @@ onUnmounted(() => {
       </nav>
 
       <div class="relative col-start-3 flex items-center justify-end gap-2">
-        <CButton
-          v-if="canAccessDashboard"
-          size="md"
-          variant="secondary"
-          @click="handleDashboardClick"
-        >
-          {{ t('landing.header.dashboard') }}
-        </CButton>
-
         <Transition
           enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           enter-from-class="translate-x-8 scale-50 opacity-0 blur-sm"
@@ -335,6 +326,21 @@ onUnmounted(() => {
                     {{ user?.email }}
                   </p>
                 </div>
+              </div>
+
+              <!-- Dashboard -->
+              <div
+                v-if="canAccessDashboard"
+                class="border-t border-gray-200/70 dark:border-white/10 p-2"
+              >
+                <button
+                  type="button"
+                  class="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-100 hover:text-primary dark:text-gray-300 dark:hover:bg-white/10 dark:hover:text-primary-400"
+                  @click="handleDashboardClick"
+                >
+                  <IconLayoutDashboard class="h-4 w-4" aria-hidden="true" />
+                  {{ t('landing.header.dashboard') }}
+                </button>
               </div>
 
               <!-- Sign out -->

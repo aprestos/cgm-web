@@ -107,7 +107,7 @@ export default {
     copyright: '© {year} {name}. Todos os direitos reservados.',
   },
   header: {
-    dashboard: 'Painel de administração',
+    dashboard: 'Administração',
     logoAltFallback: 'Logotipo',
     primaryNavAriaLabel: 'Navegação principal',
     mobileNavAriaLabel: 'Navegação mobile',

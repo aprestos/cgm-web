@@ -14,15 +14,23 @@ interface Props {
 
 defineProps<Props>()
 
+// Card sizes for the mosaic. The 13 entries are ordered so that `grid-flow-dense`
+// packs them with no gaps at every breakpoint: 5 full rows on lg (5 columns) and
+// no gaps on sm (3 columns). Reordering or dropping entries reopens holes in the
+// last rows, so change this together with TRENDING_GAMES_COUNT in PageLanding.
 function getGameCardClass(index: number): string {
   const pattern: string[] = [
     'row-span-2 lg:col-span-2 lg:row-span-2',
     'row-span-2',
-    'row-span-1',
     'row-span-2',
+    'row-span-1 lg:col-span-2',
     'row-span-1 lg:col-span-2',
     'row-span-2',
     'row-span-1',
+    'row-span-2',
+    'row-span-2',
+    'row-span-1',
+    'row-span-2',
     'row-span-2',
     'row-span-1',
   ]
