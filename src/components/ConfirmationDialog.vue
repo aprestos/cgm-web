@@ -19,7 +19,6 @@
         </CButton>
         <CButton
           variant="primary"
-          loading-text="Loading..."
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="loading"
