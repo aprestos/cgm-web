@@ -85,7 +85,7 @@ const handleImageLoad = (): void => {
     <!-- Fallback: Show initials -->
     <div
       v-if="showFallback"
-      class="flex h-full w-full items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600 font-semibold text-white"
+      class="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-500 to-purple-600 font-semibold text-white"
       :class="shapeClasses"
     >
       {{ initials }}

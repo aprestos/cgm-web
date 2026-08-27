@@ -63,7 +63,7 @@
               <select
                 id="tournament-type"
                 v-model="formData.format"
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-indigo-500 sm:text-sm/6"
+                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500 sm:text-sm/6"
               >
                 <option
                   v-for="type in TOURNAMENT_TYPES"
@@ -84,6 +84,40 @@
           :rows="3"
           :helper-text="t('common.actions.optional')"
         />
+
+        <!-- Cover image — uploaded on submit, stored on the tournament -->
+        <div>
+          <label
+            class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+          >
+            {{ t('admin.tournaments.form.cover') }}
+            <span class="font-normal text-gray-500 dark:text-gray-400">
+              ({{ t('common.actions.optional') }})
+            </span>
+          </label>
+          <FilePondUploader
+            ref="coverUploader"
+            class="mt-2"
+            :allow-multiple="false"
+            :accepted-file-types="[
+              'image/jpeg',
+              'image/png',
+              'image/gif',
+              'image/webp',
+            ]"
+            max-file-size="10MB"
+            :max-files="1"
+            :label-idle="t('admin.tournaments.form.coverLabelIdle')"
+            supabase-bucket="images"
+            :supabase-path="coverFolder"
+            file-naming-strategy="uuid"
+            :supabase-options="{ cacheControl: '31536000', upsert: false }"
+            @update:has-files="hasCover = $event"
+          />
+          <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('admin.tournaments.form.coverHint') }}
+          </p>
+        </div>
 
         <!-- Prizes — optional, stored per prize type in the current language -->
         <div>
@@ -149,7 +183,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { computed, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRegle } from '@regle/core'
 import { dateAfter, minValue, numeric, required } from '@regle/rules'
@@ -159,12 +193,15 @@ import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import CTextArea from '@/components/CTextArea.vue'
+import FilePondUploader from '@/components/FilePondUploader.vue'
+import type { FilePondUploaderInstance } from '@/components/filePondUploader.model.ts'
+import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
 import {
   type CreateTournament,
   TournamentFormat,
   TournamentPrizeType,
   TournamentStatus,
-} from '@/features/tournaments/model'
+} from '@/features/tournaments/tournament.model.ts'
 import logger from '@/lib/logger'
 import tournamentService from '@/features/tournaments/service.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
@@ -216,6 +253,15 @@ const createFormData = (): {
 const formData = ref(createFormData())
 const isSubmitting = ref<boolean>(false)
 const showPrizes = ref<boolean>(false)
+const hasCover = ref<boolean>(false)
+const coverUploader = useTemplateRef<FilePondUploaderInstance>('coverUploader')
+
+const coverFolder = computed((): string => {
+  const tenantId = tenantStore.value?.id
+  return tenantId
+    ? `tenants/${tenantId}/tournaments`
+    : 'tenants/default/tournaments'
+})
 
 const { r$ } = useRegle(formData, {
   title: { required },
@@ -233,6 +279,8 @@ const { r$ } = useRegle(formData, {
 const resetForm = (): void => {
   formData.value = createFormData()
   showPrizes.value = false
+  hasCover.value = false
+  coverUploader.value?.reset()
   r$.$reset()
 }
 
@@ -265,6 +313,16 @@ const submit = async (): Promise<void> => {
   isSubmitting.value = true
 
   try {
+    // The cover is only uploaded once the form is known to be valid.
+    let coverFile: UploadedFile | undefined
+    if (hasCover.value && coverUploader.value) {
+      ;[coverFile] = await coverUploader.value.upload()
+      if (!coverFile) {
+        toast.error(t('admin.tournaments.form.coverUploadFailed'))
+        return
+      }
+    }
+
     const prizes = buildPrizes()
 
     const tournament: CreateTournament = {
@@ -279,6 +337,7 @@ const submit = async (): Promise<void> => {
         ? { description: formData.value.description.trim() }
         : {}),
       ...(prizes ? { prizes } : {}),
+      ...(coverFile ? { cover: coverFile.url } : {}),
       status: TournamentStatus.scheduled,
     }
 
@@ -293,6 +352,8 @@ const submit = async (): Promise<void> => {
       emit('close')
     } catch (error) {
       logger.error('Unable to create tournament', { error })
+      // The tournament never made it to the database — drop its cover too.
+      if (coverFile) await deleteUploadedFiles([coverFile])
       toast.error('Unable to create tournament. Try again later')
     }
   } finally {

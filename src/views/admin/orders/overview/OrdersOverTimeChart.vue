@@ -146,7 +146,7 @@ const chartOptions = computed(() => {
             class="px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 cursor-pointer"
             :class="
               props.selectedPeriod === option.value
-                ? 'bg-white dark:bg-gray-900 text-indigo-600 dark:text-indigo-400 shadow-sm'
+                ? 'bg-white dark:bg-gray-900 text-primary-600 dark:text-primary-400 shadow-sm'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
             "
             @click="selectPeriod(option.value)"
@@ -159,7 +159,7 @@ const chartOptions = computed(() => {
       <div class="mt-4">
         <div v-if="loading" class="flex items-center justify-center h-64">
           <div
-            class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"
+            class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"
           />
         </div>
 

@@ -157,9 +157,9 @@ async function submit(): Promise<void> {
             class="flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold transition-colors"
             :class="
               n === step
-                ? 'bg-indigo-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : n < step
-                  ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/40 dark:text-indigo-400'
+                  ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/40 dark:text-primary-400'
                   : 'bg-gray-100 text-gray-400 dark:bg-white/10 dark:text-gray-500'
             "
           >

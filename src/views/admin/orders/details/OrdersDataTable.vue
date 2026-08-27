@@ -131,7 +131,7 @@ function formatDate(iso: string): string {
         <template #actions="{ item }">
           <button
             type="button"
-            class="p-1.5 rounded-md text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
+            class="p-1.5 rounded-md text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-gray-100 dark:hover:bg-white/10 transition-colors cursor-pointer"
             :title="t('admin.orders.viewDetails')"
             @click="emit('viewDetails', item.id)"
           >

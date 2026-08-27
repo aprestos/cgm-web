@@ -17,7 +17,7 @@
             'flex py-3 items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
             isMobile ? 'px-4' : '',
             {
-              'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300':
+              'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300':
                 selectedTag === category.id,
             },
           ]"
@@ -28,7 +28,7 @@
               isMobile ? 'h-5 w-5' : 'h-4 w-4',
               'text-gray-400 dark:text-gray-300',
               {
-                'text-indigo-600 dark:text-indigo-400':
+                'text-primary-600 dark:text-primary-400':
                   selectedTag === category.id,
               },
             ]"
@@ -85,7 +85,7 @@
                   :value="option.value"
                   type="checkbox"
                   :checked="isFilterSelected(section.id, option.value)"
-                  class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
+                  class="col-start-1 row-start-1 appearance-none rounded-sm border border-gray-300 bg-white checked:border-primary-600 checked:bg-primary-600 indeterminate:border-primary-600 indeterminate:bg-primary-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                   @change="handleToggleFilter(section.id, option.value, $event)"
                 />
                 <svg

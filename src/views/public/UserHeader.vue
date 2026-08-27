@@ -14,11 +14,11 @@ defineProps<Props>()
   <div
     class="md:bg-white md:dark:bg-gray-800 md:rounded-2xl md:shadow-lg overflow-hidden"
   >
-    <div class="bg-gradient-to-r from-indigo-600 to-indigo-400 h-32"></div>
+    <div class="bg-gradient-to-r from-primary-600 to-primary-400 h-32"></div>
     <div class="px-6 pb-6 -mt-16 relative z-10">
       <div class="flex flex-col sm:flex-row sm:items-end sm:gap-6">
         <div
-          class="w-32 h-32 rounded-2xl bg-gradient-to-br from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-4xl font-bold shadow-lg border-4 border-white dark:border-gray-900 flex-shrink-0"
+          class="w-32 h-32 rounded-2xl bg-gradient-to-br from-primary-600 to-primary-400 flex items-center justify-center text-white text-4xl font-bold shadow-lg border-4 border-white dark:border-gray-900 flex-shrink-0"
         >
           {{ user?.name?.charAt(0).toUpperCase() || 'U' }}
         </div>

@@ -1,46 +1,43 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { DateTime } from 'luxon'
 import { toast } from 'vue-sonner'
+import TournamentToolbar from './TournamentToolbar.vue'
+import TournamentStatusTabs from './TournamentStatusTabs.vue'
+import TournamentGrid from './TournamentGrid.vue'
+import TournamentGridSkeleton from './TournamentGridSkeleton.vue'
+import DialogTournamentDetails from './dialogs/details/DialogTournamentDetails.vue'
 import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-} from '@headlessui/vue'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
-import { IconArrowsSort, IconCheck, IconTrophy } from '@tabler/icons-vue'
-import SearchInput from '@/components/SearchInput.vue'
-import SkeletonLoader from '@/components/SkeletonLoader.vue'
-import TournamentCard from './TournamentCard.vue'
-import { type Tournament, TournamentStatus } from '@/features/tournaments/model'
+  countByStatus,
+  filterTournaments,
+  SortOption,
+  sortTournaments,
+  type StatusTab,
+} from './tournaments.filters.ts'
+import {
+  type Tournament,
+  TournamentStatus,
+} from '@/features/tournaments/tournament.model.ts'
 import tournamentService from '@/features/tournaments/service.ts'
 import { authService } from '@/features/auth/service.ts'
+import type { User } from '@/features/auth/user.model.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
 import { editionStore } from '@/features/events/edition.store.ts'
+import type {
+  CreateTournamentParticipant,
+  TournamentParticipant,
+} from '@/features/tournaments/participant.model.ts'
 
 const { t } = useI18n()
 
-enum SortOption {
-  soonest = 'soonest',
-  slots = 'slots',
-  name = 'name',
-}
-
-// Cancelled tournaments are never shown, so the tabs cover the rest.
-const STATUS_TABS = [
-  'all',
-  TournamentStatus.scheduled,
-  TournamentStatus.ongoing,
-  TournamentStatus.finished,
-] as const
-
-type StatusTab = (typeof STATUS_TABS)[number]
-
 const tournaments = ref<Tournament[]>([])
+const participants = ref<Map<string, TournamentParticipant[]>>(new Map())
 const loading = ref<boolean>(true)
-const isAuthenticated = ref<boolean>(false)
+const currentUser = ref<User | null>(null)
+const selectedTournament = ref<Tournament | null>(null)
+// Opened from a join/edit button rather than the card body, so the dialog
+// scrolls past the info straight to the form.
+const focusSignUp = ref<boolean>(false)
 const searchQuery = ref<string>('')
 const selectedStatus = ref<StatusTab>('all')
 const selectedSort = ref<SortOption>(SortOption.soonest)
@@ -51,66 +48,70 @@ const availableTournaments = computed<Tournament[]>(() =>
   ),
 )
 
-const countByStatus = computed<Record<StatusTab, number>>(() => {
-  const counts = {
-    all: availableTournaments.value.length,
-    [TournamentStatus.scheduled]: 0,
-    [TournamentStatus.ongoing]: 0,
-    [TournamentStatus.finished]: 0,
-  } as Record<StatusTab, number>
+const statusCounts = computed(() => countByStatus(availableTournaments.value))
 
-  for (const tournament of availableTournaments.value) {
-    if (tournament.status in counts) {
-      counts[tournament.status as StatusTab]++
-    }
-  }
+const visibleTournaments = computed<Tournament[]>(() =>
+  sortTournaments(
+    filterTournaments(
+      availableTournaments.value,
+      selectedStatus.value,
+      searchQuery.value,
+    ),
+    selectedSort.value,
+  ),
+)
 
-  return counts
-})
+// Only signed-in users get the join button, so the dialog always has a user.
+const isAuthenticated = computed<boolean>(() => !!currentUser.value)
 
-const slotsLeft = (tournament: Tournament): number =>
-  Math.max(tournament.maxParticipants - tournament.participants, 0)
+const openDetails = (tournament: Tournament, atSignUp: boolean): void => {
+  selectedTournament.value = tournament
+  focusSignUp.value = atSignUp
+}
 
-const visibleTournaments = computed<Tournament[]>(() => {
-  const query = searchQuery.value.trim().toLowerCase()
+const selectedParticipants = computed<TournamentParticipant[]>(() =>
+  selectedTournament.value
+    ? (participants.value.get(selectedTournament.value.id) ?? [])
+    : [],
+)
 
-  const filtered = availableTournaments.value.filter((tournament) => {
-    if (
-      selectedStatus.value !== 'all' &&
-      tournament.status !== selectedStatus.value
-    ) {
-      return false
-    }
+const closeDetailsDialog = (): void => {
+  focusSignUp.value = false
+}
 
-    if (!query) return true
+const handleJoinConfirm = async (
+  participants: CreateTournamentParticipant[],
+): Promise<void> => {
+  const tournament = selectedTournament.value
+  if (!tenantStore.value || !editionStore.value || !tournament || !participants)
+    return
 
-    return (
-      tournament.title.toLowerCase().includes(query) ||
-      (tournament.organizer ?? '').toLowerCase().includes(query) ||
-      (tournament.place ?? '').toLowerCase().includes(query)
+  try {
+    await tournamentService.join(
+      tenantStore.value.id,
+      editionStore.value.id,
+      tournament.id,
+      participants,
     )
-  })
-
-  return filtered.sort((a, b) => {
-    switch (selectedSort.value) {
-      case SortOption.slots:
-        return slotsLeft(b) - slotsLeft(a)
-      case SortOption.name:
-        return a.title.localeCompare(b.title)
-      default:
-        return (
-          DateTime.fromISO(a.startsAt).toMillis() -
-          DateTime.fromISO(b.startsAt).toMillis()
-        )
-    }
-  })
-})
-
-// Sign-ups aren't persisted yet — the toast stands in for the real flow.
-const handleJoin = (tournament: Tournament): void => {
+  } catch {
+    toast.error(t('public.tournaments.joinError'))
+    return
+  }
   toast.success(
-    t('public.tournaments.joinSuccess', { title: tournament.title }),
+    participants.length > 1
+      ? t('public.tournaments.joinSuccessMultiple', {
+          title: tournament.title,
+          count: participants.length,
+        })
+      : t('public.tournaments.joinSuccess', {
+          title: tournament.title,
+          name: participants[0]?.participantName ?? '',
+        }),
   )
+
+  void loadTournaments()
+
+  closeDetailsDialog()
 }
 
 async function loadTournaments(): Promise<void> {
@@ -120,10 +121,27 @@ async function loadTournaments(): Promise<void> {
   }
 
   try {
-    tournaments.value = await tournamentService.getAll(
-      tenantStore.value.id,
-      editionStore.value.id,
-    )
+    const [allTournaments, tournamentParticipants] = await Promise.allSettled([
+      tournamentService.getAll(tenantStore.value.id, editionStore.value.id),
+      tournamentService.getParticipantsByUser(
+        tenantStore.value.id,
+        editionStore.value.id,
+        currentUser.value?.id,
+      ),
+    ])
+
+    if (allTournaments.status === 'fulfilled')
+      tournaments.value = allTournaments.value
+    if (tournamentParticipants.status === 'fulfilled')
+      participants.value = tournamentParticipants.value.reduce(
+        (acc: Map<string, TournamentParticipant[]>, participant) => {
+          const currentTournament = acc.get(participant.tournamentId) ?? []
+          currentTournament.push(participant)
+          acc.set(participant.tournamentId, currentTournament)
+          return acc
+        },
+        new Map(),
+      )
   } catch (error) {
     console.error('Failed to load tournaments:', error)
     toast.error(t('public.tournaments.loadError'))
@@ -133,169 +151,42 @@ async function loadTournaments(): Promise<void> {
 }
 
 onMounted(async () => {
-  isAuthenticated.value = !!(await authService.getUser())
+  currentUser.value = await authService.getUser()
   await loadTournaments()
 })
 </script>
 
 <template>
   <div class="pb-16">
-    <!-- Toolbar -->
-    <div class="flex items-center gap-4 pb-6">
-      <div class="flex-1">
-        <SearchInput
-          v-model="searchQuery"
-          :placeholder="t('public.tournaments.search')"
-        />
-      </div>
+    <TournamentToolbar
+      v-model:search="searchQuery"
+      v-model:sort="selectedSort"
+    />
 
-      <div class="shrink-0 self-stretch">
-        <Listbox v-model="selectedSort" class="h-full">
-          <div class="relative h-full">
-            <ListboxButton
-              class="relative h-full w-full cursor-pointer rounded-full bg-gray-100 pl-12 pr-10 text-left focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:bg-gray-700 dark:focus:border-indigo-400 dark:focus:ring-indigo-400"
-            >
-              <span
-                class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
-              >
-                <IconArrowsSort
-                  class="size-6 text-gray-400 dark:text-gray-300"
-                  aria-hidden="true"
-                />
-              </span>
-              <span class="hidden flex-col justify-center md:flex">
-                <span class="mb-0.5 text-xs text-gray-500 dark:text-gray-400">
-                  {{ t('public.tournaments.sort.sortBy') }}
-                </span>
-                <span
-                  class="block truncate text-base font-medium text-gray-900 dark:text-white"
-                >
-                  {{ t(`public.tournaments.sort.${selectedSort}`) }}
-                </span>
-              </span>
-              <span
-                class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4"
-              >
-                <ChevronDownIcon
-                  class="size-5 text-gray-400"
-                  aria-hidden="true"
-                />
-              </span>
-            </ListboxButton>
+    <TournamentStatusTabs v-model="selectedStatus" :counts="statusCounts" />
 
-            <transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
-            >
-              <ListboxOptions
-                class="absolute right-0 z-10 mt-1 max-h-60 w-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm dark:bg-gray-800 dark:ring-gray-700"
-              >
-                <ListboxOption
-                  v-for="option in Object.values(SortOption)"
-                  :key="option"
-                  v-slot="{ active, selected }"
-                  :value="option"
-                  as="template"
-                >
-                  <li
-                    :class="[
-                      active
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-gray-900 dark:text-white',
-                      'relative flex cursor-pointer select-none flex-row py-2 pl-3 pr-9',
-                    ]"
-                  >
-                    <span
-                      :class="[
-                        selected ? 'font-semibold' : 'font-normal',
-                        'block truncate',
-                      ]"
-                    >
-                      {{ t(`public.tournaments.sort.${option}`) }}
-                    </span>
+    <TournamentGridSkeleton v-if="loading" />
 
-                    <IconCheck
-                      v-if="selected"
-                      :class="[
-                        active ? 'text-white' : 'text-indigo-600',
-                        'absolute right-0 mr-4 size-5',
-                      ]"
-                    />
-                  </li>
-                </ListboxOption>
-              </ListboxOptions>
-            </transition>
-          </div>
-        </Listbox>
-      </div>
-    </div>
-
-    <!-- Status tabs -->
-    <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-6 sm:mx-0 sm:px-0">
-      <button
-        v-for="status in STATUS_TABS"
-        :key="status"
-        type="button"
-        class="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors"
-        :class="
-          selectedStatus === status
-            ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/5 dark:text-gray-300 dark:hover:bg-white/10'
-        "
-        @click="selectedStatus = status"
-      >
-        {{ t(`public.tournaments.tabs.${status}`) }}
-        <span class="ml-1 opacity-60">{{ countByStatus[status] }}</span>
-      </button>
-    </div>
-
-    <!-- Loading -->
-    <div
-      v-if="loading"
-      class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-    >
-      <div v-for="index in 8" :key="index" class="space-y-3">
-        <SkeletonLoader width="100%" height="180px" rounded="lg" />
-        <SkeletonLoader width="70%" height="20px" />
-        <SkeletonLoader width="45%" height="16px" />
-      </div>
-    </div>
-
-    <!-- Tournaments grid -->
-    <div
-      v-else-if="visibleTournaments.length"
-      class="grid grid-cols-2 gap-x-6 gap-y-8 md:grid-cols-3 lg:grid-cols-4"
-    >
-      <TournamentCard
-        v-for="tournament in visibleTournaments"
-        :key="tournament.id"
-        :tournament="tournament"
-        :can-join="isAuthenticated"
-        @join="handleJoin"
-      />
-    </div>
-
-    <!-- Empty state -->
-    <div
+    <TournamentGrid
       v-else
-      class="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 px-4 py-16 text-center dark:border-white/10"
-    >
-      <div
-        class="mb-4 flex size-12 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20"
-      >
-        <IconTrophy class="size-6 text-amber-600 dark:text-amber-400" />
-      </div>
-      <h3 class="font-display font-semibold text-gray-900 dark:text-white">
-        {{ t('public.tournaments.empty') }}
-      </h3>
-      <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        {{ t('public.tournaments.emptyDescription') }}
-      </p>
-    </div>
+      :tournaments="visibleTournaments"
+      :participants="participants"
+      :can-join="isAuthenticated"
+      @details="openDetails($event, false)"
+      @join="openDetails($event, true)"
+      @edit="openDetails($event, true)"
+    />
+
+    <DialogTournamentDetails
+      :open="focusSignUp"
+      :tournament="selectedTournament"
+      :participants="selectedParticipants"
+      :user="currentUser"
+      :can-join="isAuthenticated"
+      :focus-sign-up="focusSignUp"
+      @close="closeDetailsDialog"
+      @confirm="handleJoinConfirm"
+    />
   </div>
 </template>
 

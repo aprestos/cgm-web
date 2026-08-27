@@ -54,7 +54,7 @@ async function handleContinue(): Promise<void> {
         :key="attendee.key"
         class="rounded-2xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-gray-950"
       >
-        <p class="text-sm font-semibold text-indigo-600 dark:text-indigo-300">
+        <p class="text-sm font-semibold text-primary-600 dark:text-primary-300">
           <IconTicket class="mr-1 inline size-4" />
           {{ attendee.ticketName }} ·
           {{
@@ -70,7 +70,7 @@ async function handleContinue(): Promise<void> {
             <input
               v-model="attendees[index].holderName"
               type="text"
-              class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-white/15 dark:bg-gray-900"
+              class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary-500 dark:border-white/15 dark:bg-gray-900"
               :class="{
                 'border-red-400 dark:border-red-500':
                   r$.attendees.$each[index]?.holderName.$error,
@@ -91,7 +91,7 @@ async function handleContinue(): Promise<void> {
             <input
               v-model="attendees[index].holderEmail"
               type="email"
-              class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 dark:border-white/15 dark:bg-gray-900"
+              class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary-500 dark:border-white/15 dark:bg-gray-900"
               :class="{
                 'border-red-400 dark:border-red-500':
                   r$.attendees.$each[index]?.holderEmail.$error,
@@ -118,7 +118,7 @@ async function handleContinue(): Promise<void> {
       </button>
       <button
         type="button"
-        class="rounded-xl cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500"
+        class="rounded-xl cursor-pointer bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-500"
         @click="handleContinue"
       >
         {{ t('common.actions.continue') }}

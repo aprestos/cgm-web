@@ -98,7 +98,7 @@ const totalTicketCount = computed(
 )
 
 const GROUP_COLORS = [
-  'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
   'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
   'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
@@ -305,7 +305,7 @@ const sendEmails = async (): Promise<void> => {
                     class="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-3"
                   >
                     <div
-                      class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-display font-semibold text-sm shrink-0 select-none"
+                      class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-display font-semibold text-sm shrink-0 select-none"
                     >
                       {{ buyerInitials }}
                     </div>

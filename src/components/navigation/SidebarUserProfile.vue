@@ -35,7 +35,7 @@ const handleSignOut = async (): Promise<void> => {
         class="flex w-full items-center gap-x-4 px-6 py-3 text-sm/6 font-semibold text-gray-900 hover:bg-gray-100 dark:text-white dark:hover:bg-white/5 cursor-pointer"
       >
         <div
-          class="size-8 rounded-full bg-indigo-600 flex items-center justify-center text-white text-sm font-medium uppercase dark:bg-indigo-500"
+          class="size-8 rounded-full bg-primary-600 flex items-center justify-center text-white text-sm font-medium uppercase dark:bg-primary-500"
         >
           {{ userName[0] }}
         </div>

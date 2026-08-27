@@ -3,7 +3,10 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconTrophy } from '@tabler/icons-vue'
 import { DateTime } from 'luxon'
-import { type Tournament, TournamentStatus } from '@/features/tournaments/model'
+import {
+  type Tournament,
+  TournamentStatus,
+} from '@/features/tournaments/tournament.model.ts'
 
 const { t } = useI18n()
 

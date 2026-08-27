@@ -138,10 +138,10 @@ const backToSignIn = async (): Promise<void> => {
   <div v-if="isValidating" class="mt-6 text-center">
     <!-- Loading state -->
     <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30"
+      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30"
     >
       <svg
-        class="h-8 w-8 animate-spin text-indigo-600 dark:text-indigo-400"
+        class="h-8 w-8 animate-spin text-primary-600 dark:text-primary-400"
         fill="none"
         viewBox="0 0 24 24"
       >
@@ -206,7 +206,7 @@ const backToSignIn = async (): Promise<void> => {
     <!-- Manual redirect button -->
     <div class="mt-6">
       <button
-        class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500"
+        class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500"
         @click="redirectToHome"
       >
         <IconArrowNarrowRight class="h-4 w-4" aria-hidden="true" />
@@ -247,7 +247,7 @@ const backToSignIn = async (): Promise<void> => {
 
     <div class="mt-6">
       <button
-        class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+        class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="isUpdatingDisplayName"
         @click="updateDisplayName"
       >

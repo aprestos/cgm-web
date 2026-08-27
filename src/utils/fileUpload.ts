@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/features/auth/service.ts'
+import logger from '@/lib/logger'
 
 export interface FileUploadOptions {
   bucket: string
@@ -21,6 +22,16 @@ export interface UploadResult {
   path: string
   bucket: string
   error?: any
+}
+
+/**
+ * A file that reached storage. Keeps the path alongside the public URL so the
+ * upload can be rolled back when whatever it belonged to never got persisted.
+ */
+export interface UploadedFile {
+  url: string
+  path: string
+  bucket: string
 }
 
 export interface UploadProgress {
@@ -239,6 +250,31 @@ export async function deleteFileFromSupabase(
 }
 
 /**
+ * Remove uploads that were never persisted. Best effort: failures are logged
+ * rather than thrown, since the caller is already handling another error.
+ */
+export async function deleteUploadedFiles(
+  files: UploadedFile[],
+): Promise<void> {
+  await Promise.all(
+    files.map(async (file) => {
+      const { success, error } = await deleteFileFromSupabase(
+        file.path,
+        file.bucket,
+      )
+
+      if (!success) {
+        logger.error('Unable to delete orphaned upload', {
+          error,
+          path: file.path,
+          bucket: file.bucket,
+        })
+      }
+    }),
+  )
+}
+
+/**
  * Get signed URL for private file access
  */
 export async function getSignedUrl(
@@ -316,6 +352,7 @@ export default {
   uploadFileToSupabase,
   uploadFilesToSupabase,
   deleteFileFromSupabase,
+  deleteUploadedFiles,
   getSignedUrl,
   listFiles,
   getFileMetadata,

@@ -60,7 +60,7 @@ const status = computed(() => {
         class="truncate text-sm font-semibold"
         :class="
           selected
-            ? 'text-indigo-700 dark:text-indigo-300'
+            ? 'text-primary-700 dark:text-primary-300'
             : 'text-gray-900 dark:text-white'
         "
       >

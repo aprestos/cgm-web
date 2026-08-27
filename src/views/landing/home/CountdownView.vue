@@ -24,7 +24,7 @@ function formatDate(dateString: string | undefined): string {
 <template>
   <section
     id="countdown"
-    class="relative flex min-h-[60vh] items-center justify-center overflow-hidden bg-linear-to-b from-gray-50 via-indigo-50/25 to-gray-50 dark:from-gray-950 dark:via-indigo-950/25 dark:to-gray-950"
+    class="relative flex min-h-[60vh] items-center justify-center overflow-hidden bg-linear-to-b from-gray-50 via-primary-50/25 to-gray-50 dark:from-gray-950 dark:via-primary-950/25 dark:to-gray-950"
   >
     <div
       class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.1),transparent_70%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(99,102,241,0.15),transparent_70%)]"
@@ -32,7 +32,7 @@ function formatDate(dateString: string | undefined): string {
 
     <div class="relative z-10 mx-auto max-w-4xl px-4 text-center">
       <h2
-        class="text-lg font-medium uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+        class="text-lg font-medium uppercase tracking-widest text-primary-600 dark:text-primary-400"
       >
         {{ t('landing.countdown.title') }}
       </h2>

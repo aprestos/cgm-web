@@ -17,7 +17,7 @@
             'relative w-full cursor-default overflow-hidden rounded-md bg-white dark:bg-white/5 text-left outline-1 -outline-offset-1 focus-within:outline-2 focus-within:-outline-offset-2 sm:text-sm',
             errors && errors.length > 0
               ? 'outline-red-300 focus-within:outline-red-600 dark:outline-red-400 dark:focus-within:outline-red-500'
-              : 'outline-gray-300 dark:outline-white/10 focus-within:outline-indigo-600 dark:focus-within:outline-indigo-500',
+              : 'outline-gray-300 dark:outline-white/10 focus-within:outline-primary-600 dark:focus-within:outline-primary-500',
           ]"
         >
           <ComboboxInput
@@ -101,7 +101,7 @@
                 class="relative cursor-pointer select-none py-2 pl-10 pr-4"
                 :class="
                   active
-                    ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                    ? 'bg-primary-600 text-white dark:bg-primary-500'
                     : 'text-gray-900 dark:text-gray-100'
                 "
               >
@@ -115,7 +115,7 @@
                     class="ml-1"
                     :class="
                       active
-                        ? 'text-indigo-100'
+                        ? 'text-primary-100'
                         : 'text-gray-500 dark:text-gray-400'
                     "
                   >
@@ -128,7 +128,7 @@
                     isSelected
                       ? active
                         ? 'text-white'
-                        : 'text-indigo-600 dark:text-indigo-500'
+                        : 'text-primary-600 dark:text-primary-500'
                       : 'text-gray-300 dark:text-gray-600'
                   "
                 >

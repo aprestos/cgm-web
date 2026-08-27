@@ -14,6 +14,7 @@ import {
 import { verifyTicketQR } from '@/utils/ticket'
 import DialogComponent from '@/components/DialogComponent.vue'
 import ticketIssuanceService from '@/features/tickets/issuance.service.ts'
+import { IssuanceStatus } from '@/features/tickets/ticket.model.ts'
 import logger from '@/lib/logger.ts'
 import { computedAsync } from '@vueuse/core'
 import { formatWeekday } from '@/utils/date.ts'
@@ -63,7 +64,7 @@ const canCheckin = computedAsync<boolean | null>(async () => {
 
   try {
     const status = await ticketIssuanceService.getStatus(orderId)
-    return status === 'valid'
+    return status === IssuanceStatus.VALID
   } catch (error) {
     logger.warn('Error checking issuance status', { error })
     return false

@@ -10,7 +10,7 @@ import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
 import type { Ticket } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
-import type { Tournament } from '@/features/tournaments/model.ts'
+import type { Tournament } from '@/features/tournaments/tournament.model.ts'
 import { tournamentService } from '@/features/tournaments/service.ts'
 
 // Components

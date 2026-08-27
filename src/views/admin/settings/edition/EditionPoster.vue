@@ -45,7 +45,7 @@
             upsert: false,
           }"
           @close="showPosterUploadDialog = false"
-          @upload-success="handleUploadSuccess"
+          @uploaded="handleUploaded"
           @upload-error="handleUploadError"
         />
       </div>
@@ -61,6 +61,7 @@ import SettingsSection from '@/components/SettingsSection.vue'
 import FilePondUploadDialog from '@/components/FilePondUploadDialog.vue'
 import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
+import type { UploadedFile } from '@/utils/fileUpload'
 
 interface Props {
   poster: string
@@ -68,6 +69,8 @@ interface Props {
 
 interface Emits {
   (e: 'update:poster', value: string): void
+  /** The poster is in storage but not yet saved — the parent owns the rollback. */
+  (e: 'uploaded', file: UploadedFile): void
 }
 
 const props = defineProps<Props>()
@@ -91,20 +94,21 @@ const posterFolder = computed((): string => {
 })
 
 // Handle poster upload success
-const handleUploadSuccess = (urls: string[]): void => {
+const handleUploaded = (files: UploadedFile[]): void => {
   showPosterUploadDialog.value = false
-  const url = urls[0]
-  if (url) {
-    posterPreview.value = url
-    emit('update:poster', url)
-    logger.debug('Poster uploaded successfully:', { url })
+  const [file] = files
+  if (file) {
+    posterPreview.value = file.url
+    emit('update:poster', file.url)
+    emit('uploaded', file)
+    logger.debug('Poster uploaded successfully:', { url: file.url })
     toast.success('Poster uploaded successfully!')
   }
 }
 
 // Handle poster upload error
 const handleUploadError = (error: unknown): void => {
-  console.error('Poster upload failed:', error)
+  logger.error('Poster upload failed', { error })
   toast.error('Failed to upload poster. Please try again.')
 }
 </script>

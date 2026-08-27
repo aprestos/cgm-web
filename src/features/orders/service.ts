@@ -86,8 +86,6 @@ function generateBuckets(
   return buckets
 }
 
-const commerceClient = supabase.schema('commerce')
-
 export const orderService = {
   /**
    * Polls the commerce.orders table at a fixed interval until the given order
@@ -105,8 +103,8 @@ export const orderService = {
     const deadline = Date.now() + timeout * 1000
 
     while (Date.now() < deadline) {
-      const { data, error } = await commerceClient
-        .from('orders')
+      const { data, error } = await supabase
+        .from('commerce_orders')
         .select('id,status,total')
         .eq('stripe_session_id', sessionId)
         .maybeSingle<{ id: string; total: number; status: string }>()
@@ -171,8 +169,8 @@ export const orderService = {
     to?: string,
     granularity: ChartGranularity = '1d',
   ): Promise<OrdersOverTimeEntry[]> {
-    let query = commerceClient
-      .from('orders')
+    let query = supabase
+      .from('commerce_orders')
       .select('created_at')
       .eq('tenant_id', tenantId)
       .eq('edition_id', editionId)
@@ -206,8 +204,8 @@ export const orderService = {
   async getOrdersCount(
     tenantId: string,
   ): Promise<{ count: number; revenue: number }> {
-    const { data, error } = await commerceClient
-      .from('orders')
+    const { data, error } = await supabase
+      .from('commerce_orders')
       .select('count:id.count(), revenue:total.sum()')
       .eq('tenant_id', tenantId)
       .eq('status', 'paid')
@@ -219,8 +217,8 @@ export const orderService = {
   },
 
   async getOrderItemsCount(tenantId: string): Promise<number> {
-    const { data, error } = await commerceClient
-      .from('order_items')
+    const { data, error } = await supabase
+      .from('commerce_order_items')
       .select('count:id.count(), order:orders!inner(status,edition_id)')
       .eq('tenant_id', tenantId)
       .eq('orders.status', 'paid')
@@ -260,8 +258,8 @@ export const orderService = {
       if (!customerIds.length) return []
     }
 
-    let query = commerceClient
-      .from('orders')
+    let query = supabase
+      .from('commerce_orders')
       .select('id,customer_id,status,total,created_at')
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
@@ -344,8 +342,8 @@ export const orderService = {
       { data: orderItems, error: orderItemsError },
       { data: tickets, error: ticketsError },
     ] = await Promise.all([
-      commerceClient
-        .from('order_items')
+      supabase
+        .from('commerce_order_items')
         .select('ticket_id, quantity, order:orders!inner(status, edition_id)')
         .eq('tenant_id', tenantId)
         .eq('orders.status', 'paid')

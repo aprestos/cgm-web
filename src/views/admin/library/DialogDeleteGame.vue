@@ -78,7 +78,7 @@ const deleteGame = async (): Promise<void> => {
       <!-- Loading State -->
       <div v-if="isLoading" class="flex items-center justify-center py-8">
         <div
-          class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600 dark:border-gray-700 dark:border-t-indigo-400"
+          class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400"
         />
         <span class="ml-3 text-sm text-gray-600 dark:text-gray-400">{{
           t('admin.library.checkingHistory')

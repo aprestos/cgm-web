@@ -42,7 +42,7 @@
                   class="text-nowrap flex items-center -mb-px border-b-2 text-sm font-semibold transition-colors"
                   :class="
                     isActive(page.route)
-                      ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                      ? 'border-primary-600 text-primary-600 dark:border-primary-400 dark:text-primary-400'
                       : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                   "
                 >
@@ -55,29 +55,13 @@
               <LanguageSwitcher />
               <!-- Show authenticated user elements -->
               <template v-if="isAuthenticated">
-                <!-- Admin Panel Button (only show if user is staff or admin) -->
-                <RouterLink
-                  v-if="isStaffOrAdmin"
-                  :to="{ name: RouteNames.admin.library }"
-                  class="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                >
-                  <IconSettings class="h-4 w-4" aria-hidden="true" />
-                  {{ t('public.navigation.admin') }}
-                </RouterLink>
-
-                <!-- Separator (only show if admin button is visible) -->
-                <div
-                  v-if="isStaffOrAdmin"
-                  class="h-6 w-px bg-gray-300 dark:bg-gray-600"
-                ></div>
-
                 <!-- Profile Dropdown -->
                 <Menu as="div" class="relative">
                   <MenuButton
                     class="flex cursor-pointer items-center rounded-full hover:ring-2 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all"
                   >
                     <div
-                      class="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold"
+                      class="flex h-8 w-8 items-center justify-center rounded-full bg-primary-600 text-white text-sm font-semibold"
                     >
                       {{ user?.name ? user.name[0] : 'U' }}
                     </div>
@@ -92,7 +76,7 @@
                     leave-to-class="transform opacity-0 scale-95"
                   >
                     <MenuItems
-                      class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/10 ring-opacity-5 focus:outline-none overflow-hidden"
+                      class="absolute right-0 z-10 mt-2 w-[min(16rem,calc(100vw-2rem))] origin-top-right rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black/10 ring-opacity-5 focus:outline-none overflow-hidden"
                     >
                       <!-- Account details header -->
                       <div
@@ -100,7 +84,7 @@
                       >
                         <div class="flex items-center gap-3">
                           <div
-                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold"
+                            class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white text-sm font-semibold"
                           >
                             {{ user?.name ? user.name[0].toUpperCase() : 'U' }}
                           </div>
@@ -139,6 +123,24 @@
                             </button>
                           </RouterLink>
                         </MenuItem>
+
+                        <!-- Admin Panel (only show if user is staff or admin) -->
+                        <MenuItem v-if="isStaffOrAdmin" v-slot="{ active }">
+                          <RouterLink :to="{ name: RouteNames.admin.library }">
+                            <button
+                              :class="[
+                                active ? 'bg-gray-100 dark:bg-gray-700' : '',
+                                'cursor-pointer flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300',
+                              ]"
+                            >
+                              <IconSettings
+                                class="h-4 w-4"
+                                aria-hidden="true"
+                              />
+                              {{ t('public.navigation.admin') }}
+                            </button>
+                          </RouterLink>
+                        </MenuItem>
                       </div>
 
                       <!-- Sign out -->
@@ -172,7 +174,7 @@
                   name: RouteNames.auth.signIn,
                   query: { redirect: $route.fullPath },
                 }"
-                class="flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 transition-colors"
+                class="flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 transition-colors"
               >
                 {{ t('auth.signIn') }}
               </RouterLink>

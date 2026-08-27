@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import {
-  IconCalendar,
-  IconPlus,
-  IconMinus,
-  IconShoppingBagPlus,
-  IconShoppingBag,
   IconArrowRight,
+  IconCalendar,
   IconLock,
+  IconMinus,
+  IconPlus,
+  IconShoppingBag,
+  IconShoppingBagPlus,
 } from '@tabler/icons-vue'
 import { computed, onMounted, ref } from 'vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
@@ -54,8 +54,6 @@ const hasItems = computed(() => !props.showComingSoon && totalItems.value > 0)
 const formattedTotal = computed(() => formatPrice(totalPrice.value))
 
 const isAvailableToBuy = (ticket: Ticket): boolean => {
-  if (!ticket.active) return false
-
   const now = Date.now()
 
   if (ticket.saleFrom) {
@@ -85,17 +83,17 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
   <section id="tickets" class="relative overflow-hidden py-32">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-linear-to-b from-transparent via-indigo-100/40 to-transparent dark:via-indigo-950/35"
+      class="absolute inset-0 bg-linear-to-b from-transparent via-primary-100/40 to-transparent dark:via-primary-950/35"
     />
     <div
-      class="absolute left-0 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-indigo-300/40 dark:bg-indigo-600/30 blur-3xl"
+      class="absolute left-0 top-1/2 h-125 w-125 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary-300/40 dark:bg-primary-600/30 blur-3xl"
     />
 
     <div class="relative z-10 mx-auto max-w-5xl px-4">
       <!-- Section Header -->
       <div class="text-center">
         <h2
-          class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+          class="text-sm font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400"
         >
           {{ t('landing.tickets.sectionTitle') }}
         </h2>
@@ -114,8 +112,8 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
           :class="[
             'relative overflow-hidden rounded-3xl p-8 transition-all duration-300',
             ticket.isPopular
-              ? 'bg-linear-to-b from-indigo-600 to-violet-700 ring-2 ring-indigo-400 lg:scale-105 shadow-2xl'
-              : 'bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl',
+              ? 'bg-linear-to-b from-primary-600 to-violet-700 ring-2 ring-primary-400 lg:scale-105 shadow-2xl'
+              : 'bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none hover:ring-primary-300 dark:hover:ring-white/20 hover:shadow-xl',
           ]"
         >
           <!-- Popular Badge -->
@@ -201,8 +199,8 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
                   :class="[
                     'w-full cursor-pointer rounded-lg py-2 text-xs font-semibold transition-all duration-200',
                     ticket.isPopular
-                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
-                      : 'bg-indigo-600 text-white hover:bg-indigo-500',
+                      ? 'bg-white text-primary-600 hover:bg-primary-50'
+                      : 'bg-primary-600 text-white hover:bg-primary-500',
                   ]"
                   @click="goToSignIn"
                 >
@@ -226,7 +224,7 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
                   :class="[
                     'flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl py-3 text-sm font-semibold transition-all duration-300',
                     ticket.isPopular
-                      ? 'bg-white text-indigo-600 hover:bg-indigo-50'
+                      ? 'bg-white text-primary-600 hover:bg-primary-50'
                       : 'bg-gray-100 text-black hover:bg-gray-300 dark:bg-white/10 dark:text-white dark:hover:bg-white/20',
                   ]"
                   @click="addToCart(ticket)"
@@ -296,7 +294,7 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
             :class="[
               'mt-4 text-center text-xs',
               ticket.isPopular
-                ? 'text-indigo-200'
+                ? 'text-primary-200'
                 : 'text-amber-600 dark:text-amber-400',
             ]"
           >
@@ -323,7 +321,7 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
           >
             <button
               type="button"
-              class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-indigo-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition-all duration-300 hover:scale-105 hover:bg-indigo-500 hover:shadow-xl hover:shadow-indigo-500/40 dark:shadow-indigo-700/30"
+              class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-primary-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition-all duration-300 hover:scale-105 hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/40 dark:shadow-primary-700/30"
             >
               <IconShoppingBag class="h-5 w-5" />
               <span>

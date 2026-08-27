@@ -28,7 +28,7 @@ const isActive = (routeName: string): boolean => route.name === routeName
             :to="{ name: item.routeName }"
             :class="[
               isActive(item.routeName)
-                ? 'font-semibold text-indigo-600 border-indigo-600 dark:text-indigo-400 dark:border-indigo-400'
+                ? 'font-semibold text-primary-600 border-primary-600 dark:text-primary-400 dark:border-primary-400'
                 : 'font-medium text-slate-400 dark:text-slate-400 border-transparent hover:text-slate-700 dark:hover:text-gray-200',
               'flex items-center gap-x-2 border-b pb-2 lg:pb-3 pt-0 lg:pt-2',
             ]"

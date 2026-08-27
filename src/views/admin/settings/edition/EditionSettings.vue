@@ -77,7 +77,10 @@
         />
       </div>
     </SettingsSection>
-    <EditionPoster v-model:poster="formData.poster" />
+    <EditionPoster
+      v-model:poster="formData.poster"
+      @uploaded="handlePosterUploaded"
+    />
   </div>
   <SettingsBottomBar>
     <CButton
@@ -109,6 +112,7 @@ import CInput from '@/components/CInput.vue'
 import CButton from '@/components/CButton.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import { IconDeviceFloppy } from '@tabler/icons-vue'
+import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
 
 // Form data
 const formData = ref({
@@ -140,6 +144,18 @@ const initialValues = ref({
 
 // Loading state for save operation
 const isSaving = ref(false)
+
+// Poster already in storage but not yet saved on the edition. Kept so it can be
+// removed again if it never gets persisted.
+const pendingPoster = ref<UploadedFile | null>(null)
+
+const handlePosterUploaded = async (file: UploadedFile): Promise<void> => {
+  // A previous pick that was never saved is now unreachable — drop it.
+  const replaced = pendingPoster.value
+  pendingPoster.value = file
+
+  if (replaced) await deleteUploadedFiles([replaced])
+}
 
 // Load initial data from editionStore
 onMounted(() => {
@@ -237,10 +253,23 @@ const saveEdition = async (): Promise<void> => {
     // Update initial values after successful save
     initialValues.value = JSON.parse(JSON.stringify(formData.value))
 
+    // The poster is persisted now, so there is nothing left to roll back.
+    pendingPoster.value = null
+
     logger.debug('Edition settings saved successfully')
     toast.success('Edition settings saved successfully!')
   } catch (error) {
     logger.error('Error saving edition settings:', { error })
+
+    // Nothing was saved — remove the poster upload and restore the previous one
+    // so the preview keeps matching what is actually in storage.
+    if (pendingPoster.value) {
+      const orphan = pendingPoster.value
+      pendingPoster.value = null
+      formData.value.poster = initialValues.value.poster
+      await deleteUploadedFiles([orphan])
+    }
+
     toast.error('Failed to save edition settings. Please try again.')
   } finally {
     isSaving.value = false

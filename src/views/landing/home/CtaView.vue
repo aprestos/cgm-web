@@ -18,10 +18,10 @@ const { t } = useI18n()
   <section class="relative overflow-hidden py-32">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-linear-to-b from-transparent via-indigo-100/40 to-transparent dark:via-indigo-950/35"
+      class="absolute inset-0 bg-linear-to-b from-transparent via-primary-100/40 to-transparent dark:via-primary-950/35"
     />
     <div
-      class="absolute bottom-0 left-1/2 h-[600px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-indigo-300/30 dark:bg-indigo-600/20 blur-3xl"
+      class="absolute bottom-0 left-1/2 h-[600px] w-[600px] -translate-x-1/2 translate-y-1/2 rounded-full bg-primary-300/30 dark:bg-primary-600/20 blur-3xl"
     />
 
     <div class="relative z-10 mx-auto max-w-4xl px-4 text-center">
@@ -37,7 +37,7 @@ const { t } = useI18n()
       >
         {{ t('landing.cta.title') }}<br />
         <span
-          class="bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-400 bg-clip-text text-transparent"
+          class="bg-gradient-to-r from-primary-600 to-violet-600 dark:from-primary-400 dark:to-violet-400 bg-clip-text text-transparent"
         >
           {{ t('landing.cta.titleHighlight') }}
         </span>

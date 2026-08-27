@@ -108,7 +108,7 @@ const handleDelete = (): void => {
         <div class="flex items-start justify-between gap-2">
           <div class="flex min-w-0 items-center gap-3">
             <div
-              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+              class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400"
             >
               <IconCalendarEvent class="h-5 w-5" />
             </div>
@@ -128,7 +128,7 @@ const handleDelete = (): void => {
           >
             <button
               type="button"
-              class="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-indigo-600 dark:hover:bg-white/10 dark:hover:text-indigo-400"
+              class="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-white/10 dark:hover:text-primary-400"
               :aria-label="t('common.actions.edit')"
               :title="t('common.actions.edit')"
               @click="handleEdit()"

@@ -168,7 +168,7 @@ export default {
       failed:
         'Não foi possível processar o pagamento. Tenta novamente mais tarde.',
       confirmationTimeout:
-        'Não foi possível confirmar o pagamento. Por vezes a confirmação pode demorar mais do que o esperado. Podes atualizar a página para tentar novamente. Em caso de dúvidas, por favor contacta-nos pelo email {email}.',
+        'Não foi possível confirmar o pagamento. Se o pagamento tiver sido processado corretamente receberás um email com a confirmação da encomenda e podes fechar esta janela. Caso contrário entra em contacto: {email}.',
     },
     confirming: {
       title: 'A confirmar o pagamento…',

@@ -181,7 +181,7 @@ const importGames = async (): Promise<void> => {
       <!-- Loading State -->
       <div v-if="isLoading" class="flex items-center justify-center py-8">
         <div
-          class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-indigo-600 dark:border-gray-700 dark:border-t-indigo-400"
+          class="h-8 w-8 animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 dark:border-gray-700 dark:border-t-primary-400"
         />
       </div>
 
@@ -210,7 +210,7 @@ const importGames = async (): Promise<void> => {
         >
           <div class="flex items-center gap-x-3 flex-1 min-w-0">
             <IconMapPin
-              class="h-5 w-5 flex-shrink-0 text-indigo-600 dark:text-indigo-400"
+              class="h-5 w-5 flex-shrink-0 text-primary-600 dark:text-primary-400"
             />
             <span
               class="text-sm font-medium text-gray-900 dark:text-white truncate"

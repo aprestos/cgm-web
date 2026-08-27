@@ -7,7 +7,7 @@
       aria-hidden="true"
     >
       <div
-        class="h-2 rounded-full bg-indigo-600 transition-all duration-300 dark:bg-indigo-500"
+        class="h-2 rounded-full bg-primary-600 transition-all duration-300 dark:bg-primary-500"
         :style="{ width: `${progressPercentage}%` }"
       />
     </div>
@@ -19,7 +19,7 @@
         :class="[
           'rounded-xl border px-3 py-2 text-sm transition-colors',
           step.status === 'current'
-            ? 'border-indigo-300 bg-indigo-50 text-indigo-700 dark:border-indigo-500/70 dark:bg-indigo-500/10 dark:text-indigo-300'
+            ? 'border-primary-300 bg-primary-50 text-primary-700 dark:border-primary-500/70 dark:bg-primary-500/10 dark:text-primary-300'
             : step.status === 'completed'
               ? 'border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-500/70 dark:bg-emerald-500/10 dark:text-emerald-300'
               : 'border-gray-200 bg-white text-gray-500 dark:border-white/10 dark:bg-gray-900 dark:text-gray-400',
@@ -32,7 +32,7 @@
               step.status === 'completed'
                 ? 'bg-emerald-500 text-white'
                 : step.status === 'current'
-                  ? 'bg-indigo-600 text-white'
+                  ? 'bg-primary-600 text-white'
                   : 'bg-gray-200 text-gray-600 dark:bg-white/10 dark:text-gray-300',
             ]"
           >

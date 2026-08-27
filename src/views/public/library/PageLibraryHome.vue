@@ -38,7 +38,7 @@
                   </h2>
                   <button
                     type="button"
-                    class="relative -mr-2 flex size-10 items-center justify-center rounded-md bg-white dark:bg-gray-800 p-2 text-gray-400 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-indigo-500 focus:outline-hidden"
+                    class="relative -mr-2 flex size-10 items-center justify-center rounded-md bg-white dark:bg-gray-800 p-2 text-gray-400 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-hidden"
                     @click="mobileFiltersOpen = false"
                   >
                     <span class="absolute -inset-0.5" />
@@ -82,7 +82,7 @@
             <Listbox v-model="selectedSort" class="h-full">
               <div class="relative h-full">
                 <ListboxButton
-                  class="relative w-full h-full cursor-pointer rounded-full bg-gray-100 dark:bg-gray-700 pl-12 pr-10 text-left focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:focus:ring-indigo-400 dark:focus:border-indigo-400"
+                  class="relative w-full h-full cursor-pointer rounded-full bg-gray-100 dark:bg-gray-700 pl-12 pr-10 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
                 >
                   <span
                     class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
@@ -139,7 +139,7 @@
                       <li
                         :class="[
                           active
-                            ? 'bg-indigo-600 text-white'
+                            ? 'bg-primary-600 text-white'
                             : 'text-gray-900 dark:text-white',
                           'relative flex flex-row cursor-pointer select-none py-2 pl-3 pr-9',
                         ]"
@@ -156,7 +156,7 @@
                         <IconCheck
                           v-if="selected"
                           :class="[
-                            active ? 'text-white' : 'text-indigo-600',
+                            active ? 'text-white' : 'text-primary-600',
                             'size-5 absolute right-0 mr-4',
                           ]"
                         />
@@ -172,7 +172,7 @@
           <div class="shrink-0 lg:hidden self-stretch">
             <button
               type="button"
-              class="h-full px-5 py-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 dark:focus:ring-indigo-400 transition-colors flex items-center gap-2"
+              class="h-full px-5 py-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors flex items-center gap-2"
               @click="mobileFiltersOpen = true"
             >
               <FunnelIcon class="size-6 text-gray-400" aria-hidden="true" />

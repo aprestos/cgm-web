@@ -2,7 +2,7 @@
   <div class="w-full py-4">
     <TabGroup :selected-index="selectedTab" @change="handleTabChange">
       <TabList
-        class="flex space-x-1 rounded-xl bg-indigo-50 dark:bg-gray-900 p-1"
+        class="flex space-x-1 rounded-xl bg-primary-50 dark:bg-gray-900 p-1"
       >
         <Tab
           v-for="(tab, idx) in tabs"
@@ -13,9 +13,9 @@
           <button
             :class="[
               'flex flex-row justify-center w-full cursor-pointer rounded-lg py-2.5 text-sm font-medium leading-5',
-              'bg-indigo-50 dark:bg-gray-900 ring-offset-2 ring-offset-indigo-50 dark:ring-offset-white/40',
+              'bg-primary-50 dark:bg-gray-900 ring-offset-2 ring-offset-primary-50 dark:ring-offset-white/40',
               selected
-                ? 'bg-indigo-600 dark:bg-indigo-700 text-white shadow'
+                ? 'bg-primary-600 dark:bg-primary-700 text-white shadow'
                 : 'text-gray-500 hover:bg-white hover:dark:bg-gray-800',
             ]"
           >
