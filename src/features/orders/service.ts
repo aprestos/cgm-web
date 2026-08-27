@@ -5,7 +5,6 @@ import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order, OrderItem } from '@/features/orders/order.model.ts'
-import { formatWeekday } from '@/utils/date.ts'
 
 export interface TicketsStats {
   total: number
@@ -22,8 +21,22 @@ export interface OrdersOverTimeEntry {
   count: number
 }
 
+/** An order as listed in the admin tables, with the buyer it belongs to */
+export interface OrderSummary {
+  id: string
+  user_id: string | null
+  status: string
+  total: number
+  created_at: string
+  profiles: { name: string; email: string } | null
+}
+
 export type ChartGranularity =
   '10min' | '30min' | '1h' | '2h' | '6h' | '12h' | '1d'
+
+/** Every issued ticket of an order, with the ticket type it was issued for */
+const ISSUANCES_SELECT =
+  'issuances:ticket_issuances(id,ticket_id,attendee_id,attendee_name,attendee_email,status,ticket:ticket_types(id,name,access_days:ticket_days!ticket_type_days(day)))'
 
 function bucketTimestamp(
   isoString: string,
@@ -88,7 +101,7 @@ function generateBuckets(
 
 export const orderService = {
   /**
-   * Polls the commerce.orders table at a fixed interval until the given order
+   * Polls the commerce_orders table at a fixed interval until the given order
    * reaches the 'paid' status or the timeout elapses.
    *
    * @param sessionId
@@ -105,49 +118,22 @@ export const orderService = {
     while (Date.now() < deadline) {
       const { data, error } = await supabase
         .from('commerce_orders')
-        .select('id,status,total')
+        .select(
+          `id,status,total,items:commerce_order_items(ticket_id,quantity),${ISSUANCES_SELECT}`,
+        )
         .eq('stripe_session_id', sessionId)
-        .maybeSingle<{ id: string; total: number; status: string }>()
+        .maybeSingle<Order>()
 
       if (error) {
         logger.error('Error polling order status', { sessionId, error })
       } else if (data?.status === 'paid') {
-        const [items, issuances] = await Promise.all([
-          supabase
-            .schema('commerce')
-            .from('order_items')
-            .select('ticket_id,quantity')
-            .eq('order_id', data.id),
-          supabase
-            .schema('tickets')
-            .from('issuances')
-            .select('ticket_id,recipient_id,recipient_email,recipient_name')
-            .eq('order_id', data.id),
-        ])
-
-        const order: Order = {
+        return {
           id: data.id,
           status: 'paid',
           total: data.total,
-          items: items.data ?? [],
-          issuances: issuances.data ?? [],
+          items: data.items ?? [],
+          issuances: data.issuances ?? [],
         }
-
-        if (items.error) {
-          logger.error('Error loading order items', {
-            orderId: data.id,
-            error: items.error,
-          })
-        }
-
-        if (issuances.error) {
-          logger.error('Error loading order issuances', {
-            orderId: data.id,
-            error: issuances.error,
-          })
-        }
-
-        return order
       }
 
       // Wait before next attempt (unless we have already exceeded the deadline)
@@ -219,9 +205,9 @@ export const orderService = {
   async getOrderItemsCount(tenantId: string): Promise<number> {
     const { data, error } = await supabase
       .from('commerce_order_items')
-      .select('count:id.count(), order:orders!inner(status,edition_id)')
+      .select('count:id.count(), commerce_orders!inner(status)')
       .eq('tenant_id', tenantId)
-      .eq('orders.status', 'paid')
+      .eq('commerce_orders.status', 'paid')
       .single<{ count: number }>()
 
     if (error) throw error
@@ -229,83 +215,28 @@ export const orderService = {
     return data?.count ?? 0
   },
 
-  async getOrders(
-    tenantId: string,
-    email?: string,
-  ): Promise<
-    {
-      id: string
-      customer_id: string | null
-      status: string
-      total: number
-      created_at: string
-      profiles: { name: string; email: string } | null
-    }[]
-  > {
-    // When filtering by email, resolve matching profile IDs first
-    let customerIds: string[] | undefined
-    if (email) {
-      const { data: matchedProfiles, error: matchedProfilesError } =
-        await supabase
-          .from('profiles')
-          .select('id')
-          .ilike('email', `%${email}%`)
-
-      if (matchedProfilesError) throw matchedProfilesError
-      customerIds = ((matchedProfiles ?? []) as { id: string }[]).map(
-        (p) => p.id,
-      )
-      if (!customerIds.length) return []
-    }
-
+  async getOrders(tenantId: string, email?: string): Promise<OrderSummary[]> {
+    // The buyer lives one foreign key away, so it is embedded instead of being
+    // resolved with a second round trip. Filtering by email needs that join to
+    // be inner, otherwise orders of other buyers would still come back.
+    const columns = 'id,user_id,status,total,created_at'
     let query = supabase
       .from('commerce_orders')
-      .select('id,customer_id,status,total,created_at')
+      .select(
+        email
+          ? `${columns},profiles!inner(name,email)`
+          : `${columns},profiles(name,email)`,
+      )
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
       .limit(100)
 
-    if (customerIds) query = query.in('customer_id', customerIds)
+    if (email) query = query.ilike('profiles.email', `%${email}%`)
 
-    const { data: orders, error } = await query
+    const { data, error } = await query
     if (error) throw error
-    if (!orders?.length) return []
 
-    const allCustomerIds = [
-      ...new Set(
-        orders
-          .map((o) => o.customer_id as string | null)
-          .filter((id): id is string => id !== null),
-      ),
-    ]
-
-    const { data: profileRows, error: profileRowsError } = await supabase
-      .from('profiles')
-      .select('id,email,name')
-      .in('id', allCustomerIds)
-
-    if (profileRowsError) throw profileRowsError
-    const profileMap = new Map(
-      (
-        (profileRows ?? []) as { id: string; email: string; name: string }[]
-      ).map((p) => [p.id, { email: p.email, name: p.name }]),
-    )
-
-    return orders.map((o) => {
-      const customerId = o.customer_id as string | null
-      const customer = customerId ? profileMap.get(customerId) : undefined
-
-      return {
-        id: o.id as string,
-        customer_id: customerId,
-        status: o.status as string,
-        total: o.total as number,
-        created_at: o.created_at as string,
-        profiles: customer
-          ? { name: customer.name, email: customer.email }
-          : null,
-      }
-    })
+    return (data ?? []) as unknown as OrderSummary[]
   },
 
   async create(order: CreateOrderInput): Promise<{ orderId: string }> {
@@ -336,7 +267,6 @@ export const orderService = {
   async getTicketsDistribution(
     tenantId: string,
     editionId: number,
-    locale: string,
   ): Promise<TicketsStats> {
     const [
       { data: orderItems, error: orderItemsError },
@@ -344,14 +274,13 @@ export const orderService = {
     ] = await Promise.all([
       supabase
         .from('commerce_order_items')
-        .select('ticket_id, quantity, order:orders!inner(status, edition_id)')
+        .select('ticket_id, quantity, commerce_orders!inner(status)')
         .eq('tenant_id', tenantId)
-        .eq('orders.status', 'paid')
-        .eq('orders.edition_id', editionId),
+        .eq('edition_id', editionId)
+        .eq('commerce_orders.status', 'paid'),
       supabase
-        .schema('tickets')
-        .from('types')
-        .select('id, valid_from, valid_until')
+        .from('ticket_types')
+        .select('id, name')
         .eq('tenant_id', tenantId)
         .eq('edition_id', editionId),
     ])
@@ -367,20 +296,25 @@ export const orderService = {
 
     let totalTickets = 0
     const totalsMap = new Map<
-      number,
+      string,
       {
         label: string
         count: number
       }
     >()
     for (const item of tickets ?? []) {
-      totalsMap.set(item.id as number, {
-        label: formatWeekday(item.valid_from, item.valid_until, locale),
+      totalsMap.set(item.id as string, {
+        label: item.name as string,
         count: 0,
       })
     }
 
-    orderItems?.forEach((item: OrderItem) => {
+    const paidItems = (orderItems ?? []) as unknown as Pick<
+      OrderItem,
+      'ticket_id' | 'quantity'
+    >[]
+
+    paidItems.forEach((item) => {
       const mapItem = totalsMap.get(item.ticket_id)
 
       if (mapItem) {
@@ -393,43 +327,28 @@ export const orderService = {
   },
 
   async getOrder(order_id: string): Promise<Order> {
-    const [orderResponse, issuancesResponse] = await Promise.all([
-      supabase
-        .schema('commerce')
-        .from('orders')
-        .select('*,items:order_items(*)')
-        .eq('id', order_id)
-        .single<Order>(),
-      supabase
-        .schema('tickets')
-        .from('issuances')
-        .select('*,ticket:types(id,valid_from,valid_until)')
-        .eq('order_id', order_id),
-    ])
+    const { data, error } = await supabase
+      .from('commerce_orders')
+      .select(
+        `*,customer:profiles(name,email),items:commerce_order_items(*),${ISSUANCES_SELECT}`,
+      )
+      .eq('id', order_id)
+      .single<Order>()
 
-    if (orderResponse.error || issuancesResponse.error) {
+    if (error || !data) {
       throw new Error('Order not found')
     }
 
-    const orderData = orderResponse.data
-
-    const { data: customerData } = await supabase
-      .schema('public')
-      .from('profiles')
-      .select('name,email')
-      .eq('id', orderResponse.data?.customer_id)
-      .single<{ name: string; email: string }>()
-
     return {
-      id: orderData.id,
-      status: orderData.status,
-      total: orderData.total,
-      created_at: orderData.created_at as string,
-      customer_id: orderData.customer_id as string,
-      customer: { name: customerData?.name, email: customerData?.email },
-      items: orderData.items,
-      issuances: (issuancesResponse.data ?? []) as Order['issuances'],
-      stripe_session_id: orderData.stripe_session_id,
+      id: data.id,
+      status: data.status,
+      total: data.total,
+      created_at: data.created_at,
+      user_id: data.user_id,
+      customer: data.customer ?? undefined,
+      items: data.items ?? [],
+      issuances: data.issuances ?? [],
+      stripe_session_id: data.stripe_session_id,
     }
   },
 } as const

@@ -21,7 +21,7 @@ import PageHeader from '@/components/PageHeader.vue'
 import TicketsDistributionCard from '@/views/admin/orders/overview/TicketsDistributionCard.vue'
 import DialogCreateOrder from '@/views/admin/orders/DialogCreateOrder.vue'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
 const selectedPeriod = ref<Period>('1m')
 const createOrderOpen = ref(false)
@@ -80,7 +80,6 @@ async function loadStats(params: PeriodParams): Promise<void> {
     orderService.getTicketsDistribution(
       tenantStore.value.id,
       editionStore.value.id,
-      locale.value,
     ),
   ])
 

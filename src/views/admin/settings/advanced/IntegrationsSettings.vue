@@ -366,8 +366,7 @@ const connectStripe = async (): Promise<void> => {
     selectedAccountType.value,
   )
   if (res) {
-    logger.debug('Stripe connect response:', { res })
-    //window.location.assign(res)
+    window.location.assign(res)
   }
 }
 

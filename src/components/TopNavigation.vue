@@ -46,7 +46,7 @@
                       : 'border-transparent text-gray-700 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white'
                   "
                 >
-                  {{ page.name }}
+                  {{ t(page.name) }}
                 </RouterLink>
               </div>
             </PopoverGroup>
@@ -259,12 +259,12 @@ interface NavigationItem {
 
 const navigation = ref<NavigationItem[]>([
   {
-    name: t('public.navigation.library'),
+    name: 'public.navigation.library',
     route: RouteNames.public.library,
     enabled: settingsStore.value?.library?.enabled ?? false,
   },
   {
-    name: t('public.navigation.tournaments'),
+    name: 'public.navigation.tournaments',
     route: RouteNames.public.tournaments,
     enabled: settingsStore.value?.tournaments?.enabled ?? false,
   },
