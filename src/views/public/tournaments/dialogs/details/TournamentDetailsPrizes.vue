@@ -76,11 +76,15 @@ const prizeFor = (type: TournamentPrizeType): Prize | null => {
 // organizer typed it in — empty ones simply drop out of the list. The podium
 // sits in a row of cards, the catch-alls span the width below it.
 const podiumPrizes = computed<Prize[]>(() =>
-  PODIUM_PRIZE_TYPES.map(prizeFor).filter((prize) => prize !== null),
+  PODIUM_PRIZE_TYPES.map(prizeFor).filter(
+    (prize): prize is Prize => prize !== null,
+  ),
 )
 
 const otherPrizes = computed<Prize[]>(() =>
-  OTHER_PRIZE_TYPES.map(prizeFor).filter((prize) => prize !== null),
+  OTHER_PRIZE_TYPES.map(prizeFor).filter(
+    (prize): prize is Prize => prize !== null,
+  ),
 )
 
 const hasPrizes = computed<boolean>(
