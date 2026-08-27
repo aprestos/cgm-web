@@ -26,6 +26,7 @@ yarn.lock
 *.njsproj
 *.sln
 *.sw?
+.air
 
 # Environment variables
 .env
