@@ -90,7 +90,7 @@ onMounted(async () => {
           class="flex h-10 w-10 items-center justify-center rounded-full"
           :class="
             isLoading
-              ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400'
+              ? 'bg-primary-100 text-primary-600 dark:bg-primary-900/30 dark:text-primary-400'
               : isSuccess
                 ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
                 : 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
@@ -116,7 +116,7 @@ onMounted(async () => {
 
         <button
           type="button"
-          class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+          class="inline-flex items-center gap-2 rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600"
           @click="redirectToAdvancedSettings"
         >
           Back to settings

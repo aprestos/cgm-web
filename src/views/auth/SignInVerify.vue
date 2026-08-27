@@ -42,7 +42,7 @@
             type="text"
             inputmode="numeric"
             maxlength="1"
-            class="block w-12 h-12 text-center rounded-md border-0 py-3 text-xl font-semibold text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500"
+            class="block w-12 h-12 text-center rounded-md border-0 py-3 text-xl font-semibold text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500"
             @input="handleInput(index, $event)"
             @keydown="handleKeydown(index, $event)"
             @paste="handlePaste"
@@ -54,7 +54,7 @@
         <button
           type="submit"
           :disabled="!isOtpComplete || isLoading"
-          class="flex w-full justify-center items-center gap-2 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg
             v-if="isLoading"
@@ -86,7 +86,7 @@
       <p class="text-xs text-gray-500 dark:text-gray-400">
         {{ t('auth.didntReceiveCode') }}
         <button
-          class="font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300"
+          class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
           @click="goBack"
         >
           {{ t('auth.tryAgain') }}

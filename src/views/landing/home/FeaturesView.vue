@@ -34,7 +34,7 @@ defineProps<Props>()
       <!-- Section Header -->
       <div class="text-center">
         <h2
-          class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+          class="text-sm font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400"
         >
           {{ t('landing.features.sectionTitle') }}
         </h2>
@@ -56,7 +56,7 @@ defineProps<Props>()
           v-for="feature in features"
           :key="feature.id"
           :to="{ name: feature.route }"
-          class="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-900 p-8 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-500 hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl dark:hover:shadow-none"
+          class="group relative overflow-hidden rounded-3xl bg-white dark:bg-gray-900 p-8 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-500 hover:ring-primary-300 dark:hover:ring-white/20 hover:shadow-xl dark:hover:shadow-none"
         >
           <!-- Gradient Background on Hover -->
           <div
@@ -86,7 +86,7 @@ defineProps<Props>()
 
           <!-- Arrow -->
           <div
-            class="mt-6 flex items-center text-sm font-medium text-gray-500 dark:text-white/60 transition-colors group-hover:text-indigo-600 dark:group-hover:text-white"
+            class="mt-6 flex items-center text-sm font-medium text-gray-500 dark:text-white/60 transition-colors group-hover:text-primary-600 dark:group-hover:text-white"
           >
             {{ t('landing.features.explore') }}
             <IconArrowRight

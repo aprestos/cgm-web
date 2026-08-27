@@ -68,7 +68,7 @@
                 upsert: false,
               }"
               @close="showSquareUploadDialog = false"
-              @upload-success="handleSquareLogoUpload"
+              @uploaded="handleSquareLogoUploaded"
               @upload-error="handleLogoUploadError"
             />
           </div>
@@ -131,7 +131,7 @@
                 upsert: false,
               }"
               @close="showLongUploadDialog = false"
-              @upload-success="handleLongLogoUpload"
+              @uploaded="handleLongLogoUploaded"
               @upload-error="handleLogoUploadError"
             />
           </div>
@@ -179,7 +179,7 @@
             upsert: false,
           }"
           @close="showImageUploadDialog = false"
-          @upload-success="handleImagesUploadSuccess"
+          @uploaded="handleImagesUploaded"
           @upload-error="handleImagesUploadError"
         />
 
@@ -259,6 +259,7 @@ import tenantService from '@/features/tenant/service.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
+import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
 
 // Logo state
 const squareLogoUrl = ref<string | undefined>(tenantStore.value?.logos?.square)
@@ -270,6 +271,12 @@ const showLongUploadDialog = ref(false)
 const uploadedImages = ref<string[]>([])
 const showImageUploadDialog = ref(false)
 const isSaving = ref(false)
+
+// Uploads already in storage but not yet saved on the tenant. Kept so they can
+// be removed again if they never get persisted.
+const pendingSquareLogo = ref<UploadedFile | null>(null)
+const pendingLongLogo = ref<UploadedFile | null>(null)
+const pendingImages = ref<UploadedFile[]>([])
 
 // Computed folder paths
 const logoFolder = computed((): string => {
@@ -299,22 +306,33 @@ const handleImageError = (event: Event): void => {
 }
 
 // Logo upload handlers
-const handleSquareLogoUpload = (urls: string[]): void => {
+const handleSquareLogoUploaded = async (
+  files: UploadedFile[],
+): Promise<void> => {
   showSquareUploadDialog.value = false
-  const url = urls[0]
-  if (url) {
-    squareLogoUrl.value = url
-    toast.success('Square logo uploaded!')
-  }
+  const [file] = files
+  if (!file) return
+
+  // A previous pick that was never saved is now unreachable — drop it.
+  const replaced = pendingSquareLogo.value
+  squareLogoUrl.value = file.url
+  pendingSquareLogo.value = file
+  toast.success('Square logo uploaded!')
+
+  if (replaced) await deleteUploadedFiles([replaced])
 }
 
-const handleLongLogoUpload = (urls: string[]): void => {
+const handleLongLogoUploaded = async (files: UploadedFile[]): Promise<void> => {
   showLongUploadDialog.value = false
-  const url = urls[0]
-  if (url) {
-    longLogoUrl.value = url
-    toast.success('Horizontal logo uploaded!')
-  }
+  const [file] = files
+  if (!file) return
+
+  const replaced = pendingLongLogo.value
+  longLogoUrl.value = file.url
+  pendingLongLogo.value = file
+  toast.success('Horizontal logo uploaded!')
+
+  if (replaced) await deleteUploadedFiles([replaced])
 }
 
 const handleLogoUploadError = (error: unknown): void => {
@@ -323,10 +341,14 @@ const handleLogoUploadError = (error: unknown): void => {
 }
 
 // Image gallery handlers
-const handleImagesUploadSuccess = (urls: string[]): void => {
+const handleImagesUploaded = (files: UploadedFile[]): void => {
   showImageUploadDialog.value = false
-  uploadedImages.value = [...uploadedImages.value, ...urls]
-  toast.success(`${urls.length} image(s) uploaded successfully!`)
+  uploadedImages.value = [
+    ...uploadedImages.value,
+    ...files.map((file) => file.url),
+  ]
+  pendingImages.value = [...pendingImages.value, ...files]
+  toast.success(`${files.length} image(s) uploaded successfully!`)
 }
 
 const handleImagesUploadError = (error: unknown): void => {
@@ -334,9 +356,46 @@ const handleImagesUploadError = (error: unknown): void => {
   toast.error('Failed to upload images. Please try again.')
 }
 
-const removeImage = (index: number): void => {
+const removeImage = async (index: number): Promise<void> => {
+  const removed = uploadedImages.value[index]
   uploadedImages.value = uploadedImages.value.filter((_, i) => i !== index)
   toast.success('Image removed from gallery')
+
+  // Only unsaved uploads are deleted here — an image the tenant already
+  // references stays in storage until a save actually drops it.
+  const pending = pendingImages.value.find((file) => file.url === removed)
+  if (pending) {
+    pendingImages.value = pendingImages.value.filter((file) => file !== pending)
+    await deleteUploadedFiles([pending])
+  }
+}
+
+const clearPendingUploads = (): void => {
+  pendingSquareLogo.value = null
+  pendingLongLogo.value = null
+  pendingImages.value = []
+}
+
+/**
+ * Nothing was saved, so every upload made since the last save is an orphan.
+ * Removes them and restores the previews to what the tenant actually holds.
+ */
+const discardPendingUploads = async (): Promise<void> => {
+  const orphans = [
+    ...(pendingSquareLogo.value ? [pendingSquareLogo.value] : []),
+    ...(pendingLongLogo.value ? [pendingLongLogo.value] : []),
+    ...pendingImages.value,
+  ]
+
+  if (orphans.length === 0) return
+
+  clearPendingUploads()
+  squareLogoUrl.value =
+    tenantStore.value?.logos?.square ?? tenantStore.value?.logo
+  longLogoUrl.value = tenantStore.value?.logos?.long
+  uploadedImages.value = tenantStore.value?.images ?? []
+
+  await deleteUploadedFiles(orphans)
 }
 
 // Save branding
@@ -379,12 +438,16 @@ const saveBranding = async (): Promise<void> => {
       if (tenantStore.value) {
         tenantStore.value = { ...tenantStore.value, ...updatedTenant }
       }
+      // Everything is persisted now, so there is nothing left to roll back.
+      clearPendingUploads()
       toast.success('Branding saved successfully!')
     } else {
+      await discardPendingUploads()
       toast.error('Failed to save settings. Please try again.')
     }
   } catch (error) {
     logger.error('Error saving branding:', { error })
+    await discardPendingUploads()
     toast.error('An error occurred while saving. Please try again.')
   } finally {
     isSaving.value = false

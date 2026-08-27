@@ -1,10 +1,11 @@
 import { supabase } from '@/lib/supabase'
-import type {
-  CreateTicketDayInput,
-  CreateTicketInput,
-  Ticket,
-  TicketDay,
-  UpdateTicketInput,
+import type { TicketStatus } from './ticket.model'
+import {
+  type CreateTicketDayInput,
+  type CreateTicketInput,
+  type Ticket,
+  type TicketDay,
+  type UpdateTicketInput,
 } from './ticket.model'
 import { toCamelCaseAs, toSnakeCaseAs } from '@/utils/caseConverter'
 
@@ -24,12 +25,20 @@ export const ticketService = {
     return toCamelCaseAs<Ticket>(data ?? [])
   },
 
-  async getAll(tenantId: string, editionId: number): Promise<Ticket[]> {
-    const { data, error } = await supabase
+  async getAll(
+    tenantId: string,
+    editionId: number,
+    status?: TicketStatus,
+  ): Promise<Ticket[]> {
+    const query = supabase
       .from('ticket_types')
       .select('*,access_days:ticket_days!ticket_type_days(day)')
       .eq('edition_id', editionId)
       .eq('tenant_id', tenantId)
+
+    if (status) query.eq('status', status)
+
+    const { data, error } = await query
 
     if (error) throw error
     return toCamelCaseAs<Ticket>(data ?? [])

@@ -35,7 +35,7 @@
           $slots['icon-right'] ? 'pr-10' : '',
           errors && errors.length > 0
             ? 'outline-red-300 focus:outline-red-600 dark:outline-red-400 dark:focus:outline-red-500'
-            : 'outline-gray-300 focus:outline-indigo-600 dark:outline-white/10 dark:focus:outline-indigo-500',
+            : 'outline-gray-300 focus:outline-primary-600 dark:outline-white/10 dark:focus:outline-primary-500',
         ]"
         @input="onInput"
         @blur="onBlur"

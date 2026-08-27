@@ -116,7 +116,7 @@
                                   <div class="flex">
                                     <button
                                       type="button"
-                                      class="font-medium text-indigo-600 hover:text-indigo-500"
+                                      class="font-medium text-primary-600 hover:text-primary-500"
                                       @click="removeFromCart(item.ticket.id)"
                                     >
                                       {{ t('landing.cart.remove') }}
@@ -140,7 +140,7 @@
                       <div class="mt-6">
                         <RouterLink
                           :to="{ name: RouteNames.landing.checkout }"
-                          class="flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-indigo-700"
+                          class="flex items-center justify-center rounded-md border border-transparent bg-primary-600 px-6 py-3 text-base font-medium text-white shadow-xs hover:bg-primary-700"
                           >{{ t('landing.cart.checkout') }}</RouterLink
                         >
                       </div>
@@ -151,7 +151,7 @@
                           {{ t('landing.cart.or') }}{{ ' ' }}
                           <button
                             type="button"
-                            class="font-medium text-indigo-600 hover:text-indigo-500"
+                            class="font-medium text-primary-600 hover:text-primary-500"
                             @click="open = false"
                           >
                             {{ t('landing.cart.continueShopping') }}

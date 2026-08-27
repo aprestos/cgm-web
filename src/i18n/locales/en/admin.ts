@@ -169,6 +169,11 @@ export default {
       type: 'Format',
       description: 'Description',
       prizes: 'Prizes',
+      cover: 'Cover image',
+      coverHint: 'JPG, PNG, GIF or WebP. Max file size: 10MB.',
+      coverLabelIdle:
+        'Drag & Drop the cover image or <span class="filepond--label-action">Browse</span>',
+      coverUploadFailed: 'Failed to upload the cover image. Please try again.',
     },
   },
   tickets: {

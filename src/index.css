@@ -14,20 +14,30 @@
     'Space Grotesk', ui-sans-serif, system-ui, -apple-system,
     BlinkMacSystemFont, sans-serif;
 
-  /* Brand palette - blue instead of Volt's default green.
+  /* Brand palette. Indigo is only the default seed — every brand-coloured
+     surface in the app goes through primary-*, never through indigo-* directly,
+     so a tenant retheme is a matter of redefining this ramp on :root at
+     runtime. Tailwind compiles these to var() references, so an override takes
+     effect without rebuilding:
+
+       :root { --color-primary-600: #b91c1c; ... }
+
+     Keep the full 50..950 ramp populated — utilities pick individual steps
+     (bg-primary-50, ring-primary-200, dark:text-primary-300), so a partial
+     override leaves the rest of the UI on the old hue.
      Bare `primary` (text-primary, bg-primary) resolves to 500. */
-  --color-primary-50: var(--color-blue-50);
-  --color-primary-100: var(--color-blue-100);
-  --color-primary-200: var(--color-blue-200);
-  --color-primary-300: var(--color-blue-300);
-  --color-primary-400: var(--color-blue-400);
-  --color-primary-500: var(--color-blue-500);
-  --color-primary-600: var(--color-blue-600);
-  --color-primary-700: var(--color-blue-700);
-  --color-primary-800: var(--color-blue-800);
-  --color-primary-900: var(--color-blue-900);
-  --color-primary-950: var(--color-blue-950);
-  --color-primary: var(--color-blue-500);
+  --color-primary-50: var(--color-indigo-50);
+  --color-primary-100: var(--color-indigo-100);
+  --color-primary-200: var(--color-indigo-200);
+  --color-primary-300: var(--color-indigo-300);
+  --color-primary-400: var(--color-indigo-400);
+  --color-primary-500: var(--color-indigo-500);
+  --color-primary-600: var(--color-indigo-600);
+  --color-primary-700: var(--color-indigo-700);
+  --color-primary-800: var(--color-indigo-800);
+  --color-primary-900: var(--color-indigo-900);
+  --color-primary-950: var(--color-indigo-950);
+  --color-primary: var(--color-indigo-500);
 
   /* Surface + highlight point at the runtime variables below, which invert in
      dark mode - @theme itself cannot express a media-conditional value. */
@@ -80,7 +90,7 @@
     --surface-950: 2 6 23; /* slate-950 */
 
     /* Highlight color (primary with opacity) */
-    --highlight: 59 130 246; /* blue-500 */
+    --highlight: 99 102 241; /* indigo-500 */
   }
 
   /* Matches how the dark: variant resolves everywhere else in the app */

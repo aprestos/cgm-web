@@ -36,29 +36,93 @@
                 ]"
               >
                 <div
-                  class="border-b border-gray-100 dark:border-white/10 px-4 pt-5 pb-4 sm:px-6"
+                  class="px-4 pt-5 pb-4 sm:px-6"
+                  :class="
+                    cover
+                      ? 'relative flex min-h-44 flex-col justify-end overflow-hidden rounded-t-2xl sm:min-h-52'
+                      : 'border-b border-gray-100 dark:border-white/10'
+                  "
                 >
-                  <div class="flex items-start justify-between gap-4">
+                  <!-- Cover art sits behind the header rather than above it, so
+                       the title and close button read as part of the image -->
+                  <template v-if="cover">
+                    <img
+                      :src="cover"
+                      alt=""
+                      aria-hidden="true"
+                      decoding="async"
+                      class="absolute inset-0 size-full object-cover"
+                    />
+                    <!-- Photos are unpredictable; the scrim is what guarantees
+                         the white text on top of one stays legible -->
+                    <div
+                      class="absolute inset-0 bg-linear-to-t from-black/85 via-black/55 to-black/25"
+                    />
+                  </template>
+
+                  <!-- Badges ride on the cover art, clear of the close
+                       button. Without cover art there is nothing to ride on,
+                       so they sit inline above the title instead. -->
+                  <div
+                    v-if="$slots['header-badges']"
+                    :class="
+                      cover
+                        ? 'pointer-events-none absolute left-4 top-4 z-10 flex flex-wrap items-center gap-2 pr-16 sm:left-6 sm:top-5'
+                        : 'mb-2 flex flex-wrap items-center gap-2'
+                    "
+                  >
+                    <slot name="header-badges" />
+                  </div>
+
+                  <!-- z-10 with no positioning: as a flex item it stacks above
+                       the image, and the close button below can then anchor to
+                       the header itself rather than to this row -->
+                  <div
+                    class="flex items-start justify-between gap-4"
+                    :class="cover ? 'z-10' : ''"
+                  >
                     <h3
                       v-if="title"
-                      class="font-display text-xl font-bold text-gray-900 dark:text-white"
+                      class="font-display text-xl font-bold"
+                      :class="
+                        cover
+                          ? 'text-white drop-shadow-sm'
+                          : 'text-gray-900 dark:text-white'
+                      "
                     >
                       {{ title }}
                     </h3>
                     <button
                       type="button"
-                      class="ml-auto cursor-pointer grid h-9 w-9 shrink-0 place-items-center rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200 transition-colors"
+                      class="cursor-pointer grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors"
+                      :class="
+                        cover
+                          ? 'absolute right-4 top-4 z-10 bg-black/40 text-white backdrop-blur hover:bg-black/60 sm:right-6 sm:top-5'
+                          : 'ml-auto text-gray-400 hover:bg-gray-100 dark:hover:bg-white/10 hover:text-gray-700 dark:hover:text-gray-200'
+                      "
                       @click="closeDialog"
                     >
                       <span class="sr-only">Close</span>
                       <IconX class="h-5 w-5" aria-hidden="true" />
                     </button>
                   </div>
-                  <slot name="header-sub-content"></slot>
+                  <div :class="cover ? 'z-10' : 'contents'">
+                    <slot name="header-sub-content"></slot>
+                  </div>
                 </div>
 
-                <div class="px-4 py-5 sm:p-6">
+                <div :class="bodyClass">
                   <slot />
+                </div>
+
+                <!-- Actions that belong to the dialog rather than to its
+                     content. Absent by default, so dialogs that put their own
+                     buttons in the body are untouched. -->
+                <div
+                  v-if="$slots.footer"
+                  class="border-t border-gray-100 px-4 py-4 sm:px-6 dark:border-white/10"
+                >
+                  <slot name="footer" />
                 </div>
               </DialogPanel>
             </TransitionChild>
@@ -85,11 +149,20 @@ interface Props {
   open: boolean
   title?: string
   size?: DialogSize
+  /** Artwork for the header background. Without it the header stays plain. */
+  cover?: string
+  /**
+   * Padding of the body. Overridable so a dialog can run its content to the
+   * panel edges (a split layout, a full-bleed list) and pad the parts itself.
+   */
+  bodyClass?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   title: '',
   size: 'md',
+  cover: undefined,
+  bodyClass: 'px-4 py-5 sm:p-6',
 })
 
 const emit = defineEmits<{
@@ -105,8 +178,11 @@ const dialogSizeClasses = computed((): string => {
     sm: 'sm:max-w-sm',
     md: 'sm:max-w-lg md:min-w-[500px]',
     lg: 'sm:max-w-2xl md:min-w-[700px]',
-    xl: 'sm:max-w-4xl md:min-w-[900px]',
-    '2xl': 'sm:max-w-6xl md:min-w-[1100px]',
+    // Clamped to the viewport: a bare min-width wider than the screen (a
+    // tablet in portrait, a half-width browser window) pushes the panel out
+    // of the backdrop and takes the close button with it.
+    xl: 'sm:max-w-4xl md:min-w-[min(900px,calc(100vw-4rem))]',
+    '2xl': 'sm:max-w-6xl md:min-w-[min(1100px,calc(100vw-4rem))]',
     full: 'sm:max-w-[90vw] md:min-w-[80vw]',
   }
   return sizeMap[props.size]

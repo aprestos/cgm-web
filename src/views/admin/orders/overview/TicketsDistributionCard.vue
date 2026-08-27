@@ -12,7 +12,7 @@ defineProps<{
 }>()
 
 const SEGMENT_COLORS = [
-  'bg-indigo-500',
+  'bg-primary-500',
   'bg-emerald-500',
   'bg-amber-500',
   'bg-rose-500',
@@ -23,7 +23,7 @@ const SEGMENT_COLORS = [
 ]
 
 const DOT_COLORS = [
-  'bg-indigo-500',
+  'bg-primary-500',
   'bg-emerald-500',
   'bg-amber-500',
   'bg-rose-500',

@@ -16,7 +16,7 @@ import {
   type CreateTournament,
   type Tournament,
   TournamentStatus,
-} from '@/features/tournaments/model'
+} from '@/features/tournaments/tournament.model.ts'
 import tournamentService from '@/features/tournaments/service.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
 import { editionStore } from '@/features/events/edition.store.ts'

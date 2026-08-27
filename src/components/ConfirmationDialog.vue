@@ -22,6 +22,7 @@
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="loading"
+          :disabled="confirmDisabled"
           @click="handleConfirm"
         >
           {{ confirmText }}
@@ -42,6 +43,7 @@ interface Props {
   confirmText?: string
   cancelText?: string
   loading?: boolean
+  confirmDisabled?: boolean
 }
 
 withDefaults(defineProps<Props>(), {
@@ -50,6 +52,7 @@ withDefaults(defineProps<Props>(), {
   confirmText: 'Confirm',
   cancelText: 'Cancel',
   loading: false,
+  confirmDisabled: false,
 })
 
 const emit = defineEmits<{

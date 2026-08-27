@@ -32,7 +32,7 @@ const { t } = useI18n()
     class="flex flex-col items-center justify-center gap-6 py-16 text-center"
   >
     <svg
-      class="size-12 animate-spin text-indigo-600"
+      class="size-12 animate-spin text-primary-600"
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"
@@ -96,7 +96,7 @@ const { t } = useI18n()
       </button>
       <button
         type="button"
-        class="rounded-xl hover:cursor-pointer bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-70"
+        class="rounded-xl hover:cursor-pointer bg-primary-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-500 disabled:cursor-not-allowed disabled:opacity-70"
         :disabled="isWaitingForPaymentSession"
         @click="emit('submit')"
       >

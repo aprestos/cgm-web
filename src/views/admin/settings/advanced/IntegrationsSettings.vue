@@ -135,10 +135,10 @@
           >
             <div class="flex items-center gap-3">
               <div
-                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-900/30"
+                class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30"
               >
                 <IconBrandStripe
-                  class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+                  class="h-6 w-6 text-primary-600 dark:text-primary-400"
                 />
               </div>
               <div>
@@ -216,13 +216,51 @@
     <ConfirmationDialog
       :open="shownDialog === 'connect-stripe'"
       title="Connect Stripe account"
-      message="You will be redirected to Stripe to connect your account. Do you want to continue?"
       confirm-text="Continue"
       cancel-text="Cancel"
       :loading="isLoadingStripeConnect"
+      :confirm-disabled="!selectedAccountType"
       @confirm="connectStripe"
       @close="closeDialog"
-    />
+    >
+      <p>
+        Choose the type of Stripe account you want to connect. You will be
+        redirected to Stripe to complete the setup.
+      </p>
+      <fieldset class="mt-4">
+        <legend class="sr-only">Stripe account type</legend>
+        <div class="space-y-3">
+          <label
+            v-for="option in STRIPE_ACCOUNT_TYPE_OPTIONS"
+            :key="option.value"
+            class="flex cursor-pointer items-start gap-3 rounded-lg border p-4 transition-colors"
+            :class="
+              selectedAccountType === option.value
+                ? 'border-primary-600 bg-primary-50 dark:border-primary-500 dark:bg-primary-500/10'
+                : 'border-gray-200 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50'
+            "
+          >
+            <input
+              v-model="selectedAccountType"
+              type="radio"
+              name="stripe-account-type"
+              :value="option.value"
+              class="mt-0.5 size-4 shrink-0 border-gray-300 text-primary-600 focus:ring-primary-600 dark:border-gray-600 dark:bg-gray-900"
+            />
+            <span>
+              <span
+                class="block text-sm font-semibold text-gray-900 dark:text-white"
+                >{{ option.label }}</span
+              >
+              <span
+                class="mt-1 block text-sm text-gray-500 dark:text-gray-400"
+                >{{ option.description }}</span
+              >
+            </span>
+          </label>
+        </div>
+      </fieldset>
+    </ConfirmationDialog>
 
     <ConfirmationDialog
       :open="shownDialog === 'disconnect-stripe'"
@@ -231,7 +269,7 @@
       confirm-text="Continue"
       cancel-text="Cancel"
       :loading="isLoadingStripeConnect"
-      @confirm="disconnectStripe"
+      @confirm="handleConfirmation"
       @close="closeDialog"
     />
   </SettingsSection>
@@ -289,23 +327,69 @@ onMounted(async () => {
 
 const isLoadingStripeConnect = ref(false)
 
+const STRIPE_ACCOUNT_TYPE_OPTIONS: ReadonlyArray<{
+  value: StripeConfiguration['accountType']
+  label: string
+  description: string
+}> = [
+  {
+    value: 'sandbox',
+    label: 'Sandbox',
+    description:
+      'Connect a Stripe test account. Payments are simulated and no real money is moved — use this to try out ticket sales and checkout.',
+  },
+  {
+    value: 'live',
+    label: 'Live',
+    description:
+      'Connect your real Stripe account. Payments are charged to your customers and paid out to you.',
+  },
+]
+
+const selectedAccountType = ref<StripeConfiguration['accountType'] | null>(null)
+
+const handleConfirmation = async (): Promise<void> => {
+  if (!stripeConfiguration?.value?.accountId) {
+    await connectStripe()
+  } else {
+    await disconnectStripe()
+  }
+}
+
 // Configure payment gateway
 const connectStripe = async (): Promise<void> => {
+  if (!selectedAccountType.value) return
   isLoadingStripeConnect.value = true
   const res = await stripeService.connect(
     tenantStore.value?.id as string,
     window.location.origin,
+    selectedAccountType.value,
   )
-  if (res) window.location.assign(res)
+  if (res) {
+    window.location.assign(res)
+  }
 }
 
-const disconnectStripe = (): void => {
+const disconnectStripe = async (): Promise<void> => {
+  isLoadingStripeConnect.value = true
+  try {
+    await stripeService.disconnect(tenantStore.value?.id as string)
+  } catch (error) {
+    logger.error('Error disconnecting Stripe:', { error })
+    toast.error('Failed to disconnect Stripe')
+  } finally {
+    isLoadingStripeConnect.value = false
+  }
+
   closeDialog()
 }
 
 const shownDialog = ref<'connect-stripe' | 'disconnect-stripe' | null>(null)
 
 const openDialog = (dialog: 'connect-stripe' | 'disconnect-stripe'): void => {
+  // Resuming an incomplete setup keeps the account type already on record.
+  if (dialog === 'connect-stripe')
+    selectedAccountType.value = stripeConfiguration.value?.accountType ?? null
   shownDialog.value = dialog
 }
 

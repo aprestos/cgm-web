@@ -208,7 +208,7 @@ onMounted(async () => {
         class="mt-0.5 block text-xs font-normal"
         :class="
           selected
-            ? 'text-indigo-400 dark:text-indigo-300'
+            ? 'text-primary-400 dark:text-primary-300'
             : 'text-gray-400 dark:text-gray-500'
         "
       >

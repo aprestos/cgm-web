@@ -312,7 +312,7 @@ onUnmounted(() => {
               <!-- Account details -->
               <div class="flex items-center gap-3 p-4">
                 <div
-                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white"
+                  class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-600 text-sm font-semibold text-white"
                 >
                   {{ displayName[0]?.toUpperCase() }}
                 </div>

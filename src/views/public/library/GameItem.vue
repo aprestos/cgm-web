@@ -176,7 +176,7 @@ const isConventionHappening = computed(() => {
             {{ game.game.year }}
           </p>
           <h3
-            class="mt-1 font-semibold text-gray-900 dark:text-white text-center group-hover:text-indigo-600 dark:group-hover:text-indigo-400"
+            class="mt-1 font-semibold text-gray-900 dark:text-white text-center group-hover:text-primary-600 dark:group-hover:text-primary-400"
           >
             <span class="absolute inset-0" />
             {{ game.game.name }}

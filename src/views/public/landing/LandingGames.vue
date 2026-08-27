@@ -38,7 +38,7 @@ defineProps<Props>()
         </div>
         <RouterLink
           :to="{ name: RouteNames.public.library }"
-          class="hidden items-center gap-2 text-sm font-medium text-gray-600 dark:text-white/60 transition-colors hover:text-indigo-600 dark:hover:text-white sm:flex"
+          class="hidden items-center gap-2 text-sm font-medium text-gray-600 dark:text-white/60 transition-colors hover:text-primary-600 dark:hover:text-white sm:flex"
         >
           {{ t('landing.games.viewAll') }}
           <IconArrowRight class="h-4 w-4" />
@@ -52,7 +52,7 @@ defineProps<Props>()
             v-for="game in games"
             :key="game.id"
             :to="{ name: RouteNames.public.library }"
-            class="group relative w-64 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-300 hover:ring-indigo-300 dark:hover:ring-white/20 hover:shadow-xl"
+            class="group relative w-64 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 ring-1 ring-gray-200 dark:ring-white/10 shadow-lg dark:shadow-none transition-all duration-300 hover:ring-primary-300 dark:hover:ring-white/20 hover:shadow-xl"
           >
             <!-- Game Image -->
             <div class="aspect-[3/4] overflow-hidden">
@@ -64,7 +64,7 @@ defineProps<Props>()
               />
               <div
                 v-else
-                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50"
+                class="flex h-full w-full items-center justify-center bg-gradient-to-br from-violet-100 to-primary-100 dark:from-violet-900/50 dark:to-primary-900/50"
               >
                 <IconDice5
                   class="h-16 w-16 text-violet-300 dark:text-white/20"

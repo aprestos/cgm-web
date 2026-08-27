@@ -133,7 +133,7 @@ const ticketRows = computed(() =>
           class="flex items-center gap-3 rounded-xl border px-4 py-3 transition-colors"
           :class="
             getQty(ticket.id) > 0
-              ? 'border-indigo-200 bg-indigo-50 dark:border-indigo-700/50 dark:bg-indigo-900/20'
+              ? 'border-primary-200 bg-primary-50 dark:border-primary-700/50 dark:bg-primary-900/20'
               : 'border-gray-200 dark:border-white/10'
           "
         >
@@ -141,7 +141,7 @@ const ticketRows = computed(() =>
           <div class="min-w-0 flex-1">
             <div class="flex items-center gap-2 flex-wrap">
               <span
-                class="rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400"
+                class="rounded-md px-1.5 py-0.5 text-[11px] font-bold tracking-wide bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400"
               >
                 {{ title.weekday }}
               </span>

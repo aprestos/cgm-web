@@ -8,7 +8,7 @@ import {
   TransitionRoot,
 } from '@headlessui/vue'
 import { IconCheck, IconMail, IconTicket, IconX } from '@tabler/icons-vue'
-import type { Order } from '@/features/orders/order.model.ts'
+import type { Issuance, Order } from '@/features/orders/order.model.ts'
 import orderService from '@/features/orders/service.ts'
 import logger from '@/lib/logger.ts'
 import { shortId } from '@/utils/order.ts'
@@ -18,7 +18,7 @@ import { toast } from 'vue-sonner'
 import { tenantStore } from '@/features/tenant/tenant.store'
 import { editionStore } from '@/features/events/edition.store'
 import CButton from '@/components/CButton.vue'
-import { getTicketDays } from '@/utils/date.ts'
+import { formatDayLabel } from '@/utils/date.ts'
 
 const props = defineProps<{
   open: boolean
@@ -98,29 +98,32 @@ const totalTicketCount = computed(
 )
 
 const GROUP_COLORS = [
-  'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400',
+  'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
   'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
   'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
   'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400',
 ]
 
-const groupColorMap = computed(() => {
-  const groups = [
-    ...new Set(
-      (order.value?.items ?? [])
-        .map((i) => i.ticket?.group)
-        .filter((g): g is string => !!g),
-    ),
+/** The days a ticket grants access to, as short labels for the chips */
+function ticketDays(issuance: Issuance): string[] {
+  return (issuance.ticket?.access_days ?? []).map(({ day }) =>
+    formatDayLabel(day, locale.value),
+  )
+}
+
+const dayColorMap = computed(() => {
+  const days = [
+    ...new Set((order.value?.issuances ?? []).flatMap((i) => ticketDays(i))),
   ]
   const map = new Map<string, string>()
-  groups.forEach((g, i) => map.set(g, GROUP_COLORS[i % GROUP_COLORS.length]))
+  days.forEach((d, i) => map.set(d, GROUP_COLORS[i % GROUP_COLORS.length]))
   return map
 })
 
-function groupTagColor(group?: string): string {
-  if (!group) return GROUP_COLORS[0]
-  return groupColorMap.value.get(group) ?? GROUP_COLORS[0]
+function dayTagColor(day?: string): string {
+  if (!day) return GROUP_COLORS[0]
+  return dayColorMap.value.get(day) ?? GROUP_COLORS[0]
 }
 
 const buyerInitials = computed<string>(() => {
@@ -305,7 +308,7 @@ const sendEmails = async (): Promise<void> => {
                     class="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-3"
                   >
                     <div
-                      class="h-10 w-10 rounded-full bg-indigo-600 flex items-center justify-center text-white font-display font-semibold text-sm shrink-0 select-none"
+                      class="h-10 w-10 rounded-full bg-primary-600 flex items-center justify-center text-white font-display font-semibold text-sm shrink-0 select-none"
                     >
                       {{ buyerInitials }}
                     </div>
@@ -334,7 +337,7 @@ const sendEmails = async (): Promise<void> => {
                   <div class="space-y-2">
                     <div
                       v-for="issuance in order.issuances"
-                      :key="`${issuance.ticket_id}-${issuance.recipient_email}`"
+                      :key="issuance.id"
                       class="flex items-center gap-3 rounded-xl border border-gray-200 dark:border-white/10 p-3"
                     >
                       <span
@@ -347,17 +350,13 @@ const sendEmails = async (): Promise<void> => {
                           <p
                             class="text-sm font-semibold text-gray-900 dark:text-white"
                           >
-                            {{ issuance.recipient_name }}
+                            {{ issuance.attendee_name }}
                           </p>
                           <span
-                            v-for="(day, index) in getTicketDays(
-                              issuance.ticket?.valid_from,
-                              issuance.ticket?.valid_until,
-                              locale,
-                            )"
-                            :key="`${issuance.ticket_id}-${index}`"
+                            v-for="(day, index) in ticketDays(issuance)"
+                            :key="`${issuance.id}-${index}`"
                             class="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide"
-                            :class="groupTagColor(day)"
+                            :class="dayTagColor(day)"
                           >
                             {{ day.toUpperCase() }}
                           </span>
@@ -365,7 +364,7 @@ const sendEmails = async (): Promise<void> => {
                         <p
                           class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 truncate"
                         >
-                          {{ issuance.recipient_email }}
+                          {{ issuance.attendee_email }}
                         </p>
                       </div>
                       <span

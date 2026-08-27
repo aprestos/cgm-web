@@ -174,6 +174,12 @@ export default {
       type: 'Formato',
       description: 'Descrição',
       prizes: 'Prémios',
+      cover: 'Imagem de capa',
+      coverHint: 'JPG, PNG, GIF ou WebP. Tamanho máximo: 10MB.',
+      coverLabelIdle:
+        'Arrasta a imagem de capa ou <span class="filepond--label-action">Procura</span>',
+      coverUploadFailed:
+        'Não foi possível carregar a imagem de capa. Tenta novamente.',
     },
   },
   tickets: {

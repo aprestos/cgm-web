@@ -52,7 +52,7 @@ function holderSlotLabel(index: number): string {
       :key="index"
       class="rounded-xl border border-gray-200 dark:border-white/10 px-4 py-3 space-y-3"
     >
-      <p class="text-xs font-medium text-indigo-600 dark:text-indigo-400">
+      <p class="text-xs font-medium text-primary-600 dark:text-primary-400">
         {{ holderSlotLabel(index) }}
       </p>
       <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">

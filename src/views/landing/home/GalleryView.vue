@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
     <!-- Section Header (optional) -->
     <div class="relative z-10 pt-16 pb-8 text-center px-4">
       <h2
-        class="text-sm font-semibold uppercase tracking-widest text-indigo-600 dark:text-indigo-400"
+        class="text-sm font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400"
       >
         {{ displaySubtitle }}
       </h2>

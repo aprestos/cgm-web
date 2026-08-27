@@ -82,7 +82,7 @@ const status = computed(() => {
     <div class="flex items-start justify-between gap-4">
       <div class="flex min-w-0 items-start gap-3">
         <div
-          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400"
+          class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400"
         >
           <IconTicket class="h-6 w-6" stroke="1.5" />
         </div>

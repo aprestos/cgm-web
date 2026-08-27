@@ -8,9 +8,9 @@ import { tenantStore } from '@/features/tenant/tenant.store'
 import { useI18n } from 'vue-i18n'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
-import type { Ticket } from '@/features/tickets/ticket.model.ts'
+import { type Ticket, TicketStatus } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
-import type { Tournament } from '@/features/tournaments/model.ts'
+import type { Tournament } from '@/features/tournaments/tournament.model.ts'
 import { tournamentService } from '@/features/tournaments/service.ts'
 
 // Components
@@ -235,6 +235,7 @@ async function loadTickets(): Promise<void> {
       availableTickets.value = await ticketService.getAll(
         tenant.value.id,
         edition.value.id,
+        TicketStatus.ACTIVE,
       )
     }
   } catch {

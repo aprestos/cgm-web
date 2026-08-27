@@ -129,15 +129,15 @@ function getDurationHours(
             <!-- Day badge -->
             <div class="w-16 flex-shrink-0 text-center pt-1">
               <div
-                class="rounded-lg bg-indigo-100 dark:bg-indigo-900/30 px-2 py-1"
+                class="rounded-lg bg-primary-100 dark:bg-primary-900/30 px-2 py-1"
               >
                 <div
-                  class="text-sm font-bold text-indigo-600 dark:text-indigo-400"
+                  class="text-sm font-bold text-primary-600 dark:text-primary-400"
                 >
                   {{ getDay(withdraw.started_at) }}
                 </div>
                 <div
-                  class="text-xs text-indigo-600 dark:text-indigo-400 uppercase tracking-wider"
+                  class="text-xs text-primary-600 dark:text-primary-400 uppercase tracking-wider"
                 >
                   {{ getMonth(withdraw.started_at) }}
                 </div>

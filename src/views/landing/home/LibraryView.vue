@@ -93,7 +93,7 @@ function getGameCardClass(index: number): string {
             />
             <div
               v-else
-              class="flex h-full w-full items-center justify-center bg-linear-to-br from-violet-100 to-indigo-100 dark:from-violet-900/50 dark:to-indigo-900/50"
+              class="flex h-full w-full items-center justify-center bg-linear-to-br from-violet-100 to-primary-100 dark:from-violet-900/50 dark:to-primary-900/50"
             >
               <IconDice5 class="h-16 w-16 text-violet-300 dark:text-white/20" />
             </div>

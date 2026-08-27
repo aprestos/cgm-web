@@ -388,7 +388,7 @@ async function handlePaymentSubmit(): Promise<void> {
     class="relative min-h-screen overflow-x-hidden bg-gray-50 pt-24 text-gray-900 dark:bg-gray-950 dark:text-white"
   >
     <div
-      class="absolute inset-x-0 top-0 z-0 h-72 bg-linear-to-b from-indigo-100/70 to-transparent dark:from-indigo-900/30"
+      class="absolute inset-x-0 top-0 z-0 h-72 bg-linear-to-b from-primary-100/70 to-transparent dark:from-primary-900/30"
     />
 
     <div
@@ -418,7 +418,7 @@ async function handlePaymentSubmit(): Promise<void> {
           {{ t('landing.checkout.emptyCart.description') }}
         </p>
         <RouterLink
-          class="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-indigo-500"
+          class="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-primary-500"
           :to="{ name: RouteNames.landing.home, hash: '#tickets' }"
         >
           <IconArrowLeft class="size-4" />

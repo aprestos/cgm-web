@@ -3,6 +3,12 @@ export enum TicketGroup {
   ADMIN = 'admin',
 }
 
+export enum TicketStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive',
+  DRAFT = 'draft',
+}
+
 export interface Ticket {
   id: number
   editionId: number
@@ -25,7 +31,28 @@ export interface Ticket {
   createdAt: string
   isPopular?: boolean
   accessDays?: Array<{ day: string }>
-  status?: 'active' | 'inactive' | 'draft'
+  status?: TicketStatus
+}
+
+export enum IssuanceStatus {
+  VALID = 'valid',
+  REDEEMED = 'redeemed',
+  CANCELED = 'canceled',
+}
+
+/** A ticket handed to an attendee — one per person the buyer paid for */
+export interface TicketIssuance {
+  id: string
+  ticketId: string
+  orderId: string
+  /** The user who paid for the ticket */
+  userId?: string
+  /** The profile of the attendee, when they already have an account */
+  attendeeId?: string
+  attendeeName: string
+  attendeeEmail: string
+  status: IssuanceStatus
+  createdAt: string
 }
 
 /** A pre-defined day (from `ticket_days`) an edition offers, that ticket types can be linked to */

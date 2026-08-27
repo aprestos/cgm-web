@@ -25,7 +25,7 @@ const route = useRoute()
           :to="{ name: item.routeName }"
           :class="[
             item.routeName === route.name
-              ? 'text-indigo-600 dark:text-indigo-400 bg-white/60 dark:bg-indigo-950/50'
+              ? 'text-primary-600 dark:text-primary-400 bg-white/60 dark:bg-primary-950/50'
               : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800',
             'flex flex-col items-center justify-center gap-1 px-4 py-4 rounded-full transition-all min-w-0',
           ]"

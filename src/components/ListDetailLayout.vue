@@ -55,7 +55,7 @@
             class="whitespace-nowrap border-b-2 px-3 py-2.5 text-left text-sm font-medium transition-colors"
             :class="
               isSelected(item, index)
-                ? 'border-indigo-500 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                ? 'border-primary-500 text-primary-600 dark:border-primary-400 dark:text-primary-400'
                 : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
             "
             :aria-pressed="isSelected(item, index)"
@@ -88,7 +88,7 @@
                 class="group flex w-full cursor-pointer items-center gap-2 border-l-2 pr-3 text-left transition-colors"
                 :class="
                   isSelected(item, index)
-                    ? 'border-indigo-500 bg-indigo-50/70 dark:border-indigo-400 dark:bg-indigo-500/10'
+                    ? 'border-primary-500 bg-primary-50/70 dark:border-primary-400 dark:bg-primary-500/10'
                     : 'border-transparent hover:bg-gray-50 dark:hover:bg-white/5'
                 "
                 :aria-pressed="isSelected(item, index)"
@@ -105,7 +105,7 @@
                   class="h-4 w-4 shrink-0 transition-colors"
                   :class="
                     isSelected(item, index)
-                      ? 'text-indigo-500 dark:text-indigo-400'
+                      ? 'text-primary-500 dark:text-primary-400'
                       : 'text-gray-300 group-hover:text-gray-500 dark:text-gray-600 dark:group-hover:text-gray-400'
                   "
                 />

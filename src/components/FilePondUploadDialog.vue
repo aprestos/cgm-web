@@ -5,9 +5,8 @@
         {{ description }}
       </p>
 
-      <file-pond
-        ref="pond"
-        class="w-full"
+      <FilePondUploader
+        ref="uploader"
         :allow-multiple="allowMultiple"
         :accepted-file-types="acceptedFileTypes"
         :max-file-size="maxFileSize"
@@ -15,9 +14,18 @@
         :label-idle="labelIdle"
         :allow-image-preview="allowImagePreview"
         :image-preview-height="imagePreviewHeight"
-        :server="null"
-        @addfile="onAddFile"
-        @removefile="onRemoveFile"
+        :supabase-bucket="supabaseBucket"
+        :supabase-path="supabasePath"
+        :supabase-options="supabaseOptions"
+        :file-naming-strategy="fileNamingStrategy"
+        :custom-file-namer="customFileNamer"
+        @update:has-files="hasFiles = $event"
+        @update:uploading="isUploading = $event"
+        @update:progress="uploadProgress = $event"
+        @upload-error="emit('upload-error', $event)"
+        @file-added="emit('file-added', $event)"
+        @file-removed="emit('file-removed', $event)"
+        @file-error="emit('file-error', $event)"
       />
 
       <!-- Upload Progress -->
@@ -84,41 +92,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, nextTick, watch, type Ref } from 'vue'
-import vueFilePondModule from 'vue-filepond'
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
-import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size'
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview'
-import { uploadFilesToSupabase } from '@/utils/fileUpload'
+import { ref, watch, useTemplateRef } from 'vue'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
-import type { FileUploadOptions, FileNamingOptions } from '@/utils/fileUpload'
-
-// Import FilePond styles
-import 'filepond/dist/filepond.min.css'
-import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
-
-interface VueFilePondFactory {
-  (...plugins: unknown[]): unknown
-}
-
-const resolveVueFilePondFactory = (): VueFilePondFactory => {
-  const moduleWithDefault = vueFilePondModule as { default?: unknown }
-  const maybeFactory = moduleWithDefault.default ?? vueFilePondModule
-
-  if (typeof maybeFactory !== 'function') {
-    throw new TypeError('Invalid vue-filepond module export')
-  }
-
-  return maybeFactory as VueFilePondFactory
-}
-
-// Create FilePond component
-const FilePond = resolveVueFilePondFactory()(
-  FilePondPluginFileValidateType,
-  FilePondPluginFileValidateSize,
-  FilePondPluginImagePreview,
-)
+import FilePondUploader from '@/components/FilePondUploader.vue'
+import type { FilePondUploaderInstance } from '@/components/filePondUploader.model.ts'
+import type { UploadedFile } from '@/utils/fileUpload'
 
 // Props interface
 interface Props {
@@ -176,6 +155,8 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<{
   close: []
   'upload-success': [urls: string[]]
+  /** Same files as `upload-success`, with the storage paths needed to undo them. */
+  uploaded: [files: UploadedFile[]]
   'upload-error': [error: unknown]
   'file-added': [file: unknown]
   'file-removed': [file: unknown]
@@ -186,19 +167,7 @@ const emit = defineEmits<{
 const hasFiles = ref(false)
 const isUploading = ref(false)
 const uploadProgress = ref(0)
-const pond: Ref<FilePondInstance | null> = ref(null)
-
-// FilePond file item interface
-interface FilePondFileItem {
-  file: File
-  getFiles(): FilePondFileItem[]
-}
-
-// FilePond instance interface
-interface FilePondInstance {
-  getFiles(): FilePondFileItem[]
-  removeFiles(): void
-}
+const uploader = useTemplateRef<FilePondUploaderInstance>('uploader')
 
 // Methods
 const handleClose = (): void => {
@@ -209,105 +178,23 @@ const handleClose = (): void => {
   resetState()
 }
 
-const handleUpload = (): void => {
-  if (!hasFiles.value || isUploading.value || !pond.value) {
+const handleUpload = async (): Promise<void> => {
+  if (!hasFiles.value || isUploading.value || !uploader.value) {
     return
   }
 
-  const files = pond.value.getFiles().map((fileItem) => fileItem.file)
-  void uploadFiles(files)
-}
+  const uploaded = await uploader.value.upload()
 
-const uploadFiles = async (files: File[]): Promise<void> => {
-  if (files.length === 0) {
-    return
-  }
-
-  isUploading.value = true
-  uploadProgress.value = 0
-
-  try {
-    const uploadOptions: FileUploadOptions = {
-      bucket: props.supabaseBucket,
-      path: props.supabasePath,
-      ...props.supabaseOptions,
-    }
-
-    const namingOptions: FileNamingOptions = {
-      strategy: props.fileNamingStrategy,
-      customNamer: props.customFileNamer || undefined,
-    }
-
-    const result = await uploadFilesToSupabase(
-      files,
-      uploadOptions,
-      namingOptions,
-      (progress) => {
-        uploadProgress.value = Math.round(progress.progress)
-      },
+  if (uploaded.length > 0) {
+    emit(
+      'upload-success',
+      uploaded.map((file) => file.url),
     )
+    emit('uploaded', uploaded)
 
-    // Handle errors
-    if (result.errors.length > 0) {
-      result.errors.forEach((error) => {
-        emit('upload-error', error)
-      })
-    }
-
-    // Emit success with URLs
-    if (result.successful.length > 0) {
-      const urls = result.successful
-        .map((r) => r.publicUrl)
-        .filter(Boolean) as string[]
-
-      emit('upload-success', urls)
-
-      // Close dialog after successful upload
-      handleClose()
-    }
-  } catch (error) {
-    console.error('Upload error:', error)
-    emit('upload-error', {
-      error: error,
-      message: error instanceof Error ? error.message : 'Unknown upload error',
-    })
-  } finally {
-    isUploading.value = false
-    uploadProgress.value = 0
+    // Close dialog after successful upload
+    handleClose()
   }
-}
-
-const onAddFile = (error: unknown, file: unknown): void => {
-  if (error) {
-    console.error('Add file error:', error)
-    emit('file-error', error)
-    return
-  }
-
-  updateFileState()
-  emit('file-added', file)
-}
-
-const onRemoveFile = (error: unknown, file: unknown): void => {
-  if (error) {
-    console.error('Remove file error:', error)
-    return
-  }
-
-  updateFileState()
-  emit('file-removed', file)
-}
-
-const updateFileState = (): void => {
-  void nextTick(() => {
-    if (!pond.value) {
-      hasFiles.value = false
-      return
-    }
-
-    const files = pond.value.getFiles() || []
-    hasFiles.value = files.length > 0
-  })
 }
 
 const resetState = (): void => {
@@ -315,10 +202,7 @@ const resetState = (): void => {
   isUploading.value = false
   uploadProgress.value = 0
 
-  // Clear FilePond
-  if (pond.value) {
-    pond.value.removeFiles()
-  }
+  uploader.value?.reset()
 }
 
 // Watchers
@@ -336,10 +220,3 @@ defineExpose({
   resetState,
 })
 </script>
-
-<style scoped>
-/* Minimal overrides - let FilePond handle its own styling */
-:deep(.filepond--root) {
-  margin-bottom: 0;
-}
-</style>

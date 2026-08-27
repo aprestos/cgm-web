@@ -107,7 +107,7 @@ function scrollToMap(): void {
         :style="{ transform: heroTransform }"
       />
       <div
-        class="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-indigo-300/50 dark:bg-indigo-600/40 blur-3xl"
+        class="absolute -bottom-20 -right-20 h-80 w-80 rounded-full bg-primary-300/50 dark:bg-primary-600/40 blur-3xl"
         :style="{
           transform: `translateY(${-props.scrollY * (isMobile ? 0.15 : 0.3)}px)`,
         }"
@@ -136,7 +136,7 @@ function scrollToMap(): void {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            class="text-indigo-600 dark:text-indigo-400"
+            class="text-primary-600 dark:text-primary-400"
           >
             <rect
               x="3"
@@ -313,7 +313,7 @@ function scrollToMap(): void {
             viewBox="0 0 24 24"
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
-            class="text-indigo-700 dark:text-indigo-300"
+            class="text-primary-700 dark:text-primary-300"
           >
             <rect
               x="2"
@@ -503,7 +503,7 @@ function scrollToMap(): void {
           <!-- Upcoming Badge -->
           <div
             v-else-if="countdown"
-            class="mb-8 inline-flex items-center gap-2 rounded-full bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 text-sm font-medium text-indigo-700 dark:text-indigo-300 ring-1 ring-indigo-300 dark:ring-indigo-500/30"
+            class="mb-8 inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-500/20 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 ring-1 ring-primary-300 dark:ring-primary-500/30"
           >
             <IconSparkles class="h-4 w-4" />
             {{ t('landing.hero.comingSoon') }}
@@ -549,7 +549,7 @@ function scrollToMap(): void {
           >
             <div class="flex items-center gap-2">
               <IconCalendar
-                class="h-5 w-5 text-indigo-600 dark:text-indigo-400"
+                class="h-5 w-5 text-primary-600 dark:text-primary-400"
               />
               <span>{{
                 formatDateRange(
@@ -567,7 +567,7 @@ function scrollToMap(): void {
             >
               <div class="flex items-center gap-2">
                 <IconMapPin
-                  class="h-5 w-5 text-indigo-600 transition-transform group-hover:-translate-y-0.5 dark:text-indigo-400"
+                  class="h-5 w-5 text-primary-600 transition-transform group-hover:-translate-y-0.5 dark:text-primary-400"
                 />
                 <span>{{ editionStore.location.title }}</span>
               </div>
@@ -602,7 +602,7 @@ function scrollToMap(): void {
             <a
               v-else-if="primaryCta.href"
               :href="primaryCta.href"
-              class="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-linear-to-r from-indigo-600 to-violet-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:from-indigo-500 hover:to-violet-500 hover:shadow-indigo-500/25 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
+              class="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-linear-to-r from-primary-600 to-violet-600 px-6 py-3.5 text-base font-semibold text-white shadow-lg transition-all duration-300 hover:from-primary-500 hover:to-violet-500 hover:shadow-primary-500/25 sm:w-auto sm:px-8 sm:py-4 sm:text-lg"
             >
               <component :is="primaryCta.icon" class="h-6 w-6" />
               {{ primaryCta.text }}

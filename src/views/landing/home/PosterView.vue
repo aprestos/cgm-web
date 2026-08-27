@@ -50,7 +50,7 @@ const altText = props.editionName
   <div class="group relative">
     <button
       type="button"
-      class="poster-card relative block cursor-pointer overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all duration-500 hover:shadow-indigo-500/20 hover:ring-indigo-400/30 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950"
+      class="poster-card relative block cursor-pointer overflow-hidden rounded-2xl shadow-2xl ring-1 ring-white/10 transition-all duration-500 hover:shadow-primary-500/20 hover:ring-primary-400/30 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-950"
       :aria-label="t('landing.poster.viewPoster')"
       @click="openLightbox"
     >
@@ -90,7 +90,7 @@ const altText = props.editionName
 
     <!-- Decorative glow behind card -->
     <div
-      class="pointer-events-none absolute -inset-4 -z-10 rounded-3xl bg-linear-to-br from-indigo-500/20 via-violet-500/10 to-fuchsia-500/20 opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-100 dark:from-indigo-500/15 dark:via-violet-500/10 dark:to-fuchsia-500/15"
+      class="pointer-events-none absolute -inset-4 -z-10 rounded-3xl bg-linear-to-br from-primary-500/20 via-violet-500/10 to-fuchsia-500/20 opacity-0 blur-2xl transition-opacity duration-700 group-hover:opacity-100 dark:from-primary-500/15 dark:via-violet-500/10 dark:to-fuchsia-500/15"
     />
   </div>
 

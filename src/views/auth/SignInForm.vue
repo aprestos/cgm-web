@@ -2,10 +2,10 @@
   <div>
     <!-- Lock icon -->
     <div
-      class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900/30"
+      class="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30"
     >
       <LockClosedIcon
-        class="h-6 w-6 text-indigo-600 dark:text-indigo-400"
+        class="h-6 w-6 text-primary-600 dark:text-primary-400"
         aria-hidden="true"
       />
     </div>
@@ -40,7 +40,7 @@
             autocomplete="email"
             required
             :placeholder="t('auth.enterEmailPlaceholder')"
-            class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-indigo-600 dark:focus:ring-indigo-500 sm:text-sm sm:leading-6"
+            class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm sm:leading-6"
           />
           <div
             class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3"
@@ -57,7 +57,7 @@
         <button
           type="submit"
           :disabled="isLoading || !email"
-          class="flex cursor-pointer w-full justify-center items-center gap-2 rounded-md bg-indigo-600 dark:bg-indigo-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 dark:hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex cursor-pointer w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <span v-if="!isLoading">
             <PaperAirplaneIcon class="h-4 w-4" aria-hidden="true" />

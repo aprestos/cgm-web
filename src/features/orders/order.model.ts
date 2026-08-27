@@ -1,7 +1,7 @@
 export interface OrderTicketInfo {
-  group: string
-  validFrom: string
-  validUntil: string
+  id?: string
+  name?: string
+  access_days?: Array<{ day: string }>
 }
 
 export interface Order {
@@ -9,7 +9,8 @@ export interface Order {
   status: 'placed' | 'paid' | 'canceled' | 'failed' | 'refunded'
   total: number
   created_at?: string
-  customer_id?: string
+  /** The buyer who paid for the order */
+  user_id?: string
   customer?: {
     email?: string
     name?: string
@@ -20,19 +21,17 @@ export interface Order {
 }
 
 export interface OrderItem {
-  ticket_id: number
+  ticket_id: string
   quantity: number
   ticket?: OrderTicketInfo
 }
 
 export interface Issuance {
-  ticket_id: number
-  recipient_id?: string
-  recipient_name: string
-  recipient_email: string
-  ticket?: {
-    id?: number
-    valid_from: string
-    valid_until: string
-  } | null
+  id: string
+  ticket_id: string
+  /** The profile of the attendee, when they already have an account */
+  attendee_id?: string
+  attendee_name: string
+  attendee_email: string
+  ticket?: OrderTicketInfo | null
 }

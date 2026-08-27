@@ -40,7 +40,7 @@ const handleLocaleChange = (localeCode: string): void => {
         leave-to="opacity-0"
       >
         <ListboxOptions
-          class="absolute z-20 mt-1 max-h-60 w-40 overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
+          class="absolute right-0 z-20 mt-1 max-h-60 w-[min(10rem,calc(100vw-2rem))] overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
         >
           <ListboxOption
             v-for="locale in availableLocales"
@@ -53,7 +53,7 @@ const handleLocaleChange = (localeCode: string): void => {
               class="group flex flex-row relative cursor-default select-none px-3 py-2"
               :class="
                 active
-                  ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                  ? 'bg-primary-600 text-white dark:bg-primary-500'
                   : 'text-gray-900 dark:text-gray-100'
               "
             >
@@ -67,7 +67,9 @@ const handleLocaleChange = (localeCode: string): void => {
                 v-if="selected"
                 class="absolute inset-y-0 right-0 flex items-center pr-3"
                 :class="
-                  active ? 'text-white' : 'text-indigo-600 dark:text-indigo-500'
+                  active
+                    ? 'text-white'
+                    : 'text-primary-600 dark:text-primary-500'
                 "
               >
                 <IconCheck class="h-5 w-5" aria-hidden="true" />
