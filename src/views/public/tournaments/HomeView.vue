@@ -37,7 +37,7 @@ const currentUser = ref<User | null>(null)
 const selectedTournament = ref<Tournament | null>(null)
 // Opened from a join/edit button rather than the card body, so the dialog
 // scrolls past the info straight to the form.
-const focusSignUp = ref<boolean>(false)
+const shownDialog = ref<string>('')
 const searchQuery = ref<string>('')
 const selectedStatus = ref<StatusTab>('all')
 const selectedSort = ref<SortOption>(SortOption.soonest)
@@ -64,9 +64,9 @@ const visibleTournaments = computed<Tournament[]>(() =>
 // Only signed-in users get the join button, so the dialog always has a user.
 const isAuthenticated = computed<boolean>(() => !!currentUser.value)
 
-const openDetails = (tournament: Tournament, atSignUp: boolean): void => {
+const openDetails = (tournament: Tournament): void => {
   selectedTournament.value = tournament
-  focusSignUp.value = atSignUp
+  shownDialog.value = 'details'
 }
 
 const selectedParticipants = computed<TournamentParticipant[]>(() =>
@@ -76,7 +76,7 @@ const selectedParticipants = computed<TournamentParticipant[]>(() =>
 )
 
 const closeDetailsDialog = (): void => {
-  focusSignUp.value = false
+  shownDialog.value = ''
 }
 
 const handleJoinConfirm = async (
@@ -99,14 +99,8 @@ const handleJoinConfirm = async (
   }
   toast.success(
     participants.length > 1
-      ? t('public.tournaments.joinSuccessMultiple', {
-          title: tournament.title,
-          count: participants.length,
-        })
-      : t('public.tournaments.joinSuccess', {
-          title: tournament.title,
-          name: participants[0]?.participantName ?? '',
-        }),
+      ? t('public.tournaments.joinSuccessMultiple')
+      : t('public.tournaments.joinSuccess'),
   )
 
   void loadTournaments()
@@ -172,18 +166,18 @@ onMounted(async () => {
       :tournaments="visibleTournaments"
       :participants="participants"
       :can-join="isAuthenticated"
-      @details="openDetails($event, false)"
-      @join="openDetails($event, true)"
-      @edit="openDetails($event, true)"
+      @details="openDetails"
+      @join="openDetails"
+      @edit="openDetails"
     />
 
     <DialogTournamentDetails
-      :open="focusSignUp"
+      :open="shownDialog === 'details'"
       :tournament="selectedTournament"
       :participants="selectedParticipants"
       :user="currentUser"
       :can-join="isAuthenticated"
-      :focus-sign-up="focusSignUp"
+      :focus-sign-up="false"
       @close="closeDetailsDialog"
       @confirm="handleJoinConfirm"
     />
