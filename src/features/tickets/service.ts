@@ -28,7 +28,7 @@ export const ticketService = {
   async getAll(
     tenantId: string,
     editionId: number,
-    status: TicketStatus | undefined,
+    status?: TicketStatus,
   ): Promise<Ticket[]> {
     const query = supabase
       .from('ticket_types')
