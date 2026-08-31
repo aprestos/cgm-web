@@ -76,6 +76,7 @@ export default {
     sectionSubtitle: 'Compete for glory',
     sectionDescription:
       'Sign up at the venue and battle it out for the top spot.',
+    viewAll: 'View all tournaments',
     organizedBy: 'by {name}',
   },
   map: {

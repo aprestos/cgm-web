@@ -20,7 +20,7 @@ import { v4 as uuidv4 } from 'uuid'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
-import TournamentParticipantRow from './TournamentParticipantRow.vue'
+import TournamentParticipantRow from '@/features/tournaments/components/TournamentParticipantRow.vue'
 import type { Tournament } from '@/features/tournaments/tournament.model.ts'
 import type { User } from '@/features/auth/user.model.ts'
 import {

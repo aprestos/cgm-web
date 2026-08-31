@@ -1,10 +1,13 @@
 @import './base.css';
 
+/* Compiled on its own, so the Tailwind variants need pulling in for reference. */
+@reference '../index.css';
+
 @media (hover: hover) {
 }
 
-@media (min-width: 1024px) {
-  body {
+body {
+  @variant lg {
     display: flex;
     place-items: center;
   }

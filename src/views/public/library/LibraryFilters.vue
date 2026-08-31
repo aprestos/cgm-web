@@ -3,19 +3,11 @@
     <h3 class="sr-only">{{ t('public.library.filters.title') }}</h3>
 
     <!-- Category Tags -->
-    <ul
-      role="list"
-      :class="[
-        isMobile
-          ? 'py-3 font-medium text-gray-900 dark:text-white'
-          : 'border-b border-gray-200 dark:border-gray-700 pb-6 text-sm font-medium text-gray-900 dark:text-white',
-      ]"
-    >
+    <ul role="list" class="py-3 font-medium text-gray-900 dark:text-white">
       <li v-for="category in subCategories" :key="category.id">
         <label
           :class="[
-            'flex py-3 items-center gap-2 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700',
-            isMobile ? 'px-4' : '',
+            'flex cursor-pointer items-center gap-2 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700',
             {
               'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300':
                 selectedTag === category.id,
@@ -25,8 +17,7 @@
           <component
             :is="category.icon"
             :class="[
-              isMobile ? 'h-5 w-5' : 'h-4 w-4',
-              'text-gray-400 dark:text-gray-300',
+              'size-5 text-gray-400 dark:text-gray-300',
               {
                 'text-primary-600 dark:text-primary-400':
                   selectedTag === category.id,
@@ -46,20 +37,11 @@
       :key="section.id"
       v-slot="{ open }"
       as="div"
-      :class="[
-        isMobile
-          ? 'border-t border-gray-200 dark:border-gray-700 px-4 py-6'
-          : 'border-b border-gray-200 dark:border-gray-700 py-6',
-      ]"
+      class="border-t border-gray-200 px-4 py-6 dark:border-gray-700"
     >
-      <h3 :class="isMobile ? '-mx-2 -my-3 flow-root' : '-my-3 flow-root'">
+      <h3 class="-mx-2 -my-3 flow-root">
         <DisclosureButton
-          :class="[
-            'flex w-full items-center justify-between py-3 text-sm text-gray-400 dark:text-gray-300 hover:text-gray-500 dark:hover:text-gray-200',
-            isMobile
-              ? 'bg-white dark:bg-gray-800 px-2'
-              : 'bg-white dark:bg-gray-900',
-          ]"
+          class="flex w-full items-center justify-between bg-white px-2 py-3 text-sm text-gray-400 hover:text-gray-500 dark:bg-gray-800 dark:text-gray-300 dark:hover:text-gray-200"
         >
           <span class="font-medium text-gray-900 dark:text-white">
             {{ t('public.library.filters.' + section.id) }}
@@ -71,7 +53,7 @@
         </DisclosureButton>
       </h3>
       <DisclosurePanel class="pt-6">
-        <div :class="isMobile ? 'space-y-6' : 'space-y-4'">
+        <div class="space-y-6">
           <div
             v-for="(option, optionIdx) in section.options"
             :key="option.value"
@@ -80,7 +62,7 @@
             <div class="flex h-5 shrink-0 items-center">
               <div class="group grid size-4 grid-cols-1">
                 <input
-                  :id="`filter-${isMobile ? 'mobile' : 'desktop'}-${section.id}-${optionIdx}`"
+                  :id="`filter-${section.id}-${optionIdx}`"
                   :name="`${section.id}[]`"
                   :value="option.value"
                   type="checkbox"
@@ -111,7 +93,7 @@
               </div>
             </div>
             <label
-              :for="`filter-${isMobile ? 'mobile' : 'desktop'}-${section.id}-${optionIdx}`"
+              :for="`filter-${section.id}-${optionIdx}`"
               class="text-sm text-gray-600 dark:text-gray-400"
             >
               {{ option.label }}
@@ -130,7 +112,6 @@ import { MinusIcon, PlusIcon } from '@heroicons/vue/20/solid'
 import type { Component } from 'vue'
 
 interface Props {
-  isMobile?: boolean
   selectedTag: string
   selectedFilters: Record<string, string[]>
   subCategories: Array<{ id: string; href: string; icon: Component }>
@@ -145,9 +126,7 @@ interface Emits {
   (e: 'toggle-filter', sectionId: string, value: string, event: Event): void
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  isMobile: false,
-})
+const props = defineProps<Props>()
 
 const emit = defineEmits<Emits>()
 

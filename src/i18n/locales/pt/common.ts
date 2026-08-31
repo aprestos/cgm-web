@@ -17,6 +17,8 @@ export default {
     next: 'Seguinte',
     continue: 'Continuar',
     optional: 'Opcional',
+    remove: 'Remover',
+    clearAll: 'Limpar tudo',
   },
   state: {
     yes: 'Sim',

@@ -11,7 +11,6 @@ import { libraryService } from '@/features/library/games/service.ts'
 import { type Ticket, TicketStatus } from '@/features/tickets/ticket.model.ts'
 import { ticketService } from '@/features/tickets/service.ts'
 import type { Tournament } from '@/features/tournaments/tournament.model.ts'
-import { tournamentService } from '@/features/tournaments/service.ts'
 
 // Components
 import HeroView from './HeroView.vue'
@@ -24,6 +23,7 @@ import MapView from '@/views/landing/home/MapView.vue'
 import ScheduleView from './ScheduleView.vue'
 import TournamentsView from './TournamentsView.vue'
 import type { Schedule } from '@/features/events/edition.model.ts'
+import tournamentService from '@/features/tournaments/events/service.ts'
 
 const { t } = useI18n()
 

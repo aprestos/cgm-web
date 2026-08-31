@@ -2,102 +2,53 @@
   <DialogComponent
     :open="open"
     :title="t('admin.tournaments.createTournament')"
-    size="lg"
+    size="2xl"
+    body-class="p-0"
     @close="emit('close')"
   >
-    <form @submit.prevent="submit">
-      <div class="space-y-6 mx-auto max-w-7xl">
-        <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-2">
-          <CInput
-            id="tournament-title"
-            v-model="formData.title"
-            :label="t('admin.tournaments.form.title')"
-            :errors="r$.$errors.title"
-            class="col-span-full"
-          />
+    <!-- Side by side there is nothing to switch between; it is only once the
+         preview drops below the form that it needs a way back up. -->
+    <div
+      class="border-b border-gray-100 px-4 sm:px-6 lg:hidden dark:border-white/10"
+    >
+      <nav class="-mb-px flex gap-6" role="tablist">
+        <button
+          v-for="pane in PANES"
+          :key="pane"
+          type="button"
+          role="tab"
+          :aria-selected="activePane === pane"
+          :aria-controls="`tournament-pane-${pane}`"
+          class="cursor-pointer border-b-2 py-3 text-sm font-medium transition-colors"
+          :class="
+            activePane === pane
+              ? 'border-primary-600 text-primary-600 dark:border-primary-500 dark:text-primary-400'
+              : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+          "
+          @click="activePane = pane"
+        >
+          {{ t(`admin.tournaments.form.tabs.${pane}`) }}
+        </button>
+      </nav>
+    </div>
 
-          <CInput
-            id="tournament-place"
-            v-model="formData.place"
-            :label="t('admin.tournaments.form.place')"
-            :errors="r$.$errors.place"
-            class="col-span-full sm:col-span-1"
-          />
-
-          <CInput
-            id="tournament-organizer"
-            v-model="formData.organizer"
-            :label="t('admin.tournaments.form.organizer')"
-            :errors="r$.$errors.organizer"
-            class="col-span-full sm:col-span-1"
-          />
-
-          <CInput
-            id="tournament-starts-at"
-            v-model="formData.startsAt"
-            type="datetime-local"
-            :label="t('admin.tournaments.form.startsAt')"
-            :errors="r$.$errors.startsAt"
-            class="col-span-full sm:col-span-1"
-          />
-
-          <CInput
-            id="tournament-max-participants"
-            v-model="formData.maxParticipants"
-            type="number"
-            min="2"
-            :label="t('admin.tournaments.form.maxParticipants')"
-            :errors="r$.$errors.maxParticipants"
-            class="col-span-full sm:col-span-1"
-          />
-
-          <!-- Tournament type -->
-          <div class="col-span-full sm:col-span-1">
-            <label
-              for="tournament-type"
-              class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-            >
-              {{ t('admin.tournaments.form.type') }}
-            </label>
-            <div class="mt-2">
-              <select
-                id="tournament-type"
-                v-model="formData.format"
-                class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500 sm:text-sm/6"
-              >
-                <option
-                  v-for="type in TOURNAMENT_TYPES"
-                  :key="type"
-                  :value="type"
-                >
-                  {{ t(`admin.tournaments.type.${type}`) }}
-                </option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <CTextArea
-          id="tournament-description"
-          v-model="formData.description"
-          :label="t('admin.tournaments.form.description')"
-          :rows="3"
-          :helper-text="t('common.actions.optional')"
-        />
-
-        <!-- Cover image — uploaded on submit, stored on the tournament -->
-        <div>
-          <label
-            class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-          >
-            {{ t('admin.tournaments.form.cover') }}
-            <span class="font-normal text-gray-500 dark:text-gray-400">
-              ({{ t('common.actions.optional') }})
-            </span>
-          </label>
+    <div class="grid lg:grid-cols-[minmax(0,1fr)_380px]">
+      <!-- Fields run in the order the public dialog renders them: cover,
+           title and organizer, the facts grid, prizes, then the description. -->
+      <form
+        id="tournament-pane-edit"
+        :class="[
+          'px-4 py-5 sm:p-6 lg:block',
+          activePane === 'edit' ? 'block' : 'hidden',
+        ]"
+        @submit.prevent="submit"
+      >
+        <TournamentFormSection
+          :title="t('admin.tournaments.form.sections.cover')"
+          optional
+        >
           <FilePondUploader
             ref="coverUploader"
-            class="mt-2"
             :allow-multiple="false"
             :accepted-file-types="[
               'image/jpeg',
@@ -112,37 +63,99 @@
             :supabase-path="coverFolder"
             file-naming-strategy="uuid"
             :supabase-options="{ cacheControl: '31536000', upsert: false }"
-            @update:has-files="hasCover = $event"
+            @update:has-files="onCoverChange"
           />
           <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
             {{ t('admin.tournaments.form.coverHint') }}
           </p>
-        </div>
+        </TournamentFormSection>
 
-        <!-- Prizes — optional, stored per prize type in the current language -->
-        <div>
-          <button
-            type="button"
-            class="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900 dark:text-gray-100 cursor-pointer"
-            :aria-expanded="showPrizes"
-            aria-controls="tournament-prizes"
-            @click="showPrizes = !showPrizes"
-          >
-            <IconChevronRight
-              class="size-4 transition-transform"
-              :class="showPrizes ? 'rotate-90' : ''"
+        <TournamentFormSection
+          :title="t('admin.tournaments.form.sections.identity')"
+        >
+          <div class="space-y-5">
+            <CInput
+              id="tournament-title"
+              v-model="formData.title"
+              :label="t('admin.tournaments.form.title')"
+              :errors="r$.$errors.title"
             />
-            {{ t('admin.tournaments.form.prizes') }}
-            <span class="font-normal text-gray-500 dark:text-gray-400">
-              ({{ t('common.actions.optional') }})
-            </span>
-          </button>
 
-          <div
-            v-if="showPrizes"
-            id="tournament-prizes"
-            class="mt-4 grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2"
-          >
+            <CInput
+              id="tournament-organizer"
+              v-model="formData.organizer"
+              :label="t('admin.tournaments.form.organizer')"
+              :errors="r$.$errors.organizer"
+            />
+          </div>
+        </TournamentFormSection>
+
+        <TournamentFormSection
+          :title="t('admin.tournaments.form.sections.facts')"
+        >
+          <div class="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+            <CInput
+              id="tournament-starts-at"
+              v-model="formData.startsAt"
+              type="datetime-local"
+              :label="t('admin.tournaments.form.startsAt')"
+              :errors="r$.$errors.startsAt"
+              class="col-span-full sm:col-span-1"
+            />
+
+            <CInput
+              id="tournament-place"
+              v-model="formData.place"
+              :label="t('admin.tournaments.form.place')"
+              :errors="r$.$errors.place"
+              class="col-span-full sm:col-span-1"
+            />
+
+            <!-- Tournament type -->
+            <div class="col-span-full sm:col-span-1">
+              <label
+                for="tournament-type"
+                class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
+              >
+                {{ t('admin.tournaments.form.type') }}
+              </label>
+              <div class="mt-2">
+                <select
+                  id="tournament-type"
+                  v-model="formData.format"
+                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500 sm:text-sm/6"
+                >
+                  <option
+                    v-for="type in TOURNAMENT_TYPES"
+                    :key="type"
+                    :value="type"
+                  >
+                    {{ t(`admin.tournaments.format.${type}`) }}
+                  </option>
+                </select>
+              </div>
+            </div>
+
+            <CInput
+              id="tournament-max-participants"
+              v-model="formData.maxParticipants"
+              type="number"
+              min="2"
+              :label="t('admin.tournaments.form.maxParticipants')"
+              :errors="r$.$errors.maxParticipants"
+              class="col-span-full sm:col-span-1"
+            />
+          </div>
+        </TournamentFormSection>
+
+        <!-- Optional, and rarely filled — folded away, but in the place the
+             public dialog gives it rather than tacked on at the end. -->
+        <TournamentFormSection
+          :title="t('admin.tournaments.form.sections.prizes')"
+          optional
+          collapsible
+        >
+          <div class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
             <CInput
               v-for="prize in PRIZE_TYPES"
               :id="`tournament-prize-${prize}`"
@@ -152,16 +165,54 @@
               class="col-span-full sm:col-span-1"
             />
           </div>
-        </div>
-      </div>
+        </TournamentFormSection>
 
-      <!-- Action Buttons -->
-      <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end mt-6">
+        <TournamentFormSection
+          :title="t('admin.tournaments.form.sections.about')"
+          optional
+        >
+          <CTextArea
+            id="tournament-description"
+            v-model="formData.description"
+            :label="t('admin.tournaments.form.description')"
+            :rows="3"
+          />
+        </TournamentFormSection>
+      </form>
+
+      <aside
+        id="tournament-pane-preview"
+        :class="[
+          'border-t border-gray-100 bg-gray-50 px-4 py-5 sm:p-6 lg:block lg:border-t-0 lg:border-l dark:border-white/10 dark:bg-white/[0.02]',
+          activePane === 'preview' ? 'block' : 'hidden',
+        ]"
+      >
+        <div class="lg:sticky lg:top-4">
+          <h4
+            class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+          >
+            {{ t('admin.tournaments.preview.title') }}
+          </h4>
+          <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            {{ t('admin.tournaments.preview.hint') }}
+          </p>
+
+          <TournamentPreview
+            class="mt-4"
+            :tournament="draft"
+            :cover="coverPreview"
+          />
+        </div>
+      </aside>
+    </div>
+
+    <template #footer>
+      <div class="flex flex-col gap-3 sm:flex-row sm:justify-end sm:gap-2">
         <CButton
           type="button"
           variant="secondary"
           size="lg"
-          class="order-2 sm:order-1 w-full sm:w-auto"
+          class="order-2 w-full sm:order-1 sm:w-auto"
           @click="emit('close')"
         >
           {{ t('common.actions.cancel') }}
@@ -170,7 +221,7 @@
           type="button"
           variant="primary"
           size="lg"
-          class="order-1 sm:order-2 w-full sm:w-auto"
+          class="order-1 w-full sm:order-2 sm:w-auto"
           :loading="isSubmitting"
           :loading-text="t('common.actions.submitting')"
           @click="submit"
@@ -178,22 +229,23 @@
           {{ t('admin.tournaments.createTournament') }}
         </CButton>
       </div>
-    </form>
+    </template>
   </DialogComponent>
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, useTemplateRef } from 'vue'
+import { computed, onBeforeUnmount, ref, useTemplateRef } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRegle } from '@regle/core'
 import { dateAfter, minValue, numeric, required } from '@regle/rules'
-import { IconChevronRight } from '@tabler/icons-vue'
 import { DateTime } from 'luxon'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import FilePondUploader from '@/components/FilePondUploader.vue'
+import TournamentFormSection from './TournamentFormSection.vue'
+import TournamentPreview from './TournamentPreview.vue'
 import type { FilePondUploaderInstance } from '@/components/filePondUploader.model.ts'
 import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
 import {
@@ -203,10 +255,10 @@ import {
   TournamentStatus,
 } from '@/features/tournaments/tournament.model.ts'
 import logger from '@/lib/logger'
-import tournamentService from '@/features/tournaments/service.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
 import { editionStore } from '@/features/events/edition.store.ts'
 import { toast } from 'vue-sonner'
+import tournamentService from '@/features/tournaments/events/service.ts'
 
 const { t, locale } = useI18n()
 
@@ -223,6 +275,9 @@ const emit = defineEmits<{
 
 const TOURNAMENT_TYPES = Object.values(TournamentFormat)
 const PRIZE_TYPES = Object.values(TournamentPrizeType)
+const PANES = ['edit', 'preview'] as const
+
+type Pane = (typeof PANES)[number]
 
 const emptyPrizes = (): Record<TournamentPrizeType, string> =>
   Object.fromEntries(PRIZE_TYPES.map((prize) => [prize, ''])) as Record<
@@ -252,8 +307,9 @@ const createFormData = (): {
 
 const formData = ref(createFormData())
 const isSubmitting = ref<boolean>(false)
-const showPrizes = ref<boolean>(false)
 const hasCover = ref<boolean>(false)
+const coverPreview = ref<string | undefined>(undefined)
+const activePane = ref<Pane>('edit')
 const coverUploader = useTemplateRef<FilePondUploaderInstance>('coverUploader')
 
 const coverFolder = computed((): string => {
@@ -262,6 +318,61 @@ const coverFolder = computed((): string => {
     ? `tenants/${tenantId}/tournaments`
     : 'tenants/default/tournaments'
 })
+
+// Only prizes with a value are sent, keyed by the language they were typed in.
+const prizes = computed((): CreateTournament['prizes'] => {
+  const filled = PRIZE_TYPES.filter((prize) =>
+    formData.value.prizes[prize].trim(),
+  )
+  if (!filled.length) return undefined
+
+  return Object.fromEntries(
+    filled.map((prize) => [
+      prize,
+      { [locale.value]: formData.value.prizes[prize].trim() },
+    ]),
+  ) as CreateTournament['prizes']
+})
+
+// What the form would save, minus the cover — which only gets a URL once it is
+// uploaded on submit. The preview renders this, so it cannot drift from the
+// record that is actually written.
+const draft = computed((): CreateTournament => {
+  const startsAt = DateTime.fromISO(formData.value.startsAt)
+
+  return {
+    title: formData.value.title.trim(),
+    place: formData.value.place.trim(),
+    organizer: formData.value.organizer.trim(),
+    startsAt: startsAt.isValid ? (startsAt.toISO() ?? '') : '',
+    participants: 0,
+    maxParticipants: Number(formData.value.maxParticipants) || 0,
+    format: formData.value.format,
+    ...(formData.value.description.trim()
+      ? { description: formData.value.description.trim() }
+      : {}),
+    ...(prizes.value ? { prizes: prizes.value } : {}),
+    status: TournamentStatus.scheduled,
+  }
+})
+
+// The picked file has no URL until submit, so the preview shows it straight
+// from the browser. Every object URL created here is released again below.
+const releaseCoverPreview = (): void => {
+  if (!coverPreview.value) return
+  URL.revokeObjectURL(coverPreview.value)
+  coverPreview.value = undefined
+}
+
+const onCoverChange = (files: boolean): void => {
+  hasCover.value = files
+  releaseCoverPreview()
+
+  const [file] = coverUploader.value?.getFiles() ?? []
+  if (files && file) coverPreview.value = URL.createObjectURL(file)
+}
+
+onBeforeUnmount(releaseCoverPreview)
 
 const { r$ } = useRegle(formData, {
   title: { required },
@@ -278,25 +389,11 @@ const { r$ } = useRegle(formData, {
 
 const resetForm = (): void => {
   formData.value = createFormData()
-  showPrizes.value = false
   hasCover.value = false
+  activePane.value = 'edit'
+  releaseCoverPreview()
   coverUploader.value?.reset()
   r$.$reset()
-}
-
-// Only prizes with a value are sent, keyed by the language they were typed in.
-const buildPrizes = (): CreateTournament['prizes'] => {
-  const filled = PRIZE_TYPES.filter((prize) =>
-    formData.value.prizes[prize].trim(),
-  )
-  if (!filled.length) return undefined
-
-  return Object.fromEntries(
-    filled.map((prize) => [
-      prize,
-      { [locale.value]: formData.value.prizes[prize].trim() },
-    ]),
-  ) as CreateTournament['prizes']
 }
 
 const submit = async (): Promise<void> => {
@@ -307,6 +404,8 @@ const submit = async (): Promise<void> => {
   const { valid } = await r$.$validate()
   if (!valid) {
     logger.debug('Form has validation errors', r$.$errors)
+    // The errors are all in the form, which may be the pane out of view.
+    activePane.value = 'edit'
     return
   }
 
@@ -323,22 +422,9 @@ const submit = async (): Promise<void> => {
       }
     }
 
-    const prizes = buildPrizes()
-
     const tournament: CreateTournament = {
-      title: formData.value.title.trim(),
-      place: formData.value.place.trim(),
-      organizer: formData.value.organizer.trim(),
-      startsAt: DateTime.fromISO(formData.value.startsAt).toISO() ?? '',
-      participants: 0,
-      maxParticipants: Number(formData.value.maxParticipants),
-      format: formData.value.format,
-      ...(formData.value.description.trim()
-        ? { description: formData.value.description.trim() }
-        : {}),
-      ...(prizes ? { prizes } : {}),
+      ...draft.value,
       ...(coverFile ? { cover: coverFile.url } : {}),
-      status: TournamentStatus.scheduled,
     }
 
     try {

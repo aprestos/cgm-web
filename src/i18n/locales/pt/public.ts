@@ -106,6 +106,9 @@ export default {
       spotsLeft: '{count} de {total} vagas ainda livres',
       rosterFull: 'Lotado — {count} participantes',
       rosterFilled: '{percentage}% das vagas preenchidas',
+      pendingSignUp: '1 participante adicionado, ainda por guardar',
+      pendingSignUpPlural:
+        '{count} participantes adicionados, ainda por guardar',
     },
     joinDialog: {
       participants: 'Participantes',
@@ -130,6 +133,10 @@ export default {
     },
     empty: 'Nenhum torneio encontrado',
     emptyDescription: 'Tenta ajustar a pesquisa ou os filtros.',
+    filters: {
+      title: 'Filtros',
+      status: 'Estado',
+    },
     tabs: {
       all: 'Todos',
       scheduled: 'Por começar',
@@ -143,7 +150,6 @@ export default {
       cancelled: 'Cancelado',
     },
     format: {
-      swiss: 'Sistema suíço',
       'single-elimination': 'Eliminação direta',
       'double-elimination': 'Dupla eliminação',
       'round-robin': 'Todos contra Todos',

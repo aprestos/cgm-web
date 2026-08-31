@@ -102,13 +102,17 @@ const buttonClasses = computed(() => {
     'disabled:cursor-not-allowed',
   ]
 
-  // Dashboard-scale sizing: ~28/32/36/40px tall. Gaps live on the content
-  // span (the actual flex container), not here.
+  // Two scales, not one. Below md: touch sizing — every size from `md` up
+  // clears the 44px minimum tap target, and the label grows with the size so
+  // an `xl` reads as large rather than as a tiny label in a tall pill.
+  // From md: dashboard sizing — ~28/32/40/44px tall, compact enough to sit in
+  // toolbars and table rows. Gaps live on the content span (the actual flex
+  // container), not here.
   const sizeClasses = {
-    sm: ['md:px-2.5', 'md:py-1.5', 'text-xs'],
-    md: ['md:px-3 px-4', 'md:py-1.5 py-2', 'text-sm'],
-    lg: ['md:px-4 px-6', 'md:py-2 py-3', 'text-sm'],
-    xl: ['md:px-5 px-8', 'md:py-2.5 py-4', 'text-sm'],
+    sm: ['px-3', 'py-1.5', 'text-sm', 'md:px-2.5', 'md:py-1.5', 'md:text-xs'],
+    md: ['px-4', 'py-2.5', 'text-base', 'md:px-3', 'md:py-1.5', 'md:text-sm'],
+    lg: ['px-5', 'py-3', 'text-base', 'md:px-4', 'md:py-2', 'md:text-base'],
+    xl: ['px-6', 'py-3.5', 'text-lg', 'md:px-5', 'md:py-2.5', 'md:text-base'],
   }
 
   // Variant classes — flat surfaces, colour-only hover. No coloured glows and
@@ -244,8 +248,14 @@ const CONTENT_GAP: Record<NonNullable<Props['size']>, string> = {
 
 const contentClasses = computed(() => CONTENT_GAP[props.size])
 
-// Matched to the label so the button keeps its height while loading.
-const spinnerClasses = computed(() =>
-  props.size === 'sm' ? 'size-3.5' : 'size-4',
-)
+// Matched to the label so the button keeps its height while loading, which
+// means it tracks the responsive label size too.
+const SPINNER_SIZE: Record<NonNullable<Props['size']>, string> = {
+  sm: 'size-4 md:size-3.5',
+  md: 'size-4.5 md:size-4',
+  lg: 'size-4.5 md:size-4.5',
+  xl: 'size-5 md:size-4.5',
+}
+
+const spinnerClasses = computed(() => SPINNER_SIZE[props.size])
 </script>

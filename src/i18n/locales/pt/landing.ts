@@ -79,6 +79,7 @@ export default {
     sectionSubtitle: 'Compete pela glória',
     sectionDescription:
       'Inscreve-te no local e luta pelo primeiro lugar do pódio.',
+    viewAll: 'Ver todos os torneios',
     organizedBy: 'por {name}',
   },
   map: {

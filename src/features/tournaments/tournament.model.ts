@@ -1,9 +1,11 @@
 import type { LocalizedString } from '@/utils/localizedString.ts'
 
+// Values match the `tournament_format` Postgres enum verbatim.
 export enum TournamentFormat {
   singleElimination = 'single-elimination',
   doubleElimination = 'double-elimination',
   consolation = 'consolation',
+  roundRobin = 'round-robin',
 }
 
 export enum TournamentStatus {
@@ -38,4 +40,17 @@ export interface CreateTournament {
 
 export type Tournament = CreateTournament & {
   id: string
+}
+
+/**
+ * A partial write. The optional columns take `null` to clear them, which
+ * `undefined` cannot express — leaving a key out means "do not touch it".
+ */
+export type UpdateTournament = Partial<
+  Omit<CreateTournament, 'prizes' | 'description' | 'cover' | 'thumbnail'>
+> & {
+  prizes?: Record<TournamentPrizeType, LocalizedString> | null
+  description?: string | null
+  cover?: string | null
+  thumbnail?: string | null
 }

@@ -18,6 +18,8 @@ export default {
     next: 'Next',
     continue: 'Continue',
     optional: 'Optional',
+    remove: 'Remove',
+    clearAll: 'Clear all',
   },
   state: {
     yes: 'Yes',

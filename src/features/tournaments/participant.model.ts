@@ -8,6 +8,9 @@ export interface CreateTournamentParticipant {
 export type TournamentParticipant = CreateTournamentParticipant & {
   id: string
   tournamentId: string
+  /** When the sign-up was recorded */
+  createdAt: string
+  /** The account that signed this participant up, absent for imported rows */
   userId?: string
   user?: {
     id: string
@@ -31,6 +34,18 @@ export function participantDisplayName(
   return (
     participant.participantName?.trim() ||
     participant.ticketIssuance?.attendeeName?.trim() ||
+    participant.participantEmail?.trim() ||
+    participant.ticketIssuance?.attendeeEmail?.trim() ||
+    ''
+  )
+}
+
+/**
+ * Same fallback as the name: a ticket-backed sign-up carries the address on
+ * the issuance rather than on the row itself.
+ */
+export function participantEmail(participant: TournamentParticipant): string {
+  return (
     participant.participantEmail?.trim() ||
     participant.ticketIssuance?.attendeeEmail?.trim() ||
     ''

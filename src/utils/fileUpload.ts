@@ -275,6 +275,23 @@ export async function deleteUploadedFiles(
 }
 
 /**
+ * The storage path behind a public URL, so a file that is being replaced can
+ * be cleaned up along with it. Returns null for anything that is not a public
+ * URL of this bucket — an externally hosted image, or a hand-edited value.
+ */
+export function storagePathFromPublicUrl(
+  url: string,
+  bucket: string,
+): string | null {
+  const marker = `/storage/v1/object/public/${bucket}/`
+  const index = url.indexOf(marker)
+  if (index === -1) return null
+
+  const path = url.slice(index + marker.length).split('?')[0]
+  return path ? decodeURIComponent(path) : null
+}
+
+/**
  * Get signed URL for private file access
  */
 export async function getSignedUrl(
