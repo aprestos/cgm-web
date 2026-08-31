@@ -288,7 +288,13 @@ export function storagePathFromPublicUrl(
   if (index === -1) return null
 
   const path = url.slice(index + marker.length).split('?')[0]
-  return path ? decodeURIComponent(path) : null
+  if (!path) return null
+
+  try {
+    return decodeURIComponent(path)
+  } catch {
+    return path
+  }
 }
 
 /**

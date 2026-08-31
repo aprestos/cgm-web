@@ -1,7 +1,7 @@
 <template>
   <div>
     <TransitionRoot as="template" :show="props.open">
-      <Dialog class="relative z-100" @close="closeDialog">
+      <Dialog class="relative z-[100]" @close="closeDialog">
         <TransitionChild
           as="template"
           enter="ease-out duration-300"
