@@ -15,7 +15,6 @@ const props = defineProps<{ tournament: Tournament }>()
 const emit = defineEmits<{
   edit: [tournament: Tournament]
   participants: [tournament: Tournament]
-  delete: [tournament: Tournament]
 }>()
 
 const { t, locale } = useI18n()
@@ -112,7 +111,6 @@ const fillClasses = computed<string>(() => {
             :tournament="tournament"
             @edit="emit('edit', $event)"
             @participants="emit('participants', $event)"
-            @delete="emit('delete', $event)"
           />
         </div>
       </div>

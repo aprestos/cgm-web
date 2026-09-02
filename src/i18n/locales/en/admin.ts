@@ -170,19 +170,11 @@ export default {
       },
       remove: {
         action: 'Remove {name}',
-        title: 'Remove participant',
-        comingSoonMessage:
-          'Removing {name} from "{tournament}" is coming soon.',
-        comingSoonDetail:
-          'A removal also has to free the spot on the tournament participant count, so it lands together with that change.',
       },
     },
     actions: {
       menu: 'Actions for {title}',
       participants: 'Participants',
-      participantsComingSoon:
-        'Managing the participants of "{title}" is coming soon',
-      deleteComingSoon: 'Deleting "{title}" is coming soon',
     },
     stats: {
       total: 'Total',
@@ -320,7 +312,6 @@ export default {
     createFailed: 'Failed to create ticket',
     loadFailed: 'Failed to load tickets',
     missingTenantOrEdition: 'Missing tenant or edition information',
-    editFunctionalityComingSoon: 'Edit functionality coming soon',
     ticketTypesTitle: 'Ticket Types',
     dailyCapacityTitle: 'Daily Venue Capacity',
     dailyCapacityDescription:
@@ -332,9 +323,6 @@ export default {
     almostFull: 'Almost full',
     spotsLeft: '{count} left',
     addDay: 'Add Day',
-    addDayComingSoon: 'Add day functionality coming soon',
-    editDayComingSoon: 'Edit day functionality coming soon',
-    deleteDayComingSoon: 'Delete day functionality coming soon',
     button: {
       add: 'Create ticket',
     },
@@ -461,6 +449,18 @@ export default {
       updateFailed: 'Failed to update role. Please try again.',
       removeSuccess: 'User removed successfully!',
       removeFailed: 'Failed to remove user. Please try again.',
+      add: {
+        button: 'Add user',
+        title: 'Add user',
+        userLabel: 'User',
+        userPlaceholder: 'Search by name or email',
+        roleLabel: 'Role',
+        rolePlaceholder: 'Select a role',
+        alreadyMember: 'This user already has a role in this organization.',
+        submit: 'Add user',
+        success: 'User added successfully!',
+        failed: 'Failed to add user. Please try again.',
+      },
       // Enum-label map — keys match the `app_role` values verbatim
       role: {
         'super-admin': 'Super Admin',

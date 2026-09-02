@@ -15,6 +15,7 @@ import { IconPencil } from '@tabler/icons-vue'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
+import CSelect from '@/components/CSelect.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import FilePondUploader from '@/components/FilePondUploader.vue'
 import TournamentEditSection from './TournamentEditSection.vue'
@@ -63,6 +64,20 @@ const COVER_BUCKET = 'images'
 const TOURNAMENT_TYPES = Object.values(TournamentFormat)
 const TOURNAMENT_STATUSES = Object.values(TournamentStatus)
 const PRIZE_TYPES = Object.values(TournamentPrizeType)
+
+const formatOptions = computed(() =>
+  TOURNAMENT_TYPES.map((type) => ({
+    value: type,
+    label: t(`admin.tournaments.format.${type}`),
+  })),
+)
+
+const statusOptions = computed(() =>
+  TOURNAMENT_STATUSES.map((status) => ({
+    value: status,
+    label: t(`admin.tournaments.status.${status}`),
+  })),
+)
 
 type Section = 'header' | 'facts' | 'prizes' | 'about'
 
@@ -463,27 +478,12 @@ watch(
               :errors="headerR$.$errors.organizer"
             />
 
-            <div>
-              <label
-                for="edit-tournament-status"
-                class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-              >
-                {{ t('admin.tournaments.edit.status') }}
-              </label>
-              <select
-                id="edit-tournament-status"
-                v-model="headerDraft.status"
-                class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500"
-              >
-                <option
-                  v-for="status in TOURNAMENT_STATUSES"
-                  :key="status"
-                  :value="status"
-                >
-                  {{ t(`admin.tournaments.status.${status}`) }}
-                </option>
-              </select>
-            </div>
+            <CSelect
+              id="edit-tournament-status"
+              v-model="headerDraft.status"
+              :label="t('admin.tournaments.edit.status')"
+              :items="statusOptions"
+            />
           </div>
 
           <div class="mt-5 flex justify-end gap-2">
@@ -555,27 +555,13 @@ watch(
                 class="col-span-full sm:col-span-1"
               />
 
-              <div class="col-span-full sm:col-span-1">
-                <label
-                  for="edit-tournament-type"
-                  class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-                >
-                  {{ t('admin.tournaments.form.type') }}
-                </label>
-                <select
-                  id="edit-tournament-type"
-                  v-model="factsDraft.format"
-                  class="mt-2 block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500"
-                >
-                  <option
-                    v-for="type in TOURNAMENT_TYPES"
-                    :key="type"
-                    :value="type"
-                  >
-                    {{ t(`admin.tournaments.format.${type}`) }}
-                  </option>
-                </select>
-              </div>
+              <CSelect
+                id="edit-tournament-type"
+                v-model="factsDraft.format"
+                :label="t('admin.tournaments.form.type')"
+                :items="formatOptions"
+                class="col-span-full sm:col-span-1"
+              />
 
               <CInput
                 id="edit-tournament-max-participants"

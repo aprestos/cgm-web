@@ -4,9 +4,11 @@
       <div class="flex items-center gap-4 pb-6">
         <!-- Search Input -->
         <div class="flex-1">
-          <SearchInput
+          <CSearchInput
             v-model="searchQuery"
             :placeholder="t('public.library.search')"
+            size="lg"
+            rounded
           />
         </div>
 
@@ -103,7 +105,7 @@ import {
   IconTrophyFilled,
   IconUsersGroup,
 } from '@tabler/icons-vue'
-import SearchInput from '@/components/SearchInput.vue'
+import CSearchInput from '@/components/CSearchInput.vue'
 import FilterSidebar from '@/components/FilterSidebar.vue'
 import FilterRadioGroup from '@/components/FilterRadioGroup.vue'
 import FilterChips from '@/components/FilterChips.vue'

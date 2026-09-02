@@ -24,34 +24,18 @@
 
     <!-- Form -->
     <form class="mt-8 space-y-6" @submit.prevent="handleSubmit">
-      <div>
-        <label
-          for="email"
-          class="block text-sm font-medium leading-6 text-gray-900 dark:text-white"
-        >
-          {{ t('auth.emailAddress') }}
-        </label>
-        <div class="relative mt-2">
-          <input
-            id="email"
-            v-model="email"
-            type="email"
-            name="email"
-            autocomplete="email"
-            required
-            :placeholder="t('auth.enterEmailPlaceholder')"
-            class="block w-full rounded-md border-0 py-2.5 pl-3 pr-10 text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm sm:leading-6"
-          />
-          <div
-            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3"
-          >
-            <AtSymbolIcon
-              class="h-5 w-5 text-gray-400 dark:text-gray-500"
-              aria-hidden="true"
-            />
-          </div>
-        </div>
-      </div>
+      <CInput
+        id="email"
+        v-model="email"
+        type="email"
+        name="email"
+        autocomplete="email"
+        required
+        size="lg"
+        :label="t('auth.emailAddress')"
+        :placeholder="t('auth.enterEmailPlaceholder')"
+        :icon-right="AtSymbolIcon"
+      />
 
       <div>
         <button
@@ -124,6 +108,7 @@
 </template>
 
 <script setup lang="ts">
+import CInput from '@/components/CInput.vue'
 import {
   AtSymbolIcon,
   LockClosedIcon,

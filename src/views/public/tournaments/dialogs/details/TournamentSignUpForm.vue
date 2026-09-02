@@ -8,17 +8,11 @@ import {
   minLength,
   required,
 } from '@regle/rules'
-import {
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-} from '@headlessui/vue'
-import { ChevronDownIcon } from '@heroicons/vue/20/solid'
-import { IconCheck, IconPlus, IconTicket } from '@tabler/icons-vue'
+import { IconPlus, IconTicket } from '@tabler/icons-vue'
 import { v4 as uuidv4 } from 'uuid'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
+import CSelect from '@/components/CSelect.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import TournamentParticipantRow from '@/features/tournaments/components/TournamentParticipantRow.vue'
 import type { Tournament } from '@/features/tournaments/tournament.model.ts'
@@ -133,6 +127,17 @@ const canSubmit = computed<boolean>(() => stagedCount.value > 0)
 
 const issuanceLabel = (issuance: TicketIssuance): string =>
   issuance.attendeeName?.trim() || issuance.attendeeEmail
+
+const issuanceOptions = computed(() =>
+  unusedIssuances.value.map((issuance) => ({
+    value: issuance.id,
+    label: issuanceLabel(issuance),
+    // The email only disambiguates when a holder name was given.
+    secondaryLabel: issuance.attendeeName?.trim()
+      ? issuance.attendeeEmail
+      : undefined,
+  })),
+)
 
 const pickedIssuance = computed<TicketIssuance | undefined>(() =>
   issuances.value.find((issuance) => issuance.id === pickedIssuanceId.value),
@@ -288,92 +293,36 @@ defineExpose({ submit, canSubmit, isSubmitting, stagedCount })
 
     <!-- Ticket holders the user paid for -->
     <div v-else-if="ticketsEnabled">
-      <label
-        id="ticket-holder-label"
-        class="block text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
+      <CSelect
+        id="ticket-holder"
+        v-model="pickedIssuanceId"
+        :label="t('public.tournaments.joinDialog.fromTicketHolders')"
+        :placeholder="t('public.tournaments.joinDialog.selectTicket')"
+        :items="issuanceOptions"
       >
-        {{ t('public.tournaments.joinDialog.fromTicketHolders') }}
-      </label>
-      <Listbox v-model="pickedIssuanceId" as="div" class="relative mt-2">
-        <ListboxButton
-          aria-labelledby="ticket-holder-label"
-          class="relative block w-full cursor-pointer rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500"
-        >
-          <span v-if="pickedIssuance" class="block truncate py-0.5">
-            {{ issuanceLabel(pickedIssuance) }}
+        <!-- A ticket row is two lines with a leading icon; the row chrome
+             (tint, check, padding) still comes from CSelectOption. -->
+        <template #option="{ option, selected: isSelected }">
+          <span
+            class="flex items-center gap-2 truncate"
+            :class="isSelected ? 'font-medium' : 'font-normal'"
+          >
+            <IconTicket class="size-4 shrink-0 opacity-60" />
+            {{ option.label }}
           </span>
           <span
-            v-else
-            class="block truncate py-0.5 text-gray-400 dark:text-gray-500"
+            v-if="option.secondaryLabel"
+            class="ml-6 block truncate text-xs"
+            :class="
+              isSelected
+                ? 'text-primary-500 dark:text-primary-400/80'
+                : 'text-gray-500 dark:text-gray-400'
+            "
           >
-            {{ t('public.tournaments.joinDialog.selectTicket') }}
+            {{ option.secondaryLabel }}
           </span>
-          <span
-            class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3"
-          >
-            <ChevronDownIcon class="size-5 text-gray-400" aria-hidden="true" />
-          </span>
-        </ListboxButton>
-
-        <transition
-          enter-active-class="transition ease-out duration-100"
-          enter-from-class="transform opacity-0 scale-95"
-          enter-to-class="transform opacity-100 scale-100"
-          leave-active-class="transition ease-in duration-75"
-          leave-from-class="transform opacity-100 scale-100"
-          leave-to-class="transform opacity-0 scale-95"
-        >
-          <ListboxOptions
-            class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm dark:bg-gray-800 dark:ring-gray-700"
-          >
-            <ListboxOption
-              v-for="issuance in unusedIssuances"
-              :key="issuance.id"
-              v-slot="{ active: highlighted, selected }"
-              :value="issuance.id"
-              as="template"
-            >
-              <li
-                :class="[
-                  highlighted
-                    ? 'bg-primary-600 text-white'
-                    : 'text-gray-900 dark:text-white',
-                  'relative cursor-pointer select-none py-2 pl-3 pr-9',
-                ]"
-              >
-                <span
-                  :class="[
-                    selected ? 'font-semibold' : 'font-normal',
-                    'flex items-center gap-2 truncate',
-                  ]"
-                >
-                  <IconTicket class="size-4 shrink-0 opacity-60" />
-                  {{ issuanceLabel(issuance) }}
-                </span>
-                <span
-                  v-if="issuance.attendeeName?.trim()"
-                  :class="[
-                    highlighted
-                      ? 'text-primary-100'
-                      : 'text-gray-500 dark:text-gray-400',
-                    'ml-6 block truncate text-xs',
-                  ]"
-                >
-                  {{ issuance.attendeeEmail }}
-                </span>
-
-                <IconCheck
-                  v-if="selected"
-                  :class="[
-                    highlighted ? 'text-white' : 'text-primary-600',
-                    'absolute right-0 top-2 mr-4 size-5',
-                  ]"
-                />
-              </li>
-            </ListboxOption>
-          </ListboxOptions>
-        </transition>
-      </Listbox>
+        </template>
+      </CSelect>
     </div>
 
     <!-- No ticketing: the name and email are typed in -->

@@ -506,7 +506,7 @@ function scrollToMap(): void {
             class="mb-8 inline-flex items-center gap-2 rounded-full bg-primary-100 dark:bg-primary-500/20 px-4 py-2 text-sm font-medium text-primary-700 dark:text-primary-300 ring-1 ring-primary-300 dark:ring-primary-500/30"
           >
             <IconSparkles class="h-4 w-4" />
-            {{ t('landing.hero.comingSoon') }}
+            {{ t('common.comingSoon.title') }}
           </div>
 
           <!-- Logo Display -->

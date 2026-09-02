@@ -62,15 +62,6 @@ const handleParticipants = (tournament: Tournament): void => {
   isParticipantsDialogOpen.value = true
 }
 
-// Delete is still to be built — the menu entry owns up to that for now.
-const handleDelete = (tournament: Tournament): void => {
-  toast.info(
-    t('admin.tournaments.actions.deleteComingSoon', {
-      title: tournament.title,
-    }),
-  )
-}
-
 async function loadTournaments(): Promise<void> {
   if (!tenantStore.value || !editionStore.value) {
     isLoading.value = false
@@ -143,7 +134,6 @@ onMounted(async () => {
         :tournament="tournament"
         @edit="handleEdit"
         @participants="handleParticipants"
-        @delete="handleDelete"
       />
     </div>
 

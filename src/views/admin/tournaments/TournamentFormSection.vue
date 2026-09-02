@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { IconChevronRight } from '@tabler/icons-vue'
 
 interface Props {
-  title: string
+  title?: string
   /** Marks the group as optional and, on a disclosure, keeps it shut at first. */
   optional?: boolean
   /** Folds the group away behind its heading. */
@@ -12,6 +12,7 @@ interface Props {
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  title: '',
   optional: false,
   collapsible: false,
 })

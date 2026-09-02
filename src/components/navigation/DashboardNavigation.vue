@@ -13,14 +13,11 @@ import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { IconMenu2 } from '@tabler/icons-vue'
 import SidebarUserProfile from '@/components/navigation/SidebarUserProfile.vue'
 import SidebarNavLinks from '@/components/navigation/SidebarNavLinks.vue'
-import { useI18n } from 'vue-i18n'
+import EditionBadge from '@/components/navigation/EditionBadge.vue'
 import type { NavigationItem } from '@/navigation/navigation.model.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { formatDateRange } from '@/utils/date.ts'
 import { RouteNames } from '@/router/routeNames.ts'
-
-const { locale } = useI18n()
+import { useHideOnScroll } from '@/composables/useHideOnScroll'
 
 defineProps<{
   topNavigation: NavigationItem[]
@@ -37,10 +34,16 @@ const route = useRoute()
 const homeRouteName = RouteNames.landing.home
 
 const sidebarOpen = ref<boolean>(false)
+
+// Slide the mobile header out of the way on the way down, bring it back on the
+// way up — same behaviour as the public TopNavigation.
+const isHidden = useHideOnScroll()
 </script>
 
 <template>
-  <div>
+  <!-- Generates no box of its own, so the sticky header below is constrained by
+       the page rather than by this wrapper, which is only as tall as the header -->
+  <div class="contents">
     <TransitionRoot as="template" :show="sidebarOpen">
       <Dialog class="relative z-50 lg:hidden" @close="sidebarOpen = false">
         <TransitionChild
@@ -127,35 +130,18 @@ const sidebarOpen = ref<boolean>(false)
       <div
         class="flex grow flex-col gap-y-5 overflow-y-auto bg-slate-50 px-6 ring-1 ring-slate-200 dark:bg-gray-950 dark:ring-white/10"
       >
-        <router-link :to="{ name: homeRouteName }">
-          <div class="flex flex-row h-16 shrink-0 items-center">
-            <!-- Logo SkeletonLoader -->
-            <!--        <SkeletonLoader v-if="!tenantStore?.logo" width="128px" height="32px" />-->
-            <!-- Actual Logo -->
-            <img
-              class="h-10 w-auto"
-              :src="
-                getTenantLogo(LogoType.square) || '@/assets/logoipsum-381.svg'
-              "
-              :alt="tenantStore?.name + ' logo'"
-            />
-            <div class="flex flex-col">
-              <span
-                class="font-display font-bold dark:text-gray-300 text-gray-800"
-                >{{ editionStore?.name }}</span
-              >
-              <span class="text-sm dark:text-gray-500 text-gray-800"
-                >{{
-                  formatDateRange(
-                    editionStore?.start_date,
-                    editionStore?.end_date,
-                    locale,
-                  )
-                }}
-              </span>
-            </div>
-          </div>
-        </router-link>
+        <!-- Full-bleed band so the edition reads as the sidebar's header
+             rather than as the first item of the nav below it -->
+        <div
+          class="-mx-6 shrink-0 border-b border-gray-200 px-4 py-3 dark:border-white/10"
+        >
+          <router-link
+            :to="{ name: homeRouteName }"
+            class="flex rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+          >
+            <EditionBadge />
+          </router-link>
+        </div>
         <SidebarNavLinks
           :top-navigation="topNavigation"
           :bottom-navigation="bottomNavigation"
@@ -171,23 +157,32 @@ const sidebarOpen = ref<boolean>(false)
       </div>
     </div>
 
-    <div
-      class="flex items-center gap-x-6 px-4 py-4 sm:px-6 lg:hidden dark:after:pointer-events-none dark:after:absolute"
+    <header
+      class="sticky top-0 z-40 flex items-center gap-x-3 border-b border-gray-200 bg-white px-4 py-3 transition-transform duration-300 motion-reduce:transition-none sm:px-6 lg:hidden dark:border-white/10 dark:bg-gray-950"
+      :class="isHidden ? '-translate-y-full' : 'translate-y-0'"
     >
       <button
         type="button"
-        class="-m-2.5 p-2.5 text-gray-700 hover:text-gray-900 lg:hidden dark:text-gray-400 dark:hover:text-white"
+        class="-m-2.5 shrink-0 p-2.5 text-gray-700 hover:text-gray-900 lg:hidden dark:text-gray-400 dark:hover:text-white"
         @click="sidebarOpen = true"
       >
         <span class="sr-only">Open sidebar</span>
         <IconMenu2 class="size-6" aria-hidden="true" />
       </button>
       <div
-        class="flex-1 text-lg font-semibold font-display text-gray-900 dark:text-white"
+        class="min-w-0 flex-1 truncate font-display text-lg font-semibold text-gray-900 dark:text-white"
       >
         {{ route.meta.title }}
       </div>
-    </div>
+      <!-- Capped rather than shrink-0: on a narrow screen the page title and
+           the edition each give up room instead of one pushing the other out -->
+      <router-link
+        :to="{ name: homeRouteName }"
+        class="-mr-2 max-w-[50%] rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+      >
+        <EditionBadge size="sm" />
+      </router-link>
+    </header>
   </div>
 </template>
 

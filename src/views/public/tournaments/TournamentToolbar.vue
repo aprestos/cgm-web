@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { FunnelIcon } from '@heroicons/vue/20/solid'
-import SearchInput from '@/components/SearchInput.vue'
+import CSearchInput from '@/components/CSearchInput.vue'
 import SortSelect from '@/components/SortSelect.vue'
 import type { SortOption } from './tournaments.filters.ts'
 
@@ -31,9 +31,11 @@ const { t } = useI18n()
 <template>
   <div class="flex items-center gap-4 pb-6">
     <div class="flex-1">
-      <SearchInput
+      <CSearchInput
         :model-value="search"
         :placeholder="t('public.tournaments.search')"
+        size="lg"
+        rounded
         @update:model-value="$emit('update:search', $event)"
       />
     </div>

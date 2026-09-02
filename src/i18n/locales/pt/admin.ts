@@ -175,19 +175,11 @@ export default {
       },
       remove: {
         action: 'Remover {name}',
-        title: 'Remover participante',
-        comingSoonMessage:
-          'Remover {name} de "{tournament}" estará disponível em breve.',
-        comingSoonDetail:
-          'A remoção também tem de libertar a vaga no número de participantes do torneio, por isso chega em conjunto com essa alteração.',
       },
     },
     actions: {
       menu: 'Ações para {title}',
       participants: 'Gerir participantes',
-      participantsComingSoon:
-        'A gestão dos participantes de "{title}" estará disponível em breve',
-      deleteComingSoon: 'A eliminação de "{title}" estará disponível em breve',
     },
     stats: {
       total: 'Total',
@@ -249,7 +241,7 @@ export default {
       place: 'Local',
       organizer: 'Organizador',
       startsAt: 'Começa a',
-      maxParticipants: 'Máx. de participantes',
+      maxParticipants: 'Limite de participantes',
       type: 'Formato',
       description: 'Descrição',
       prizes: 'Prémios',
@@ -324,7 +316,6 @@ export default {
     createFailed: 'Falha ao criar bilhete',
     loadFailed: 'Falha ao carregar bilhetes',
     missingTenantOrEdition: 'Informação de tenant ou edição em falta',
-    editFunctionalityComingSoon: 'Funcionalidade de edição em breve',
     ticketTypesTitle: 'Tipos de Bilhete',
     dailyCapacityTitle: 'Capacidade Diária do Recinto',
     dailyCapacityDescription:
@@ -336,9 +327,6 @@ export default {
     almostFull: 'Quase esgotado',
     spotsLeft: '{count} disponíveis',
     addDay: 'Adicionar Dia',
-    addDayComingSoon: 'Funcionalidade de adicionar dia em breve',
-    editDayComingSoon: 'Funcionalidade de editar dia em breve',
-    deleteDayComingSoon: 'Funcionalidade de eliminar dia em breve',
     button: {
       add: 'Adicionar bilhete',
     },
@@ -467,6 +455,18 @@ export default {
       updateFailed: 'Erro ao atualizar a função. Tente novamente.',
       removeSuccess: 'Utilizador removido com sucesso!',
       removeFailed: 'Erro ao remover o utilizador. Tente novamente.',
+      add: {
+        button: 'Adicionar utilizador',
+        title: 'Adicionar utilizador',
+        userLabel: 'Utilizador',
+        userPlaceholder: 'Procurar por nome ou email',
+        roleLabel: 'Função',
+        rolePlaceholder: 'Selecione uma função',
+        alreadyMember: 'Este utilizador já tem uma função nesta organização.',
+        submit: 'Adicionar',
+        success: 'Utilizador adicionado com sucesso!',
+        failed: 'Erro ao adicionar o utilizador. Tente novamente.',
+      },
       // Mapa de rótulos — as chaves correspondem aos valores de `app_role`
       role: {
         'super-admin': 'Super Admin',

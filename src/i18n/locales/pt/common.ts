@@ -19,6 +19,12 @@ export default {
     optional: 'Opcional',
     remove: 'Remover',
     clearAll: 'Limpar tudo',
+    clear: 'Limpar',
+  },
+  comingSoon: {
+    title: 'Em breve',
+    message:
+      'Esta funcionalidade ainda está a ser construída e ficará disponível em breve.',
   },
   state: {
     yes: 'Sim',

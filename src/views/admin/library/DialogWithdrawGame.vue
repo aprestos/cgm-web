@@ -45,7 +45,7 @@
         >
           <!-- Tab 0: Search User -->
           <template #tab-0>
-            <CSelect2
+            <CCombobox
               id="user"
               v-model="formData.selectedUser"
               :label="t('admin.library.withdrawTo')"
@@ -132,7 +132,8 @@ import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import libraryWithdrawService from '@/features/library/withdraws/service.ts'
 import { userService } from '@/features/users/service.ts'
 import logger from '@/lib/logger.ts'
-import CSelect2, { type Option } from '@/CSelect2.vue'
+import CCombobox from '@/components/CCombobox.vue'
+import type { Option } from '@/components/select.types'
 import {
   IconSearch,
   IconUserPlus,

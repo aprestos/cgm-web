@@ -70,13 +70,12 @@
           </p>
         </TournamentFormSection>
 
-        <TournamentFormSection
-          :title="t('admin.tournaments.form.sections.identity')"
-        >
+        <TournamentFormSection>
           <div class="space-y-5">
             <CInput
               id="tournament-title"
               v-model="formData.title"
+              placeholder="Tournament A"
               :label="t('admin.tournaments.form.title')"
               :errors="r$.$errors.title"
             />
@@ -84,15 +83,14 @@
             <CInput
               id="tournament-organizer"
               v-model="formData.organizer"
+              placeholder="Riverside country club"
               :label="t('admin.tournaments.form.organizer')"
               :errors="r$.$errors.organizer"
             />
           </div>
         </TournamentFormSection>
 
-        <TournamentFormSection
-          :title="t('admin.tournaments.form.sections.facts')"
-        >
+        <TournamentFormSection>
           <div class="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
             <CInput
               id="tournament-starts-at"
@@ -112,29 +110,13 @@
             />
 
             <!-- Tournament type -->
-            <div class="col-span-full sm:col-span-1">
-              <label
-                for="tournament-type"
-                class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-              >
-                {{ t('admin.tournaments.form.type') }}
-              </label>
-              <div class="mt-2">
-                <select
-                  id="tournament-type"
-                  v-model="formData.format"
-                  class="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 focus:outline-2 focus:-outline-offset-2 focus:outline-primary-600 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:focus:outline-primary-500 sm:text-sm/6"
-                >
-                  <option
-                    v-for="type in TOURNAMENT_TYPES"
-                    :key="type"
-                    :value="type"
-                  >
-                    {{ t(`admin.tournaments.format.${type}`) }}
-                  </option>
-                </select>
-              </div>
-            </div>
+            <CSelect
+              id="tournament-type"
+              v-model="formData.format"
+              :label="t('admin.tournaments.form.type')"
+              :items="formatOptions"
+              class="col-span-full sm:col-span-1"
+            />
 
             <CInput
               id="tournament-max-participants"
@@ -167,10 +149,7 @@
           </div>
         </TournamentFormSection>
 
-        <TournamentFormSection
-          :title="t('admin.tournaments.form.sections.about')"
-          optional
-        >
+        <TournamentFormSection>
           <CTextArea
             id="tournament-description"
             v-model="formData.description"
@@ -242,6 +221,7 @@ import { DateTime } from 'luxon'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
+import CSelect from '@/components/CSelect.vue'
 import CTextArea from '@/components/CTextArea.vue'
 import FilePondUploader from '@/components/FilePondUploader.vue'
 import TournamentFormSection from './TournamentFormSection.vue'
@@ -275,6 +255,13 @@ const emit = defineEmits<{
 
 const TOURNAMENT_TYPES = Object.values(TournamentFormat)
 const PRIZE_TYPES = Object.values(TournamentPrizeType)
+
+const formatOptions = computed(() =>
+  TOURNAMENT_TYPES.map((type) => ({
+    value: type,
+    label: t(`admin.tournaments.format.${type}`),
+  })),
+)
 const PANES = ['edit', 'preview'] as const
 
 type Pane = (typeof PANES)[number]

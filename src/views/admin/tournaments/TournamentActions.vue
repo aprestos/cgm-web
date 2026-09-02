@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import {
   IconDotsVertical,
@@ -8,6 +9,7 @@ import {
 } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
 import type { Tournament } from '@/features/tournaments/tournament.model.ts'
+import CInfoPopover from '@/components/CInfoPopover.vue'
 
 const { t } = useI18n()
 
@@ -16,15 +18,20 @@ const props = defineProps<{ tournament: Tournament }>()
 const emit = defineEmits<{
   edit: [tournament: Tournament]
   participants: [tournament: Tournament]
-  delete: [tournament: Tournament]
 }>()
 
 const ITEM_BASE = 'flex w-full items-center px-4 py-2 text-sm cursor-pointer'
+
+// Deleting is still to be built. The menu item is gone by the time the
+// explanation shows, so it hangs off the menu button that is still there.
+const menuButton = ref<{ el?: HTMLElement } | null>(null)
+const isDeleteInfoOpen = ref<boolean>(false)
 </script>
 
 <template>
   <Menu as="div" class="relative inline-block shrink-0 text-left">
     <MenuButton
+      ref="menuButton"
       :aria-label="
         t('admin.tournaments.actions.menu', { title: props.tournament.title })
       "
@@ -104,7 +111,7 @@ const ITEM_BASE = 'flex w-full items-center px-4 py-2 text-sm cursor-pointer'
                   : 'text-red-600 dark:text-red-400',
                 ITEM_BASE,
               ]"
-              @click="emit('delete', props.tournament)"
+              @click="isDeleteInfoOpen = true"
             >
               <IconTrash class="mr-3 size-5" aria-hidden="true" />
               {{ t('common.actions.delete') }}
@@ -113,6 +120,11 @@ const ITEM_BASE = 'flex w-full items-center px-4 py-2 text-sm cursor-pointer'
         </div>
       </MenuItems>
     </transition>
+
+    <CInfoPopover
+      v-model:open="isDeleteInfoOpen"
+      :anchor="menuButton?.el ?? null"
+    />
   </Menu>
 </template>
 

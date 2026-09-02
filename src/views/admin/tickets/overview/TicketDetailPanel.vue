@@ -9,6 +9,7 @@ import {
 } from '@tabler/icons-vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import CBadge from '@/components/CBadge.vue'
+import CInfoPopover from '@/components/CInfoPopover.vue'
 import { formatPrice } from '@/utils/price'
 import { formatDateRange } from '@/utils/date'
 import { getTicketTitle } from '@/utils/ticket'
@@ -20,7 +21,6 @@ interface Props {
 const props = defineProps<Props>()
 
 const emit = defineEmits<{
-  edit: [ticket: Ticket]
   delete: [ticket: Ticket]
 }>()
 
@@ -110,15 +110,12 @@ const status = computed(() => {
         </div>
       </div>
       <div class="flex shrink-0 items-center gap-2">
-        <button
-          type="button"
+        <CInfoPopover
           class="rounded-lg p-2 text-gray-600 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-300 transition-colors"
           :aria-label="t('common.actions.edit')"
-          :title="t('common.actions.edit')"
-          @click="emit('edit', ticket)"
         >
           <IconEdit class="h-5 w-5" />
-        </button>
+        </CInfoPopover>
         <button
           type="button"
           class="rounded-lg p-2 text-red-600 hover:bg-red-50 hover:text-red-900 dark:text-red-400 dark:hover:bg-red-900/20 dark:hover:text-red-300 transition-colors"

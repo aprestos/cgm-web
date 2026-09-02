@@ -20,6 +20,13 @@ export default {
     optional: 'Optional',
     remove: 'Remove',
     clearAll: 'Clear all',
+    clear: 'Clear',
+  },
+  // The one wording for anything that is not built yet — every button that
+  // has nothing to do yet says exactly this.
+  comingSoon: {
+    title: 'Coming soon',
+    message: 'This is still being built and will be available soon.',
   },
   state: {
     yes: 'Yes',
