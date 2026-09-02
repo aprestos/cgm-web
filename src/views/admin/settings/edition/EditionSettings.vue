@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-10 divide-y divide-gray-200 dark:divide-white/10 pb-16">
+  <div class="space-y-10 divide-y divide-gray-200 dark:divide-white/10">
     <SettingsSection
       title="General Information"
       description="Set the start and end dates for your event"
@@ -82,13 +82,14 @@
       @uploaded="handlePosterUploaded"
     />
   </div>
-  <SettingsBottomBar>
+
+  <FloatingActionBar class="lg:pl-72">
     <CButton
       size="lg"
       type="button"
+      rounded
       :loading="isSaving"
       loading-text="Saving..."
-      class="shadow-lg shadow-black/10 dark:shadow-black/30 ring-1 ring-black/5 dark:ring-white/10"
       @click="saveEdition"
     >
       <template #icon-left>
@@ -96,20 +97,20 @@
       </template>
       Save
     </CButton>
-  </SettingsBottomBar>
+  </FloatingActionBar>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import EditionPoster from './EditionPoster.vue'
-import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
 import { editionService } from '@/features/events/service.ts'
 import { tenantStore } from '@/features/tenant/tenant.store'
 import { editionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import CInput from '@/components/CInput.vue'
 import CButton from '@/components/CButton.vue'
+import FloatingActionBar from '@/components/FloatingActionBar.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import { IconDeviceFloppy } from '@tabler/icons-vue'
 import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'

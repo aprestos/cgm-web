@@ -158,30 +158,38 @@ const isHidden = useHideOnScroll()
     </div>
 
     <header
-      class="sticky top-0 z-40 flex items-center gap-x-3 border-b border-gray-200 bg-white px-4 py-3 transition-transform duration-300 motion-reduce:transition-none sm:px-6 lg:hidden dark:border-white/10 dark:bg-gray-950"
+      class="sticky top-0 z-40 flex flex-col border-b border-gray-200 bg-white transition-transform duration-300 motion-reduce:transition-none lg:hidden dark:border-white/10 dark:bg-gray-950"
       :class="isHidden ? '-translate-y-full' : 'translate-y-0'"
     >
-      <button
-        type="button"
-        class="-m-2.5 shrink-0 p-2.5 text-gray-700 hover:text-gray-900 lg:hidden dark:text-gray-400 dark:hover:text-white"
-        @click="sidebarOpen = true"
-      >
-        <span class="sr-only">Open sidebar</span>
-        <IconMenu2 class="size-6" aria-hidden="true" />
-      </button>
-      <div
-        class="min-w-0 flex-1 truncate font-display text-lg font-semibold text-gray-900 dark:text-white"
-      >
-        {{ route.meta.title }}
+      <div class="flex items-center gap-x-3 px-4 py-3 sm:px-6">
+        <button
+          type="button"
+          class="-m-2.5 shrink-0 p-2.5 text-gray-700 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
+          @click="sidebarOpen = true"
+        >
+          <span class="sr-only">Open sidebar</span>
+          <IconMenu2 class="size-6" aria-hidden="true" />
+        </button>
+        <div
+          class="min-w-0 flex-1 truncate font-display text-lg font-semibold text-gray-900 dark:text-white"
+        >
+          {{ route.meta.title }}
+        </div>
+        <!-- Capped rather than shrink-0: on a narrow screen the page title and
+             the edition each give up room instead of one pushing the other out -->
+        <router-link
+          :to="{ name: homeRouteName }"
+          class="-mr-2 max-w-[50%] rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
+        >
+          <EditionBadge size="sm" />
+        </router-link>
       </div>
-      <!-- Capped rather than shrink-0: on a narrow screen the page title and
-           the edition each give up room instead of one pushing the other out -->
-      <router-link
-        :to="{ name: homeRouteName }"
-        class="-mr-2 max-w-[50%] rounded-md p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
-      >
-        <EditionBadge size="sm" />
-      </router-link>
+
+      <!-- Teleport target. Below lg a section's SecondaryNavigation moves itself
+           in here, so its tabs read as the bottom row of this header instead of
+           stacking a second bordered bar directly underneath it. Stays empty,
+           and therefore zero-height, on sections that have no tabs. -->
+      <div id="secondary-navigation"></div>
     </header>
   </div>
 </template>

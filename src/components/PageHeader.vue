@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import CButton from '@/components/CButton.vue'
-import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
+import FloatingActionBar from '@/components/FloatingActionBar.vue'
 
 interface Props {
   title: string
   description?: string
-  /** When set, renders the primary page action (inline on lg+, bottom bar below lg). */
+  /** When set, renders the primary page action (inline on lg+, floating bar below). */
   actionLabel?: string
 }
 
@@ -18,7 +18,7 @@ defineEmits<{
   action: []
 }>()
 
-// Multiple roots: the fixed bottom bar must stay outside the lg-only header row.
+// Multiple roots: the floating bar must stay outside the lg-only header row.
 defineOptions({ inheritAttrs: false })
 </script>
 
@@ -44,12 +44,12 @@ defineOptions({ inheritAttrs: false })
     </CButton>
   </div>
 
-  <SettingsBottomBar v-if="actionLabel" class="lg:hidden">
-    <CButton size="lg" full-width @click="$emit('action')">
+  <FloatingActionBar v-if="actionLabel" class="lg:hidden">
+    <CButton size="xl" class="w-full" rounded @click="$emit('action')">
       <template #icon-left>
         <slot name="action-icon" />
       </template>
       {{ actionLabel }}
     </CButton>
-  </SettingsBottomBar>
+  </FloatingActionBar>
 </template>

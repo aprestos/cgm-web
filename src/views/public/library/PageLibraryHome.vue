@@ -87,9 +87,10 @@
       </section>
     </main>
 
-    <!-- Sticky bottom container -->
+    <!-- Offset off the bottom edge, not padded away from it: a fixed box that
+         reaches bottom:0 makes iOS Safari turn its translucent toolbar solid. -->
     <div
-      class="fixed bottom-0 left-0 right-0 p-2 flex items-center justify-center"
+      class="pointer-events-none fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.5rem)] px-2 flex items-center justify-center"
     >
       <ReservationList />
     </div>

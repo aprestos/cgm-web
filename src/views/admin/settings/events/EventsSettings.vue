@@ -161,7 +161,6 @@
       </SettingsSection>
     </div>
   </div>
-  <SettingsBottomBar :loading="isSaving" @save="saveSettings" />
 </template>
 
 <script setup lang="ts">
@@ -171,7 +170,6 @@ import { IconPlus, IconTrash } from '@tabler/icons-vue'
 import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
-import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
 import logger from '@/lib/logger.ts'
 
 // Form data
