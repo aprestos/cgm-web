@@ -3,6 +3,11 @@ import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
 
+// Hostnames are interpolated into a PostgREST `or` filter below, so anything
+// that is not a plain hostname is rejected before it reaches the query.
+const HOSTNAME =
+  /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+
 export const tenantService = {
   async get(): Promise<Array<Tenant>> {
     try {
@@ -14,31 +19,34 @@ export const tenantService = {
     }
   },
   async getByDomain(domain: string): Promise<Tenant> {
-    try {
-      const normalizedDomain = domain.toLowerCase()
+    const hostname = domain.trim().toLowerCase()
 
-      // Try exact match for the domain or in other_domains array
+    try {
+      if (!HOSTNAME.test(hostname)) {
+        throw new Error(`Invalid hostname: ${domain}`)
+      }
+
+      // Match the primary domain or any hostname listed in other_domains
       const { data } = await supabase
         .from('tenants')
         .select()
-        .or(
-          `domain.eq.${normalizedDomain},other_domains.cs.{${normalizedDomain}}`,
-        )
+        .or(`domain.eq.${hostname},other_domains.cs.{${hostname}}`)
         .single()
 
       if (data) {
         return toCamelCaseAs<Tenant>(data)
       }
 
-      // If not found and dev tenant ID is configured, use that as fallback
-      if (import.meta.env.VITE_DEV_TENANT_ID) {
+      // Development only. In production an unrecognised host is a domain we do
+      // not serve, and must never resolve to somebody else's tenant.
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_TENANT_ID) {
         const devTenant = await this.getById(import.meta.env.VITE_DEV_TENANT_ID)
         if (devTenant) {
           return devTenant
         }
       }
 
-      throw new Error(`No tenant found for domain: ${domain}`)
+      throw new Error(`No tenant found for domain: ${hostname}`)
     } catch (error) {
       logger.error('Error on tenantService.getByDomain()', { error })
       throw error
