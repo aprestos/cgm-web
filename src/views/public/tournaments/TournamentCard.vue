@@ -51,7 +51,7 @@ const STATUS_BADGE: Record<TournamentStatus, string> = {
 }
 
 const DEFAULT_SURFACE =
-  'sm:bg-white sm:ring-1 sm:ring-gray-200 sm:dark:bg-gray-900 sm:dark:ring-white/10 sm:dark:hover:ring-white/20'
+  'bg-white ring-1 ring-gray-200 dark:bg-gray-900 dark:ring-white/10 dark:hover:ring-white/20'
 
 // Beyond this the stack stops growing and the rest roll up into a "+N" chip.
 const MAX_AVATARS = 3
@@ -83,7 +83,7 @@ const fillClasses = computed<string>(() => {
   if (isFull.value) return 'bg-gray-400 dark:bg-white/30'
   if (fillPercentage.value >= NEARLY_FULL_PERCENTAGE)
     return 'bg-amber-500 dark:bg-amber-400'
-  return 'bg-slate-500 dark:bg-purple-400'
+  return 'bg-primary-500 dark:bg-purple-400'
 })
 
 // Only tournaments that haven't started yet are open for sign-ups.
@@ -127,9 +127,10 @@ const startsAt = computed<string>(() =>
 </script>
 
 <template>
-  <!-- A row on phones so the list stays scannable, a card once there is room -->
+  <!-- Always a card; the contents just lay out as a row on phones so the
+       list stays scannable, and stack once there is room -->
   <article
-    class="group relative flex flex-row gap-3 transition-all duration-300 sm:flex-col sm:gap-0 sm:rounded-2xl sm:hover:-translate-y-0.5 sm:hover:shadow-lg"
+    class="group relative flex flex-row rounded-2xl shadow-sm transition-all duration-300 hover:shadow-lg sm:flex-col sm:hover:-translate-y-0.5"
     :class="DEFAULT_SURFACE"
   >
     <!-- The whole card opens the details. A stretched button rather than a
@@ -137,7 +138,7 @@ const startsAt = computed<string>(() =>
          name, and the real controls below simply sit above it. -->
     <button
       type="button"
-      class="absolute inset-0 z-0 cursor-pointer rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 sm:rounded-2xl dark:focus-visible:ring-offset-gray-900"
+      class="absolute inset-0 z-0 cursor-pointer rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       @click="emit('details', tournament)"
     >
       <span class="sr-only">
@@ -145,9 +146,11 @@ const startsAt = computed<string>(() =>
       </span>
     </button>
 
-    <!-- Cover — rounded here since the card itself must not clip the popover -->
+    <!-- Cover — full bleed against the card edge: rounded here rather than
+         clipped by the card, which must stay unclipped for the popover.
+         Stretches to the card height on phones, then caps at 4:3 from sm up. -->
     <div
-      class="relative w-28 shrink-0 overflow-hidden rounded-xl bg-gray-100 sm:aspect-4/3 sm:w-full sm:rounded-b-none sm:rounded-t-2xl dark:bg-white/5"
+      class="relative w-32 shrink-0 overflow-hidden rounded-l-2xl bg-gray-100 sm:aspect-4/3 sm:w-full sm:rounded-b-none sm:rounded-t-2xl dark:bg-white/5"
     >
       <img
         v-if="image"
@@ -180,7 +183,7 @@ const startsAt = computed<string>(() =>
     </div>
 
     <!-- Body -->
-    <div class="flex min-w-0 flex-1 flex-col gap-2 sm:gap-3 sm:p-4">
+    <div class="flex min-w-0 flex-1 flex-col gap-2 p-3 sm:gap-3 sm:p-4">
       <div>
         <h3
           class="font-display font-semibold text-gray-900 dark:text-white line-clamp-2"
@@ -325,7 +328,7 @@ const startsAt = computed<string>(() =>
         v-if="canJoin && !signedUp.length"
         full-width
         size="lg"
-        variant="tertiary"
+        variant="soft"
         class="relative z-10"
         :disabled="!isOpen"
         @click="emit('join', tournament)"

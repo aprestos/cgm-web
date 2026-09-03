@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useDebounceFn } from '@vueuse/core'
 import { IconShoppingBagPlus } from '@tabler/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
-import SearchInput from '@/components/SearchInput.vue'
+import CSearchInput from '@/components/CSearchInput.vue'
 import orderService from '@/features/orders/service'
 import { tenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
@@ -63,10 +62,11 @@ async function loadRecentOrders(): Promise<void> {
   }
 }
 
-const onSearch = useDebounceFn((email: string) => {
+// Debounce lives on CSearchInput (300ms by default).
+const onSearch = (email: string): void => {
   emailSearch.value = email
   void loadRecentOrders()
-}, 300)
+}
 
 onMounted(() => void loadRecentOrders())
 </script>
@@ -83,7 +83,7 @@ onMounted(() => void loadRecentOrders())
     </template>
   </PageHeader>
 
-  <SearchInput
+  <CSearchInput
     :model-value="emailSearch"
     :placeholder="t('admin.orders.searchByUserIdPlaceholder')"
     @update:model-value="onSearch"

@@ -19,6 +19,11 @@ const { t } = useI18n()
 </script>
 
 <template>
+  <!-- The status filter stays on the page: it is the one control people reach
+       for on every visit, and a strip of chips reads faster than a panel.
+       Bleeds into the page gutter so it can scroll edge to edge — the negative
+       margin has to match BasePublicPage's px-4 or the page itself gains a
+       horizontal scrollbar. -->
   <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-6 sm:mx-0 sm:px-0">
     <button
       v-for="status in STATUS_TABS"

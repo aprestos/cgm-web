@@ -4,7 +4,6 @@ import type enLanding from '../en/landing'
 export default {
   hero: {
     liveNow: 'A Decorrer',
-    comingSoon: 'Em Breve',
     defaultTitle: 'Convenção de Jogos de Tabuleiro',
     defaultDescription:
       'A melhor experiência de jogos de tabuleiro espera por ti',
@@ -32,7 +31,6 @@ export default {
   tickets: {
     sectionTitle: 'Garante o Teu Acesso',
     sectionSubtitle: 'Escolhe o teu bilhete',
-    comingSoonTitle: 'Em breve',
     comingSoonDescription: 'Volta em breve para garantires os teus bilhetes.',
     popular: 'Popular',
     getTicket: 'Adicionar ao carrinho',
@@ -79,6 +77,7 @@ export default {
     sectionSubtitle: 'Compete pela glória',
     sectionDescription:
       'Inscreve-te no local e luta pelo primeiro lugar do pódio.',
+    viewAll: 'Ver todos os torneios',
     organizedBy: 'por {name}',
   },
   map: {

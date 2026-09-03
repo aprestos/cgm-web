@@ -1,7 +1,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
-import CSelect2 from '@/CSelect2.vue'
+import { createI18n } from 'vue-i18n'
+import CCombobox from '@/components/CCombobox.vue'
+
+const i18n = createI18n({
+  legacy: false,
+  locale: 'en',
+  messages: { en: { common: { actions: { clear: 'Clear' } } } },
+})
 
 const flush = async (ms: number): Promise<void> => {
   await new Promise((r) => setTimeout(r, ms))
@@ -21,12 +28,13 @@ const makeSearchFn = (
     ].filter((o) => o.label.toLowerCase().includes(query.toLowerCase()))
   })
 
-describe('CSelect2 with searchFn', () => {
+describe('CCombobox with searchFn', () => {
   it('selects an option on mousedown and displays its label', async () => {
     const searchFn = makeSearchFn(50)
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, searchFn, label: 'Game' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, searchFn, label: 'Game' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     const input = wrapper.find('input')
@@ -46,9 +54,10 @@ describe('CSelect2 with searchFn', () => {
 
   it('shows loading state immediately while the search is pending', async () => {
     const searchFn = makeSearchFn(200)
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, searchFn, label: 'Game' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, searchFn, label: 'Game' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     await wrapper.find('input').setValue('catan')
@@ -59,9 +68,10 @@ describe('CSelect2 with searchFn', () => {
 
   it('Enter while search is pending keeps the dropdown open, then selects', async () => {
     const searchFn = makeSearchFn(200)
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, searchFn, label: 'Game' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, searchFn, label: 'Game' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     const input = wrapper.find('input')
@@ -82,9 +92,10 @@ describe('CSelect2 with searchFn', () => {
 
   it('Enter after results load selects the first option', async () => {
     const searchFn = makeSearchFn(50)
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, searchFn, label: 'Game' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, searchFn, label: 'Game' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     const input = wrapper.find('input')
@@ -97,16 +108,17 @@ describe('CSelect2 with searchFn', () => {
   })
 })
 
-describe('CSelect2 with static items', () => {
+describe('CCombobox with static items', () => {
   const items = [
     { value: 1, label: 'Sala 1' },
     { value: 2, label: 'Armazém' },
   ]
 
   it('opens the full list from the chevron button and selects', async () => {
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, items, label: 'Location' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, items, label: 'Location' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     await wrapper.find('button').trigger('click')
@@ -124,9 +136,10 @@ describe('CSelect2 with static items', () => {
   })
 
   it('filters items as the user types', async () => {
-    const wrapper = mount(CSelect2, {
-      props: { modelValue: null, items, label: 'Location' },
+    const wrapper = mount(CCombobox, {
+      props: { id: 'field', modelValue: null, items, label: 'Location' },
       attachTo: document.body,
+      global: { plugins: [i18n] },
     })
 
     await wrapper.find('input').setValue('sal')

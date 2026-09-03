@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, nextTick, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
@@ -7,8 +7,8 @@ import {
   type LibraryGame,
 } from '@/features/library/games/game.model.ts'
 import {
-  libraryService,
   type FilterOptions,
+  libraryService,
 } from '@/features/library/games/service.ts'
 import GameItem from './GameItem.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
@@ -199,9 +199,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="mx-auto max-w-2xl md:max-w-7xl">
+  <!-- Fills whatever column it is given: from lg up that is the three quarters
+       left over by the pinned filters, not the whole page -->
+  <div class="w-full">
     <div
-      class="grid grid-cols-2 gap-y-12 gap-x-6 sm:grid-cols-3 sm:gap-x-6 xl:grid-cols-4 xl:gap-x-8"
+      class="grid grid-cols-2 gap-y-12 gap-x-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8"
     >
       <template v-if="loading">
         <GameItem :loading="true" />

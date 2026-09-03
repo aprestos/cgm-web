@@ -4,9 +4,7 @@
 
     <div>
       <main>
-        <div
-          class="mx-auto max-w-7xl py-8 px-2 sm:px-4 md:px-6 lg:px-8 xl:px-0"
-        >
+        <div class="mx-auto max-w-7xl py-8 px-4 md:px-6 lg:px-8">
           <router-view />
         </div>
       </main>

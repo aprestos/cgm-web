@@ -2,10 +2,11 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { DateTime } from 'luxon'
-import type { Tournament } from '@/features/tournaments/tournament.model.ts'
+import type { CreateTournament } from '../tournament.model.ts'
 
 interface Props {
-  tournament: Tournament
+  /** Widened past `Tournament` so a draft can be previewed before it exists. */
+  tournament: CreateTournament
 }
 
 interface Fact {
@@ -19,21 +20,28 @@ const props = defineProps<Props>()
 
 const { t, locale } = useI18n()
 
-// The dialog carries the whole date; the card only had room for the weekday.
-const startsAt = computed<string>(() =>
-  DateTime.fromISO(props.tournament.startsAt)
-    .setLocale(locale.value)
-    .toLocaleString({
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-    }),
+// A saved tournament always carries a start date; one still being filled in
+// does not, so an unparseable value falls back to a placeholder instead of
+// rendering luxon's "Invalid DateTime".
+const start = computed<DateTime>(() =>
+  DateTime.fromISO(props.tournament.startsAt).setLocale(locale.value),
 )
 
-const startsAtTime = computed<string>(() =>
-  DateTime.fromISO(props.tournament.startsAt)
-    .setLocale(locale.value)
-    .toLocaleString({ hour: '2-digit', minute: '2-digit' }),
+// The dialog carries the whole date; the card only had room for the weekday.
+const startsAt = computed<string>(() =>
+  start.value.isValid
+    ? start.value.toLocaleString({
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      })
+    : '—',
+)
+
+const startsAtTime = computed<string | undefined>(() =>
+  start.value.isValid
+    ? start.value.toLocaleString({ hour: '2-digit', minute: '2-digit' })
+    : undefined,
 )
 
 // Two per row, label above value — a full date and a long venue both fit,
@@ -58,9 +66,11 @@ const facts = computed<Fact[]>(() => [
     key: 'format',
     label: t('public.tournaments.details.format'),
     value: t(`public.tournaments.format.${props.tournament.format}`),
-    hint: t('public.tournaments.details.maxParticipants', {
-      count: props.tournament.maxParticipants,
-    }),
+    hint: props.tournament.maxParticipants
+      ? t('public.tournaments.details.maxParticipants', {
+          count: props.tournament.maxParticipants,
+        })
+      : undefined,
   },
   ...(props.tournament.organizer
     ? [

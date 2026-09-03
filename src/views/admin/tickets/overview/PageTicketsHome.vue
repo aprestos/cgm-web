@@ -47,12 +47,6 @@ const handleSelect = (ticket: Ticket): void => {
   selectedTicket.value = ticket
 }
 
-const handleEdit = (ticket: Ticket): void => {
-  selectedTicket.value = ticket
-  shownDialog.value = 'edit'
-  toast.info(t('admin.tickets.editFunctionalityComingSoon'))
-}
-
 const handleDelete = (ticket: Ticket): void => {
   ticketToDelete.value = ticket
   showDeleteConfirmation.value = true
@@ -221,11 +215,7 @@ onMounted(async () => {
     </template>
 
     <template #detail>
-      <TicketDetailPanel
-        :ticket="selectedTicket"
-        @edit="handleEdit"
-        @delete="handleDelete"
-      />
+      <TicketDetailPanel :ticket="selectedTicket" @delete="handleDelete" />
     </template>
   </ListDetailLayout>
 

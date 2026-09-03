@@ -3,13 +3,16 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconGift, IconMedal, IconTrophy, IconUsers } from '@tabler/icons-vue'
 import {
-  type Tournament,
+  type CreateTournament,
   TournamentPrizeType,
-} from '@/features/tournaments/tournament.model.ts'
+} from '../tournament.model.ts'
 import { resolveLocalized } from '@/utils/localizedString.ts'
 
 interface Props {
-  tournament: Tournament
+  /** Widened past `Tournament` so a draft can be previewed before it exists. */
+  tournament: CreateTournament
+  /** Drops the heading and the divider for a caller that frames it itself. */
+  bare?: boolean
 }
 
 interface Prize {
@@ -18,7 +21,7 @@ interface Prize {
   value: string
 }
 
-const props = defineProps<Props>()
+const props = withDefaults(defineProps<Props>(), { bare: false })
 
 const { t, locale } = useI18n()
 
@@ -95,19 +98,20 @@ const hasPrizes = computed<boolean>(
 <template>
   <section
     v-if="hasPrizes"
-    class="border-t border-gray-100 pt-5 dark:border-white/10"
+    :class="bare ? '' : 'border-t border-gray-100 pt-5 dark:border-white/10'"
   >
     <h4
+      v-if="!bare"
       class="text-[11px] font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400"
     >
       {{ t('public.tournaments.details.prizes') }}
     </h4>
 
-    <dl class="mt-3 grid grid-cols-3 gap-2.5">
+    <dl class="grid grid-cols-3 gap-2.5" :class="bare ? '' : 'mt-3'">
       <div
         v-for="prize in podiumPrizes"
         :key="prize.type"
-        class="rounded-xl px-3.5 py-3 ring-1"
+        class="min-w-0 rounded-xl px-3.5 py-3 ring-1"
         :class="PRIZE_SURFACE[prize.type]"
       >
         <dt
@@ -121,7 +125,7 @@ const hasPrizes = computed<boolean>(
           {{ prize.label }}
         </dt>
         <dd
-          class="mt-1 font-display text-sm font-semibold text-gray-900 dark:text-white"
+          class="mt-1 break-words font-display text-sm font-semibold text-gray-900 dark:text-white"
         >
           {{ prize.value }}
         </dd>

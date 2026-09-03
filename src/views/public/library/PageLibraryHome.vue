@@ -1,215 +1,96 @@
 <template>
   <div class="pb-32">
-    <div>
-      <!-- Mobile filter dialog -->
-      <TransitionRoot as="template" :show="mobileFiltersOpen">
-        <Dialog
-          class="relative z-40 lg:hidden"
-          @close="mobileFiltersOpen = false"
-        >
-          <TransitionChild
-            as="template"
-            enter="transition-opacity ease-linear duration-300"
-            enter-from="opacity-0"
-            enter-to=""
-            leave="transition-opacity ease-linear duration-300"
-            leave-from=""
-            leave-to="opacity-0"
-          >
-            <div class="fixed inset-0 bg-black/25" />
-          </TransitionChild>
-
-          <div class="fixed inset-0 z-40 flex">
-            <TransitionChild
-              as="template"
-              enter="transition ease-in-out duration-300 transform"
-              enter-from="translate-x-full"
-              enter-to="translate-x-0"
-              leave="transition ease-in-out duration-300 transform"
-              leave-from="translate-x-0"
-              leave-to="translate-x-full"
-            >
-              <DialogPanel
-                class="relative ml-auto flex size-full max-w-xs flex-col overflow-y-auto bg-white dark:bg-gray-800 pt-4 pb-6 shadow-xl"
-              >
-                <div class="flex items-center justify-between px-4">
-                  <h2 class="text-lg font-medium text-gray-900 dark:text-white">
-                    {{ t('public.library.filters.title') }}
-                  </h2>
-                  <button
-                    type="button"
-                    class="relative -mr-2 flex size-10 items-center justify-center rounded-md bg-white dark:bg-gray-800 p-2 text-gray-400 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:ring-2 focus:ring-primary-500 focus:outline-hidden"
-                    @click="mobileFiltersOpen = false"
-                  >
-                    <span class="absolute -inset-0.5" />
-                    <span class="sr-only">{{
-                      t('public.library.closeMenu')
-                    }}</span>
-                    <XMarkIcon class="size-6" aria-hidden="true" />
-                  </button>
-                </div>
-
-                <!-- Filters -->
-                <div class="mt-4 border-t border-gray-200 dark:border-gray-700">
-                  <LibraryFilters
-                    is-mobile
-                    :selected-tag="selectedTag"
-                    :selected-filters="selectedFilters"
-                    :sub-categories="subCategories"
-                    :filters="filters"
-                    @select-tag="selectTag"
-                    @toggle-filter="toggleFilter"
-                  />
-                </div>
-              </DialogPanel>
-            </TransitionChild>
-          </div>
-        </Dialog>
-      </TransitionRoot>
-
-      <main>
-        <div class="flex items-center gap-4 pb-6">
-          <!-- Search Input -->
-          <div class="flex-1">
-            <SearchInput
-              v-model="searchQuery"
-              :placeholder="t('public.library.search')"
-            />
-          </div>
-
-          <!-- Sort Combobox -->
-          <div class="shrink-0 self-stretch">
-            <Listbox v-model="selectedSort" class="h-full">
-              <div class="relative h-full">
-                <ListboxButton
-                  class="relative w-full h-full cursor-pointer rounded-full bg-gray-100 dark:bg-gray-700 pl-12 pr-10 text-left focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400"
-                >
-                  <span
-                    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3"
-                  >
-                    <IconArrowsSort
-                      class="h-6 w-6 text-gray-400 dark:text-gray-300"
-                      aria-hidden="true"
-                    />
-                  </span>
-                  <span class="hidden md:flex flex-col justify-center">
-                    <span
-                      class="text-xs text-gray-500 dark:text-gray-400 mb-0.5"
-                    >
-                      {{ t('public.library.sort.sortBy') }}
-                    </span>
-                    <span
-                      class="block truncate text-base font-medium text-gray-900 dark:text-white"
-                    >
-                      {{
-                        selectedSort
-                          ? t(`public.library.sort.${selectedSort}`)
-                          : t(`public.library.sort.${SortOption.DEFAULT}`)
-                      }}
-                    </span>
-                  </span>
-                  <span
-                    class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4"
-                  >
-                    <ChevronDownIcon
-                      class="h-5 w-5 text-gray-400"
-                      aria-hidden="true"
-                    />
-                  </span>
-                </ListboxButton>
-
-                <transition
-                  enter-active-class="transition ease-out duration-100"
-                  enter-from-class="transform opacity-0 scale-95"
-                  enter-to-class="transform opacity-100 scale-100"
-                  leave-active-class="transition ease-in duration-75"
-                  leave-from-class="transform opacity-100 scale-100"
-                  leave-to-class="transform opacity-0 scale-95"
-                >
-                  <ListboxOptions
-                    class="absolute z-10 mt-1 max-h-60 w-60 overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-black/5 dark:ring-gray-700 focus:outline-none sm:text-sm"
-                  >
-                    <ListboxOption
-                      v-for="option in Object.values(SortOption)"
-                      :key="option"
-                      v-slot="{ active, selected }"
-                      :value="option"
-                      as="template"
-                    >
-                      <li
-                        :class="[
-                          active
-                            ? 'bg-primary-600 text-white'
-                            : 'text-gray-900 dark:text-white',
-                          'relative flex flex-row cursor-pointer select-none py-2 pl-3 pr-9',
-                        ]"
-                      >
-                        <span
-                          :class="[
-                            selected ? 'font-semibold' : 'font-normal',
-                            'block truncate',
-                          ]"
-                        >
-                          {{ t('public.library.sort.' + option) }}
-                        </span>
-
-                        <IconCheck
-                          v-if="selected"
-                          :class="[
-                            active ? 'text-white' : 'text-primary-600',
-                            'size-5 absolute right-0 mr-4',
-                          ]"
-                        />
-                      </li>
-                    </ListboxOption>
-                  </ListboxOptions>
-                </transition>
-              </div>
-            </Listbox>
-          </div>
-
-          <!-- Filter Button -->
-          <div class="shrink-0 lg:hidden self-stretch">
-            <button
-              type="button"
-              class="h-full px-5 py-4 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-400 transition-colors flex items-center gap-2"
-              @click="mobileFiltersOpen = true"
-            >
-              <FunnelIcon class="size-6 text-gray-400" aria-hidden="true" />
-              <span class="sr-only">{{ t('public.library.filters') }}</span>
-            </button>
-          </div>
+    <main>
+      <div class="flex items-center gap-4 pb-6">
+        <!-- Search Input -->
+        <div class="flex-1">
+          <CSearchInput
+            v-model="searchQuery"
+            :placeholder="t('public.library.search')"
+            size="lg"
+            rounded
+          />
         </div>
 
-        <section aria-labelledby="products-heading" class="">
-          <h2 id="products-heading" class="sr-only">
-            {{ t('public.library.games') }}
-          </h2>
+        <!-- Sort — in the toolbar wherever there is room for it -->
+        <div class="hidden shrink-0 self-stretch md:block">
+          <SortSelect
+            v-model="selectedSort"
+            :label="t('public.library.sort.sortBy')"
+            :options="sortOptions"
+          />
+        </div>
 
-          <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
-            <!-- Filters -->
-            <div class="hidden lg:block">
-              <LibraryFilters
-                :selected-tag="selectedTag"
-                :selected-filters="selectedFilters"
-                :sub-categories="subCategories"
-                :filters="filters"
-                @select-tag="selectTag"
-                @toggle-filter="toggleFilter"
+        <!-- Filter Button — only until the panel is pinned to the page -->
+        <div class="shrink-0 self-stretch lg:hidden">
+          <button
+            type="button"
+            class="flex h-full cursor-pointer items-center gap-2 rounded-full bg-gray-100 px-5 py-4 text-gray-700 transition-colors hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600 dark:focus:ring-primary-400"
+            @click="filtersOpen = true"
+          >
+            <FunnelIcon class="size-6 text-gray-400" aria-hidden="true" />
+            <span class="sr-only">{{ t('public.library.filters.title') }}</span>
+            <span
+              v-if="activeFilterCount"
+              class="inline-flex size-5 items-center justify-center rounded-full bg-primary-600 text-xs font-medium text-white"
+            >
+              {{ activeFilterCount }}
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <FilterChips
+        :chips="appliedFilters"
+        @remove="removeFilter"
+        @clear="clearFilters"
+      />
+
+      <section aria-labelledby="products-heading">
+        <h2 id="products-heading" class="sr-only">
+          {{ t('public.library.games') }}
+        </h2>
+
+        <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
+          <!-- A column once the page is wide enough to spare it, a slide-over
+               below that -->
+          <FilterSidebar
+            v-model:open="filtersOpen"
+            :title="t('public.library.filters.title')"
+            pinned-from="lg"
+          >
+            <!-- Sort only lives here while the toolbar has no room for it -->
+            <div
+              class="border-b border-gray-200 md:hidden dark:border-gray-700"
+            >
+              <FilterRadioGroup
+                v-model="selectedSort"
+                :label="t('public.library.sort.sortBy')"
+                :options="sortOptions"
               />
             </div>
 
-            <div class="lg:col-span-3">
-              <GameList :filters="currentFilters" />
-            </div>
-          </div>
-        </section>
-      </main>
-    </div>
+            <LibraryFilters
+              :selected-tag="selectedTag"
+              :selected-filters="selectedFilters"
+              :sub-categories="subCategories"
+              :filters="filters"
+              @select-tag="selectTag"
+              @toggle-filter="toggleFilter"
+            />
+          </FilterSidebar>
 
-    <!-- Sticky bottom container -->
+          <div class="lg:col-span-3">
+            <GameList :filters="currentFilters" />
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Offset off the bottom edge, not padded away from it: a fixed box that
+         reaches bottom:0 makes iOS Safari turn its translucent toolbar solid. -->
     <div
-      class="fixed bottom-0 left-0 right-0 p-2 flex items-center justify-center"
+      class="pointer-events-none fixed inset-x-0 bottom-[max(env(safe-area-inset-bottom),0.5rem)] px-2 flex items-center justify-center"
     >
       <ReservationList />
     </div>
@@ -220,14 +101,17 @@
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {
-  IconArrowsSort,
-  IconCheck,
   IconMoodKidFilled,
   IconPlayCard2Filled,
   IconTrophyFilled,
   IconUsersGroup,
 } from '@tabler/icons-vue'
-import SearchInput from '@/components/SearchInput.vue'
+import CSearchInput from '@/components/CSearchInput.vue'
+import FilterSidebar from '@/components/FilterSidebar.vue'
+import FilterRadioGroup from '@/components/FilterRadioGroup.vue'
+import FilterChips from '@/components/FilterChips.vue'
+import type { FilterChip } from '@/components/filterChips.model.ts'
+import SortSelect from '@/components/SortSelect.vue'
 import GameList from '@/views/public/library/GameList.vue'
 import ReservationList from '@/views/public/library/ReservationList.vue'
 import LibraryFilters from '@/views/public/library/LibraryFilters.vue'
@@ -235,22 +119,7 @@ import {
   type FilterOptions,
   SortOption,
 } from '@/features/library/games/service.ts'
-import {
-  Dialog,
-  DialogPanel,
-  Listbox,
-  ListboxButton,
-  ListboxOption,
-  ListboxOptions,
-  TransitionChild,
-  TransitionRoot,
-} from '@headlessui/vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
-import {
-  ChevronDownIcon,
-  FunnelIcon,
-  SparklesIcon,
-} from '@heroicons/vue/20/solid'
+import { FunnelIcon, SparklesIcon } from '@heroicons/vue/20/solid'
 
 const { t } = useI18n()
 
@@ -258,6 +127,63 @@ const searchQuery = ref('')
 const selectedFilters = ref<Record<string, string[]>>({})
 const selectedTag = ref<string>('')
 const selectedSort = ref<SortOption>(SortOption.DEFAULT)
+
+const sortOptions = computed(() =>
+  Object.values(SortOption).map((option) => ({
+    value: option,
+    label: t(`public.library.sort.${option}`),
+  })),
+)
+
+// Every applied filter, spelled out for the chips. Sort is left out: it always
+// has a value, so it is never something the user can take off.
+const appliedFilters = computed<FilterChip[]>(() => {
+  const chips: FilterChip[] = []
+
+  if (selectedTag.value)
+    chips.push({
+      id: `tag:${selectedTag.value}`,
+      label: t(`public.library.filters.${selectedTag.value}`),
+    })
+
+  for (const [sectionId, values] of Object.entries(selectedFilters.value)) {
+    const section = filters.find((entry) => entry.id === sectionId)
+
+    for (const value of values) {
+      const option = section?.options.find((entry) => entry.value === value)
+      chips.push({
+        id: `${sectionId}:${value}`,
+        // The value alone ("3", "60 min") does not say what it filters.
+        label: `${t(`public.library.filters.${sectionId}`)}: ${option?.label ?? value}`,
+      })
+    }
+  }
+
+  return chips
+})
+
+const activeFilterCount = computed<number>(() => appliedFilters.value.length)
+
+const removeFilter = (id: string): void => {
+  const separator = id.indexOf(':')
+  const sectionId = id.slice(0, separator)
+  const value = id.slice(separator + 1)
+
+  if (sectionId === 'tag') {
+    selectedTag.value = ''
+    return
+  }
+
+  const values = selectedFilters.value[sectionId]
+  if (!values) return
+
+  selectedFilters.value[sectionId] = values.filter((entry) => entry !== value)
+}
+
+const clearFilters = (): void => {
+  selectedTag.value = ''
+  selectedFilters.value = {}
+}
 
 // Computed property to create the proper filter structure
 const currentFilters = computed((): FilterOptions => {
@@ -322,7 +248,7 @@ const filters = [
   },
 ]
 
-const mobileFiltersOpen = ref(false)
+const filtersOpen = ref(false)
 
 // Tag management functions
 const selectTag = (tagName: string): void => {

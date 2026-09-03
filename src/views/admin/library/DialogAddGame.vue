@@ -8,7 +8,7 @@
       <div class="space-y-12 mx-auto max-w-7xl">
         <div class="pb-12">
           <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <CSelect2
+            <CCombobox
               id="external-game"
               v-model="formData.selectedGame"
               :label="t('admin.library.game')"
@@ -32,7 +32,7 @@
               :errors="r$.$errors.owner"
             />
 
-            <CSelect2
+            <CSelect
               id="location"
               v-model="formData.selectedLocation"
               :label="t('admin.library.location')"
@@ -40,6 +40,7 @@
               :items="locations"
               :errors="r$.$errors.selectedLocation"
               :helper-text="t('common.actions.optional')"
+              clearable
             />
 
             <CTextArea
@@ -96,7 +97,9 @@ import { libraryService } from '@/features/library/games/service.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import logger from '@/lib/logger.ts'
 import { toast } from 'vue-sonner'
-import CSelect2, { type Option } from '@/CSelect2.vue'
+import CCombobox from '@/components/CCombobox.vue'
+import CSelect from '@/components/CSelect.vue'
+import type { Option } from '@/components/select.types'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 
 const { t } = useI18n()
