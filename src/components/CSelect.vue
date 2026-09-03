@@ -43,7 +43,7 @@
         <button
           v-if="showClear"
           type="button"
-          tabindex="-1"
+          tabindex="0"
           class="absolute cursor-pointer inset-y-0 right-8 flex items-center pr-2 hover:text-gray-600 dark:hover:text-gray-300 z-10"
           @click.stop.prevent="handleClear"
         >
