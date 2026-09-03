@@ -3,10 +3,13 @@ import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
 
-// Hostnames are interpolated into a PostgREST `or` filter below, so anything
-// that is not a plain hostname is rejected before it reaches the query.
+// Anything that is not a plain hostname cannot be one we serve, so it is
+// rejected before it costs a round trip.
 const HOSTNAME =
   /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+
+/** A tenant_domains row with the tenant it resolves to embedded. */
+type ResolvedDomain = { tenants: Record<string, unknown> | null }
 
 export const tenantService = {
   async get(): Promise<Array<Tenant>> {
@@ -26,15 +29,18 @@ export const tenantService = {
         throw new Error(`Invalid hostname: ${domain}`)
       }
 
-      // Match the primary domain or any hostname listed in other_domains
+      // One round trip: find the hostname, embed the tenant it belongs to.
+      // Only active hostnames resolve, so a domain still being verified cannot
+      // serve a tenant before its ownership has been confirmed.
       const { data } = await supabase
-        .from('tenants')
-        .select()
-        .or(`domain.eq.${hostname},other_domains.cs.{${hostname}}`)
-        .single()
+        .from('tenant_domains')
+        .select('tenants(*)')
+        .eq('hostname', hostname)
+        .eq('status', 'active')
+        .maybeSingle<ResolvedDomain>()
 
-      if (data) {
-        return toCamelCaseAs<Tenant>(data)
+      if (data?.tenants) {
+        return toCamelCaseAs<Tenant>(data.tenants)
       }
 
       // Development only. In production an unrecognised host is a domain we do

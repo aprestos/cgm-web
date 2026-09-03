@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { tenantService } from '../service'
 import { supabase } from '@/lib/supabase'
 
@@ -9,75 +9,72 @@ vi.mock('@/lib/supabase', () => ({
   },
 }))
 
+// As stored: getByDomain camel-cases the row before returning it.
 const tenantRow = {
   id: '1',
   name: 'Test Tenant',
   domain: 'example.com',
-  other_domains: ['www.example.com'],
-  logo: '',
   current_event: '',
   email: '',
 }
 
-/** The tenant row as the service returns it, with keys converted to camelCase. */
 const tenant = {
   id: '1',
   name: 'Test Tenant',
   domain: 'example.com',
-  otherDomains: ['www.example.com'],
-  logo: '',
   currentEvent: '',
   email: '',
 }
 
-const single = vi.fn()
-const or = vi.fn(() => ({ single }))
-const select = vi.fn(() => ({ or }))
+// tenant_domains is queried as .select().eq().eq().maybeSingle()
+const maybeSingle = vi.fn()
+const statusEq = vi.fn(() => ({ maybeSingle }))
+const hostnameEq = vi.fn(() => ({ eq: statusEq }))
+const select = vi.fn(() => ({ eq: hostnameEq }))
 
 describe('tenantService.getByDomain', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(supabase.from).mockReturnValue({ select } as any)
-    single.mockResolvedValue({ data: null, error: { message: 'Not found' } })
+    vi.mocked(supabase.from).mockReturnValue({
+      select,
+    } as unknown as ReturnType<typeof supabase.from>)
+    maybeSingle.mockResolvedValue({
+      data: { tenants: tenantRow },
+      error: null,
+    })
   })
 
-  afterEach(() => {
-    vi.unstubAllEnvs()
-    vi.restoreAllMocks()
+  it('resolves the tenant the hostname points at', async () => {
+    const result = await tenantService.getByDomain('example.com')
+
+    expect(result).toEqual(tenant)
+    expect(supabase.from).toHaveBeenCalledWith('tenant_domains')
+    expect(select).toHaveBeenCalledWith('tenants(*)')
+    expect(hostnameEq).toHaveBeenCalledWith('hostname', 'example.com')
   })
 
-  it('returns the tenant matching the hostname', async () => {
-    single.mockResolvedValue({ data: tenantRow, error: null })
+  it('only resolves hostnames that are active', async () => {
+    await tenantService.getByDomain('example.com')
 
-    await expect(tenantService.getByDomain('example.com')).resolves.toEqual(
-      tenant,
-    )
-    expect(vi.mocked(supabase.from)).toHaveBeenCalledWith('tenants')
-    expect(or).toHaveBeenCalledWith(
-      'domain.eq.example.com,other_domains.cs.{example.com}',
-    )
+    expect(statusEq).toHaveBeenCalledWith('status', 'active')
   })
 
   it('normalises the hostname before querying', async () => {
-    single.mockResolvedValue({ data: tenantRow, error: null })
+    await tenantService.getByDomain('  EXAMPLE.com  ')
 
-    await tenantService.getByDomain('  WWW.Example.COM  ')
-
-    expect(or).toHaveBeenCalledWith(
-      'domain.eq.www.example.com,other_domains.cs.{www.example.com}',
-    )
+    expect(hostnameEq).toHaveBeenCalledWith('hostname', 'example.com')
   })
 
   it('rejects a malformed hostname without querying', async () => {
     await expect(
-      tenantService.getByDomain('example.com,domain.eq.evil.com'),
+      tenantService.getByDomain('https://example.com/path'),
     ).rejects.toThrow('Invalid hostname')
-    expect(vi.mocked(supabase.from)).not.toHaveBeenCalled()
+
+    expect(supabase.from).not.toHaveBeenCalled()
   })
 
   it('throws when no tenant matches', async () => {
-    vi.stubEnv('DEV', false)
+    maybeSingle.mockResolvedValue({ data: null, error: null })
 
     await expect(tenantService.getByDomain('nonexistent.com')).rejects.toThrow(
       'No tenant found for domain: nonexistent.com',
@@ -85,24 +82,32 @@ describe('tenantService.getByDomain', () => {
   })
 
   it('falls back to the dev tenant in development', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null })
     vi.stubEnv('DEV', true)
     vi.stubEnv('VITE_DEV_TENANT_ID', '1')
-    vi.spyOn(tenantService, 'getById').mockResolvedValue(tenant)
+    const getById = vi.spyOn(tenantService, 'getById').mockResolvedValue(tenant)
 
     await expect(tenantService.getByDomain('localhost')).resolves.toEqual(
       tenant,
     )
-    expect(tenantService.getById).toHaveBeenCalledWith('1')
+    expect(getById).toHaveBeenCalledWith('1')
+
+    vi.unstubAllEnvs()
   })
 
+  // An unrecognised host in production is a domain we do not serve. Falling
+  // back would hand a stranger's hostname somebody else's tenant.
   it('never falls back to the dev tenant outside development', async () => {
+    maybeSingle.mockResolvedValue({ data: null, error: null })
     vi.stubEnv('DEV', false)
     vi.stubEnv('VITE_DEV_TENANT_ID', '1')
     const getById = vi.spyOn(tenantService, 'getById')
 
-    await expect(
-      tenantService.getByDomain('someone-elses-domain.com'),
-    ).rejects.toThrow('No tenant found for domain')
+    await expect(tenantService.getByDomain('stranger.com')).rejects.toThrow(
+      'No tenant found for domain: stranger.com',
+    )
     expect(getById).not.toHaveBeenCalled()
+
+    vi.unstubAllEnvs()
   })
 })
