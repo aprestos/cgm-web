@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { IconTrophy } from '@tabler/icons-vue'
+import { IconArrowRight, IconTrophy } from '@tabler/icons-vue'
 import { DateTime } from 'luxon'
+import { RouterLink } from 'vue-router'
+import { RouteNames } from '@/router/routeNames'
 import {
   type Tournament,
   TournamentStatus,
@@ -17,7 +19,7 @@ interface Props {
 const props = defineProps<Props>()
 
 // This is a teaser, not a listing: only a handful of tournaments are shown.
-const MAX_TOURNAMENTS = 6
+const MAX_TOURNAMENTS = 3
 
 // Ongoing first, then the next ones to start, finished ones last.
 const STATUS_ORDER: Record<TournamentStatus, number> = {
@@ -44,7 +46,7 @@ const gridClass = computed<string>(() => {
   const count = visibleTournaments.value.length
   if (count === 1) return 'max-w-sm grid-cols-1'
   if (count === 2) return 'max-w-2xl grid-cols-2'
-  return 'max-w-7xl grid-cols-2 lg:grid-cols-3'
+  return 'max-w-5xl grid-cols-1 sm:grid-cols-3'
 })
 
 // Cover and thumbnail are optional today, so every card falls back gracefully.
@@ -116,6 +118,17 @@ function getImage(tournament: Tournament): string | null {
             </p>
           </div>
         </article>
+      </div>
+
+      <!-- View all -->
+      <div class="mt-10 text-center">
+        <RouterLink
+          :to="{ name: RouteNames.public.tournaments }"
+          class="inline-flex items-center gap-2 rounded-full bg-gray-900/10 px-6 py-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-900/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
+        >
+          {{ t('landing.tournaments.viewAll') }}
+          <IconArrowRight class="h-4 w-4" />
+        </RouterLink>
       </div>
     </div>
   </section>

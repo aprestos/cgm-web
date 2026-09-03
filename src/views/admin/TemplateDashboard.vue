@@ -8,8 +8,12 @@
     @close="sidebarOpen = false"
   />
 
-  <div class="lg:pl-72 dark:border-white/5 min-h-screen flex flex-col">
-    <div class="flex-1 overflow-auto min-h-0 p-0">
+  <!-- No inner scroll container: the document itself scrolls, so the sticky
+       header actually sticks and useHideOnScroll sees the scroll events. -->
+  <div
+    class="lg:pl-72 dark:border-white/5 min-h-dvh flex flex-col pb-[var(--floating-action-clearance)]"
+  >
+    <div class="flex-1">
       <router-view />
     </div>
   </div>

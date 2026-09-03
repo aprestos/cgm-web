@@ -56,6 +56,20 @@
   --color-highlight: rgb(var(--highlight));
 }
 
+/* Breakpoints, at Tailwind's own default values. Redeclaring them changes no
+   utility, it changes the compiled output: Tailwind inlines a breakpoint into
+   every media query it generates and then drops the variable, so `md:` alone
+   leaves nothing for JavaScript to read. `static` keeps these in :root even
+   though no utility references them, which is what lets useBreakpoint() match
+   the same widths the utilities do — change one here and both follow. */
+@theme static {
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+}
+
 @layer base {
   html {
     /* Let InterVariable's opsz axis pick Display shapes at large sizes (matches design tools) */
@@ -75,6 +89,11 @@
 /* Surface color tokens, consumed by the surface-* utilities defined above */
 @layer base {
   :root {
+    /* Bottom clearance for content that scrolls under a FloatingActionBar. The
+       bar overwrites this with its own measured height while it is mounted;
+       with no bar on the page it is just the safe area. */
+    --floating-action-clearance: env(safe-area-inset-bottom);
+
     /* Light theme surface colors */
     --surface-0: 255 255 255; /* Pure white */
     --surface-50: 248 250 252; /* slate-50 */
@@ -110,6 +129,14 @@
       --surface-900: 255 255 255; /* white */
       --surface-950: 255 255 255; /* white */
     }
+  }
+
+  /* Without this the UA treats the page as light-only, so Safari renders its
+     own chrome — the URL bar and the safe-area strips behind it — in light
+     appearance and paints them white, whatever background html carries. This is
+     what makes the bottom bar read as a white band in dark mode. */
+  :root {
+    color-scheme: light dark;
   }
 
   /* Set background color for body and html to match theme */

@@ -8,6 +8,9 @@
     <!-- iOS Safari specific -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <!-- Duplicated from index.css so the browser knows before the stylesheet
+         lands — otherwise the first paint still flashes light chrome. -->
+    <meta name="color-scheme" content="light dark">
     <meta name="theme-color" content="#f9fafb" media="(prefers-color-scheme: light)">
     <meta name="theme-color" content="#101828" media="(prefers-color-scheme: dark)">
 

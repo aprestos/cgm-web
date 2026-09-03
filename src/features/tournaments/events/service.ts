@@ -1,0 +1,94 @@
+import { supabase } from '@/lib/supabase'
+import { toCamelCaseAs, toSnakeCaseAs } from '@/utils/caseConverter'
+import type {
+  CreateTournament,
+  Tournament,
+  UpdateTournament,
+} from '@/features/tournaments/tournament.model.ts'
+import logger from '@/lib/logger.ts'
+
+export const tournamentService = {
+  async get(
+    tenantId: string,
+    editionId: number,
+    id: string,
+  ): Promise<Tournament> {
+    const { data, error } = await supabase
+      .from('tournament_events')
+      .select('*')
+      .eq('edition_id', editionId)
+      .eq('tenant_id', tenantId)
+      .eq('id', id)
+      .single()
+
+    if (error) throw error
+    return toCamelCaseAs<Tournament>(data)
+  },
+
+  async getAll(tenantId: string, editionId: number): Promise<Tournament[]> {
+    const { data, error } = await supabase
+      .from('tournament_events')
+      .select('*')
+      .eq('edition_id', editionId)
+      .eq('tenant_id', tenantId)
+
+    if (error) throw error
+    return toCamelCaseAs<Tournament>(data ?? [])
+  },
+
+  async create(
+    tenantId: string,
+    editionId: number,
+    input: CreateTournament,
+  ): Promise<Tournament> {
+    const { data, error } = await supabase
+      .from('tournament_events')
+      .insert({
+        tenant_id: tenantId,
+        edition_id: editionId,
+        ...toSnakeCaseAs<Record<string, unknown>>(
+          input as unknown as Record<string, unknown>,
+        ),
+      })
+      .select()
+      .single()
+
+    if (error) throw error
+
+    return toCamelCaseAs<Tournament>(data)
+  },
+
+  async update(
+    tenantId: string,
+    editionId: number,
+    id: string,
+    patch: UpdateTournament,
+  ): Promise<Tournament> {
+    const { data, error } = await supabase
+      .from('tournament_events')
+      .update(
+        toSnakeCaseAs<Record<string, unknown>>(
+          patch as unknown as Record<string, unknown>,
+        ),
+      )
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      logger.error('Unable to update tournament', {
+        tenantId,
+        editionId,
+        id,
+        error,
+      })
+      throw error
+    }
+
+    return toCamelCaseAs<Tournament>(data)
+  },
+}
+
+export default tournamentService

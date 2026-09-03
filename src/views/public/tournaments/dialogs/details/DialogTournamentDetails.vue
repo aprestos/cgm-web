@@ -3,9 +3,7 @@ import { computed, nextTick, useTemplateRef, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
-import TournamentDetailsFacts from './TournamentDetailsFacts.vue'
-import TournamentDetailsPrizes from './TournamentDetailsPrizes.vue'
-import TournamentDetailsAbout from './TournamentDetailsAbout.vue'
+import TournamentDetailsLayout from '@/features/tournaments/components/TournamentDetailsLayout.vue'
 import TournamentDetailsRoster from './TournamentDetailsRoster.vue'
 import type { TournamentDetailsRosterInstance } from './tournamentDetailsRoster.model.ts'
 import {
@@ -42,18 +40,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const STATUS_BADGE: Record<TournamentStatus, string> = {
-  scheduled: 'bg-white/90 text-gray-900 dark:bg-gray-900/90 dark:text-white',
-  ongoing: 'bg-green-500 text-white',
-  finished: 'bg-gray-900/80 text-white dark:bg-white/15',
-  cancelled: 'bg-red-500 text-white',
-}
-
 const roster = useTemplateRef<TournamentDetailsRosterInstance>('roster')
-
-const image = computed<string | undefined>(
-  () => props.tournament?.cover || props.tournament?.thumbnail || undefined,
-)
 
 const slotsLeft = computed<number>(() =>
   props.tournament ? remainingSlots(props.tournament) : 0,
@@ -77,18 +64,19 @@ const closedReason = computed<string>(() => {
   return t('public.tournaments.closed')
 })
 
-const spotsNote = computed<string>(() =>
-  isFull.value
-    ? t('public.tournaments.details.rosterFull', {
-        count: props.tournament?.maxParticipants ?? 0,
-      })
-    : t('public.tournaments.details.spotsLeft', {
-        count: slotsLeft.value,
-        total: props.tournament?.maxParticipants ?? 0,
-      }),
-)
-
 const pendingCount = computed<number>(() => roster.value?.stagedCount ?? 0)
+
+// Nothing on the roster is stored until confirm, so the footer says out loud
+// how much is still only staged — right next to the spots it would take up.
+const pendingNote = computed<string>(() => {
+  if (!pendingCount.value) return ''
+
+  return pendingCount.value === 1
+    ? t('public.tournaments.details.pendingSignUp')
+    : t('public.tournaments.details.pendingSignUpPlural', {
+        count: pendingCount.value,
+      })
+})
 
 const isSubmitting = computed<boolean>(
   () => roster.value?.isSubmitting ?? false,
@@ -110,85 +98,45 @@ watch(
   <DialogComponent
     :open="open"
     size="xl"
-    :title="tournament?.title"
-    :cover="image"
+    hide-header
     body-class="p-0"
     @close="emit('close')"
   >
-    <!-- Status and format ride on the cover, out of the way of the title -->
-    <template #header-badges>
-      <template v-if="tournament">
-        <span
-          class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium shadow-sm backdrop-blur"
-          :class="STATUS_BADGE[tournament.status]"
-        >
-          <span
-            v-if="tournament.status === TournamentStatus.ongoing"
-            class="size-1.5 animate-pulse rounded-full bg-current"
-          />
-          {{ t(`public.tournaments.status.${tournament.status}`) }}
-        </span>
-        <span
-          v-if="image"
-          class="inline-flex items-center rounded-full bg-black/45 px-2.5 py-1 text-xs font-medium text-white shadow-sm backdrop-blur"
-        >
-          {{ t(`public.tournaments.format.${tournament.format}`) }}
-        </span>
+    <!-- The layout runs to the panel edge, so it is the one that has to
+         follow the panel's rounded top corner behind the cover art. -->
+    <TournamentDetailsLayout
+      v-if="tournament"
+      :tournament="tournament"
+      class="overflow-hidden rounded-t-2xl"
+    >
+      <template #aside>
+        <TournamentDetailsRoster
+          ref="roster"
+          :tournament="tournament"
+          :participants="participants"
+          :user="user"
+          :can-sign-up="canSignUp"
+          :closed-reason="closedReason"
+          :active="open"
+          @confirm="emit('confirm', $event)"
+        />
       </template>
-    </template>
-
-    <template #header-sub-content>
-      <p
-        v-if="tournament?.organizer"
-        class="mt-1.5 min-w-0 truncate text-sm"
-        :class="
-          image
-            ? 'text-white/80 drop-shadow-sm'
-            : 'text-gray-500 dark:text-gray-400'
-        "
-      >
-        {{
-          t('public.tournaments.organizedBy', { name: tournament.organizer })
-        }}
-      </p>
-    </template>
-
-    <!-- Details on the left, the roster on the right once there is room for
-         both; stacked below lg, where the roster follows the description. -->
-    <div v-if="tournament" class="grid lg:grid-cols-[minmax(0,1fr)_340px]">
-      <div class="flex flex-col gap-6 px-4 py-5 sm:p-6">
-        <TournamentDetailsFacts :tournament="tournament" />
-        <TournamentDetailsPrizes :tournament="tournament" />
-        <TournamentDetailsAbout :tournament="tournament" />
-      </div>
-
-      <TournamentDetailsRoster
-        ref="roster"
-        :tournament="tournament"
-        :participants="participants"
-        :user="user"
-        :can-sign-up="canSignUp"
-        :closed-reason="closedReason"
-        :active="open"
-        @confirm="emit('confirm', $event)"
-      />
-    </div>
+    </TournamentDetailsLayout>
 
     <template #footer>
       <div
         class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
       >
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          {{ spotsNote }}
-        </p>
-        <!-- Reversed while stacked so the confirm sits on top, where a thumb
-             lands first; side by side it goes back to trailing the cancel. -->
+        <div class="text-sm">
+          <p
+            v-if="pendingNote"
+            class="mt-0.5 flex items-center gap-2 text-gray-500 dark:text-gray-400"
+          >
+            <span class="size-1.5 shrink-0 rounded-full bg-amber-500" />
+            {{ pendingNote }}
+          </p>
+        </div>
         <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <CButton variant="secondary" size="lg" @click="emit('close')">
-            {{
-              canSignUp ? t('common.actions.cancel') : t('common.actions.close')
-            }}
-          </CButton>
           <CButton
             v-if="canSignUp"
             variant="primary"

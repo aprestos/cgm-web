@@ -2,43 +2,32 @@
 import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import {
-  IconCalendar,
-  IconPlus,
-  IconTrophy,
-  IconUsers,
-} from '@tabler/icons-vue'
+import { IconPlus, IconTrophy } from '@tabler/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
-import BaseCard from '@/components/BaseCard.vue'
 import CButton from '@/components/CButton.vue'
+import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import DialogCreateTournament from './DialogCreateTournament.vue'
-import {
-  type CreateTournament,
-  type Tournament,
-  TournamentStatus,
+import DialogEditTournament from './DialogEditTournament.vue'
+import DialogTournamentParticipants from './DialogTournamentParticipants.vue'
+import TournamentCard from './TournamentCard.vue'
+import type {
+  CreateTournament,
+  Tournament,
 } from '@/features/tournaments/tournament.model.ts'
-import tournamentService from '@/features/tournaments/service.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
 import { editionStore } from '@/features/events/edition.store.ts'
-import { formatDayLabel } from '@/utils/date.ts'
+import tournamentService from '@/features/tournaments/events/service.ts'
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 
-// Sample data — replace with a service once tournaments are persisted.
 const tournaments = ref<Tournament[]>([])
-
-const STATUS_BADGE: Record<TournamentStatus, string> = {
-  scheduled:
-    'bg-blue-50 text-blue-700 ring-blue-600/20 dark:bg-blue-900/20 dark:text-blue-300 dark:ring-blue-400/20',
-  ongoing:
-    'bg-green-50 text-green-700 ring-green-600/20 dark:bg-green-900/20 dark:text-green-300 dark:ring-green-400/20',
-  finished:
-    'bg-gray-100 text-gray-600 ring-gray-500/20 dark:bg-white/5 dark:text-gray-400 dark:ring-white/10',
-  cancelled:
-    'bg-red-100 text-red-600 ring-red-500/20 dark:bg-white/5 dark:text-red-400 dark:ring-white/10',
-}
-
+const isLoading = ref<boolean>(true)
 const isCreateDialogOpen = ref<boolean>(false)
+// Kept set while the dialog closes so its content does not blank out mid-transition
+const editTournament = ref<Tournament | null>(null)
+const isEditDialogOpen = ref<boolean>(false)
+const participantsTournament = ref<Tournament | null>(null)
+const isParticipantsDialogOpen = ref<boolean>(false)
 
 const handleCreate = (): void => {
   isCreateDialogOpen.value = true
@@ -51,8 +40,33 @@ const handleCreated = async (tournament: CreateTournament): Promise<void> => {
   await loadTournaments()
 }
 
+const handleEdit = (tournament: Tournament): void => {
+  editTournament.value = tournament
+  isEditDialogOpen.value = true
+}
+
+// Each section of the edit dialog saves on its own, so the list is brought
+// back in step as they land rather than once at the end.
+const handleUpdated = async (): Promise<void> => {
+  await loadTournaments()
+}
+
+// The full roster is a table, which the edit dialog's column has no room for.
+const handleManageParticipants = (tournament: Tournament): void => {
+  isEditDialogOpen.value = false
+  handleParticipants(tournament)
+}
+
+const handleParticipants = (tournament: Tournament): void => {
+  participantsTournament.value = tournament
+  isParticipantsDialogOpen.value = true
+}
+
 async function loadTournaments(): Promise<void> {
-  if (!tenantStore.value || !editionStore.value) return
+  if (!tenantStore.value || !editionStore.value) {
+    isLoading.value = false
+    return
+  }
 
   try {
     tournaments.value = await tournamentService.getAll(
@@ -61,7 +75,9 @@ async function loadTournaments(): Promise<void> {
     )
   } catch (error) {
     console.error('Failed to load tournaments:', error)
-    toast.error('Failed to load tournaments')
+    toast.error(t('admin.tournaments.loadFailed'))
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -85,63 +101,40 @@ onMounted(async () => {
       </template>
     </PageHeader>
 
-    <!-- Tournaments grid -->
+    <!-- Loading — mirrors the card grid so the layout does not jump -->
     <div
-      v-if="tournaments.length"
+      v-if="isLoading"
       class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 px-4 sm:px-0"
     >
-      <BaseCard v-for="tournament in tournaments" :key="tournament.id">
-        <div class="flex flex-col h-full gap-4">
-          <div class="flex items-start justify-between gap-3">
-            <div class="flex items-center gap-3 min-w-0">
-              <div
-                class="flex items-center justify-center size-10 shrink-0 rounded-lg bg-amber-50 dark:bg-amber-900/20"
-              >
-                <IconTrophy class="size-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div class="min-w-0">
-                <h3
-                  class="font-display font-semibold text-gray-900 dark:text-white truncate"
-                >
-                  {{ tournament.title }}
-                </h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400 truncate">
-                  {{ tournament.organizer }}
-                </p>
-              </div>
-            </div>
-            <span
-              class="inline-flex items-center gap-1 shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset"
-              :class="STATUS_BADGE[tournament.status]"
-            >
-              <span
-                v-if="tournament.status === TournamentStatus.ongoing"
-                class="size-1.5 rounded-full bg-current animate-pulse"
-              />
-              {{ t(`admin.tournaments.status.${tournament.status}`) }}
-            </span>
-          </div>
-
-          <div
-            class="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mt-auto pt-2 border-t border-gray-100 dark:border-white/5"
-          >
-            <span class="inline-flex items-center gap-1.5">
-              <IconCalendar class="size-4" />
-              {{ formatDayLabel(tournament.startsAt, locale) }}
-            </span>
-            <span class="inline-flex items-center gap-1.5">
-              <IconUsers class="size-4" />
-              {{ tournament.participants }} / {{ tournament.maxParticipants }}
-            </span>
-          </div>
-
-          <div
-            class="inline-flex self-start rounded-md bg-gray-100 dark:bg-white/5 px-2 py-0.5 text-xs font-medium text-gray-600 dark:text-gray-300"
-          >
-            {{ t(`admin.tournaments.format.${tournament.format}`) }}
+      <div
+        v-for="index in 6"
+        :key="index"
+        class="rounded-2xl bg-white p-4 ring-1 ring-slate-900/5 dark:bg-slate-900 dark:ring-white/10"
+      >
+        <div class="flex items-center gap-3">
+          <SkeletonLoader class-name="size-10 shrink-0" rounded="lg" />
+          <div class="flex-1 space-y-2">
+            <SkeletonLoader class-name="h-4 w-2/3" />
+            <SkeletonLoader class-name="h-3 w-1/3" />
           </div>
         </div>
-      </BaseCard>
+        <SkeletonLoader class-name="mt-4 h-3 w-1/2" />
+        <SkeletonLoader class-name="mt-4 h-1.5 w-full" rounded="full" />
+      </div>
+    </div>
+
+    <!-- Tournaments grid -->
+    <div
+      v-else-if="tournaments.length"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 px-4 sm:px-0"
+    >
+      <TournamentCard
+        v-for="tournament in tournaments"
+        :key="tournament.id"
+        :tournament="tournament"
+        @edit="handleEdit"
+        @participants="handleParticipants"
+      />
     </div>
 
     <!-- Empty state -->
@@ -173,6 +166,23 @@ onMounted(async () => {
       :open="isCreateDialogOpen"
       @close="isCreateDialogOpen = false"
       @created="handleCreated"
+    />
+
+    <!-- Edit tournament dialog -->
+    <DialogEditTournament
+      :open="isEditDialogOpen"
+      :tournament="editTournament"
+      @close="isEditDialogOpen = false"
+      @updated="handleUpdated"
+      @participants="handleManageParticipants"
+    />
+
+    <!-- Participants dialog -->
+    <DialogTournamentParticipants
+      :open="isParticipantsDialogOpen"
+      :tournament="participantsTournament"
+      @updated="handleUpdated"
+      @close="isParticipantsDialogOpen = false"
     />
   </div>
 </template>

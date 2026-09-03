@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
-import { toast } from 'vue-sonner'
 import { DateTime } from 'luxon'
 import { IconCalendarEvent, IconEdit, IconTrash } from '@tabler/icons-vue'
 import BaseCard from '@/components/BaseCard.vue'
+import CInfoPopover from '@/components/CInfoPopover.vue'
 import type { TicketDay } from '@/features/tickets/ticket.model.ts'
 
 interface Props {
@@ -58,14 +58,6 @@ const availabilityHint = (
     text: t('admin.tickets.spotsLeft', { count: remaining(day) }),
     class: 'text-gray-500 dark:text-gray-400',
   }
-}
-
-const handleEdit = (): void => {
-  toast.info(t('admin.tickets.editDayComingSoon'))
-}
-
-const handleDelete = (): void => {
-  toast.info(t('admin.tickets.deleteDayComingSoon'))
 }
 </script>
 
@@ -126,24 +118,18 @@ const handleDelete = (): void => {
           <div
             class="flex gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100"
           >
-            <button
-              type="button"
+            <CInfoPopover
               class="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-primary-600 dark:hover:bg-white/10 dark:hover:text-primary-400"
               :aria-label="t('common.actions.edit')"
-              :title="t('common.actions.edit')"
-              @click="handleEdit()"
             >
               <IconEdit class="h-4 w-4" />
-            </button>
-            <button
-              type="button"
+            </CInfoPopover>
+            <CInfoPopover
               class="rounded-md p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               :aria-label="t('common.actions.delete')"
-              :title="t('common.actions.delete')"
-              @click="handleDelete()"
             >
               <IconTrash class="h-4 w-4" />
-            </button>
+            </CInfoPopover>
           </div>
         </div>
 

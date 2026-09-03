@@ -5,7 +5,7 @@
       <div
         v-for="reservation in activeReservations"
         :key="reservation.id"
-        class="dark:bg-gray-800/90 backdrop-blur-2xl bg-gray-50/90 ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden shadow-2xl rounded-full cursor-pointer transition-shadow duration-200 min-w-sm"
+        class="pointer-events-auto dark:bg-gray-800/90 backdrop-blur-2xl bg-gray-50/90 ring-1 ring-gray-200 dark:ring-gray-700 overflow-hidden shadow-2xl rounded-full cursor-pointer transition-shadow duration-200 min-w-sm"
         @click="openReservationDetail(reservation)"
       >
         <div class="px-2 py-2 sm:p-3">

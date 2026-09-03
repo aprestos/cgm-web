@@ -2,7 +2,6 @@
 export default {
   hero: {
     liveNow: 'Live Now',
-    comingSoon: 'Coming Soon',
     defaultTitle: 'Board Game Convention',
     defaultDescription: 'The ultimate board gaming experience awaits you',
     discoverMore: 'Discover More',
@@ -29,7 +28,6 @@ export default {
   tickets: {
     sectionTitle: 'Get Your Access',
     sectionSubtitle: 'Choose your ticket',
-    comingSoonTitle: 'Coming Soon',
     comingSoonDescription: 'Check back soon to get your tickets.',
     popular: 'Popular',
     getTicket: 'Get This Ticket',
@@ -76,6 +74,7 @@ export default {
     sectionSubtitle: 'Compete for glory',
     sectionDescription:
       'Sign up at the venue and battle it out for the top spot.',
+    viewAll: 'View all tournaments',
     organizedBy: 'by {name}',
   },
   map: {

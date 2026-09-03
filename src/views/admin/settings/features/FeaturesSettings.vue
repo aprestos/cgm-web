@@ -1,6 +1,6 @@
 <template>
   <div class="py-6">
-    <div class="px-4 sm:px-6 lg:px-8 pb-16">
+    <div class="px-4 sm:px-6 lg:px-8">
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
           Platform Features
@@ -82,13 +82,14 @@
       </div>
     </div>
   </div>
-  <SettingsBottomBar>
+
+  <FloatingActionBar class="lg:pl-72">
     <CButton
       size="lg"
       type="button"
+      rounded
       :loading="isSaving"
       loading-text="Saving..."
-      class="shadow-lg shadow-black/10 dark:shadow-black/30 ring-1 ring-black/5 dark:ring-white/10"
       @click="saveFeatures"
     >
       <template #icon-left>
@@ -96,7 +97,7 @@
       </template>
       Save
     </CButton>
-  </SettingsBottomBar>
+  </FloatingActionBar>
 </template>
 
 <script setup lang="ts">
@@ -113,8 +114,8 @@ import {
   IconDeviceFloppy,
 } from '@tabler/icons-vue'
 import FeatureCard from '@/components/FeatureCard.vue'
-import SettingsBottomBar from '@/components/SettingsBottomBar.vue'
 import CButton from '@/components/CButton.vue'
+import FloatingActionBar from '@/components/FloatingActionBar.vue'
 import {
   saveEnabledFeatures,
   settingsStore,

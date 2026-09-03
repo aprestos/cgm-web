@@ -1,25 +1,21 @@
 <template>
   <div class="col-span-full">
-    <label
-      v-if="label"
-      :for="id"
-      class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-    >
+    <label v-if="label" :for="id" :class="LABEL_CLASSES">
       {{ label }}
+      <span v-if="required" class="text-red-500 dark:text-red-400">*</span>
     </label>
-    <div class="mt-2">
+    <div :class="{ 'mt-2': label }">
       <textarea
         :id="id"
         :name="name || id"
         :rows="rows"
         :placeholder="placeholder"
         :value="modelValue"
-        :class="[
-          'block w-full rounded-md bg-white px-3 py-1.5 text-base dark:bg-white/5 dark:text-white dark:placeholder:text-gray-500 text-gray-900 outline-1 -outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6',
-          errors && errors.length > 0
-            ? 'outline-red-300 focus:outline-red-600 dark:outline-red-400 dark:focus:outline-red-500'
-            : 'outline-gray-300 focus:outline-primary-600 dark:outline-white/10 dark:focus:outline-primary-500',
-        ]"
+        :disabled="disabled"
+        :required="required"
+        :aria-invalid="hasErrors || undefined"
+        :aria-describedby="describedBy"
+        :class="textareaClasses"
         @input="
           $emit(
             'update:modelValue',
@@ -27,19 +23,27 @@
           )
         "
       />
-      <p
-        v-if="helperText"
-        class="text-xs mt-1 text-gray-600 dark:text-gray-400"
-      >
+      <p v-if="helperText" :id="`${id}-helper`" :class="HELPER_CLASSES">
         {{ helperText }}
       </p>
     </div>
-    <ValidationErrors v-if="errors" :errors="errors" />
+    <ValidationErrors v-if="errors" :id="`${id}-error`" :errors="errors" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import ValidationErrors from '@/components/ValidationErrors.vue'
+import {
+  FIELD_BASE,
+  FIELD_DISABLED,
+  FIELD_RADIUS,
+  FIELD_SIZE,
+  FIELD_STATE,
+  HELPER_CLASSES,
+  LABEL_CLASSES,
+  type FieldSize,
+} from '@/components/field.styles'
 
 interface Props {
   id: string
@@ -50,18 +54,41 @@ interface Props {
   name?: string
   errors?: string[]
   helperText?: string
+  size?: FieldSize
+  disabled?: boolean
+  required?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   label: undefined,
   rows: 4,
   placeholder: '',
   name: undefined,
   errors: undefined,
   helperText: undefined,
+  size: 'md',
+  disabled: false,
+  required: false,
 })
 
 defineEmits<{
   'update:modelValue': [value: string]
 }>()
+
+const hasErrors = computed(() => !!props.errors && props.errors.length > 0)
+
+const describedBy = computed(() => {
+  const ids: string[] = []
+  if (props.helperText) ids.push(`${props.id}-helper`)
+  if (hasErrors.value) ids.push(`${props.id}-error`)
+  return ids.length ? ids.join(' ') : undefined
+})
+
+const textareaClasses = computed(() => [
+  FIELD_BASE,
+  FIELD_DISABLED,
+  FIELD_SIZE[props.size],
+  FIELD_RADIUS,
+  hasErrors.value ? FIELD_STATE.error : FIELD_STATE.default,
+])
 </script>

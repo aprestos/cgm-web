@@ -35,7 +35,20 @@
                   dialogSizeClasses,
                 ]"
               >
+                <!-- Chrome-less: the content supplies its own header, so all
+                     that is left to place is the way out of the dialog. -->
+                <button
+                  v-if="hideHeader"
+                  type="button"
+                  class="absolute right-4 top-4 z-20 grid size-9 cursor-pointer place-items-center rounded-lg bg-white/85 text-gray-700 ring-1 ring-black/10 backdrop-blur transition-colors hover:bg-white dark:bg-gray-900/80 dark:text-gray-200 dark:ring-white/15 sm:right-5 sm:top-5"
+                  @click="closeDialog"
+                >
+                  <span class="sr-only">Close</span>
+                  <IconX class="h-5 w-5" aria-hidden="true" />
+                </button>
+
                 <div
+                  v-if="!hideHeader"
                   class="px-4 pt-5 pb-4 sm:px-6"
                   :class="
                     cover
@@ -156,6 +169,11 @@ interface Props {
    * panel edges (a split layout, a full-bleed list) and pad the parts itself.
    */
   bodyClass?: string
+  /**
+   * Drops the header strip for content that renders its own. The close button
+   * stays, floating over the top-right of the panel.
+   */
+  hideHeader?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -163,6 +181,7 @@ const props = withDefaults(defineProps<Props>(), {
   size: 'md',
   cover: undefined,
   bodyClass: 'px-4 py-5 sm:p-6',
+  hideHeader: false,
 })
 
 const emit = defineEmits<{

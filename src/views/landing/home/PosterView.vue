@@ -148,6 +148,8 @@ const altText = props.editionName
 </template>
 
 <style scoped>
+@reference '../../../index.css';
+
 @keyframes shimmer-sweep {
   0% {
     transform: translateX(-100%) rotate(15deg);
@@ -176,11 +178,8 @@ const altText = props.editionName
     box-shadow 0.5s ease;
 }
 
-@media (min-width: 1024px) {
-  .poster-card {
-    transform: perspective(800px) rotateY(-3deg);
-  }
-  .poster-card:hover {
+.poster-card:hover {
+  @variant lg {
     transform: perspective(800px) rotateY(0deg) translateY(-4px);
   }
 }

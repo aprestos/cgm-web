@@ -284,7 +284,7 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
               v-else
               class="mt-8 rounded-xl border border-gray-300/70 bg-gray-100/70 px-3 py-2 text-center text-xs font-medium text-gray-900 dark:border-gray-500/40 dark:bg-gray-500/10 dark:text-gray-200"
             >
-              {{ t('landing.tickets.comingSoonTitle') }}
+              {{ t('common.comingSoon.title') }}
             </div>
           </div>
 

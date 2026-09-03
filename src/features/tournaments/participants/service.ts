@@ -1,67 +1,13 @@
 import { supabase } from '@/lib/supabase'
 import { toCamelCaseAs, toSnakeCaseAs } from '@/utils/caseConverter'
 import type {
-  CreateTournament,
-  Tournament,
-} from '@/features/tournaments/tournament.model.ts'
-import type {
   CreateTournamentParticipant,
   TournamentParticipant,
 } from '@/features/tournaments/participant.model.ts'
 import logger from '@/lib/logger.ts'
 
-export const tournamentService = {
-  async get(
-    tenantId: string,
-    editionId: number,
-    id: string,
-  ): Promise<Tournament> {
-    const { data, error } = await supabase
-      .from('tournament_events')
-      .select('*')
-      .eq('edition_id', editionId)
-      .eq('tenant_id', tenantId)
-      .eq('id', id)
-      .single()
-
-    if (error) throw error
-    return toCamelCaseAs<Tournament>(data)
-  },
-
-  async getAll(tenantId: string, editionId: number): Promise<Tournament[]> {
-    const { data, error } = await supabase
-      .from('tournament_events')
-      .select('*')
-      .eq('edition_id', editionId)
-      .eq('tenant_id', tenantId)
-
-    if (error) throw error
-    return toCamelCaseAs<Tournament>(data ?? [])
-  },
-
+export const tournamentParticipantsService = {
   async create(
-    tenantId: string,
-    editionId: number,
-    input: CreateTournament,
-  ): Promise<Tournament> {
-    const { data, error } = await supabase
-      .from('tournament_events')
-      .insert({
-        tenant_id: tenantId,
-        edition_id: editionId,
-        ...toSnakeCaseAs<Record<string, unknown>>(
-          input as unknown as Record<string, unknown>,
-        ),
-      })
-      .select()
-      .single()
-
-    if (error) throw error
-
-    return toCamelCaseAs<Tournament>(data)
-  },
-
-  async join(
     tenantId: string,
     editionId: number,
     tournamentId: string,
@@ -97,7 +43,37 @@ export const tournamentService = {
     }
   },
 
-  async getParticipantsByUser(
+  async getAllByTournament(
+    tenantId: string,
+    editionId: number,
+    tournamentId: string,
+  ): Promise<TournamentParticipant[]> {
+    const { data, error } = await supabase
+      .from('tournament_participants')
+      .select(
+        // Ticket-backed sign-ups keep the name on the issuance, and `user` is
+        // the account that registered the participant, not the participant.
+        '*, ticketIssuance:ticket_issuances(attendee_name, attendee_email), user:profiles(id, name, email)',
+      )
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .eq('tournament_id', tournamentId)
+      .order('created_at', { ascending: true })
+
+    if (error) {
+      logger.error('Unable to load tournament participants', {
+        tenantId,
+        editionId,
+        tournamentId,
+        error,
+      })
+      throw new Error('Unable to load tournament participants')
+    }
+
+    return data ? toCamelCaseAs<TournamentParticipant>(data) : []
+  },
+
+  async getAllByUser(
     tenantId: string,
     editionId: number,
     userId: string | undefined,
@@ -124,6 +100,10 @@ export const tournamentService = {
     }
     return data ? toCamelCaseAs<TournamentParticipant>(data) : []
   },
+
+  // TODO: removing a participant has to go through an edge function — the row
+  // and the tournament participant count have to come down together, which a
+  // plain table delete from the client cannot do.
 }
 
-export default tournamentService
+export default tournamentParticipantsService

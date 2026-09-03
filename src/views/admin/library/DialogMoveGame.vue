@@ -28,7 +28,8 @@
       </div>
 
       <!-- Location Selection -->
-      <CSelect2
+      <CSelect
+        id="move-game-location"
         v-model="selectedLocationId"
         :label="t('admin.library.newLocation')"
         :items="locationOptions"
@@ -62,7 +63,7 @@
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import DialogComponent from '@/components/DialogComponent.vue'
-import CSelect2 from '@/CSelect2.vue'
+import CSelect from '@/components/CSelect.vue'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import { toast } from 'vue-sonner'

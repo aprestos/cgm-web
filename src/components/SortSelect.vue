@@ -1,5 +1,4 @@
-<script setup lang="ts">
-import { useI18n } from 'vue-i18n'
+<script setup lang="ts" generic="T extends string">
 import {
   Listbox,
   ListboxButton,
@@ -8,20 +7,31 @@ import {
 } from '@headlessui/vue'
 import { ChevronDownIcon } from '@heroicons/vue/20/solid'
 import { IconArrowsSort, IconCheck } from '@tabler/icons-vue'
-import { SortOption } from './tournaments.filters.ts'
 
-defineProps<{
-  modelValue: SortOption
+interface SortOptionItem<T extends string = string> {
+  value: T
+  label: string
+}
+
+const props = defineProps<{
+  modelValue: T
+  // "Sort by" — also the button's accessible name once the labels collapse.
+  label: string
+  options: SortOptionItem<T>[]
 }>()
 
 defineEmits<{
-  'update:modelValue': [value: SortOption]
+  'update:modelValue': [value: T]
 }>()
 
-const { t } = useI18n()
+const selectedLabel = (): string =>
+  props.options.find((option) => option.value === props.modelValue)?.label ?? ''
 </script>
 
 <template>
+  <!-- The toolbar copy of the sort control: sort is reached far more often
+       than the filters, so it stays in reach instead of moving into the panel.
+       Icon only until there is room for the labels. -->
   <Listbox
     :model-value="modelValue"
     class="h-full"
@@ -39,14 +49,15 @@ const { t } = useI18n()
             aria-hidden="true"
           />
         </span>
-        <span class="hidden flex-col justify-center md:flex">
+        <span class="sr-only">{{ label }}</span>
+        <span class="hidden flex-col justify-center md:flex" aria-hidden="true">
           <span class="mb-0.5 text-xs text-gray-500 dark:text-gray-400">
-            {{ t('public.tournaments.sort.sortBy') }}
+            {{ label }}
           </span>
           <span
             class="block truncate text-base font-medium text-gray-900 dark:text-white"
           >
-            {{ t(`public.tournaments.sort.${modelValue}`) }}
+            {{ selectedLabel() }}
           </span>
         </span>
         <span
@@ -68,10 +79,10 @@ const { t } = useI18n()
           class="absolute right-0 z-10 mt-1 max-h-60 w-60 overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black/5 focus:outline-none sm:text-sm dark:bg-gray-800 dark:ring-gray-700"
         >
           <ListboxOption
-            v-for="option in Object.values(SortOption)"
-            :key="option"
+            v-for="option in options"
+            :key="option.value"
             v-slot="{ active, selected }"
-            :value="option"
+            :value="option.value"
             as="template"
           >
             <li
@@ -88,7 +99,7 @@ const { t } = useI18n()
                   'block truncate',
                 ]"
               >
-                {{ t(`public.tournaments.sort.${option}`) }}
+                {{ option.label }}
               </span>
 
               <IconCheck

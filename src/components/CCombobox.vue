@@ -1,29 +1,24 @@
 <template>
   <div class="col-span-full">
-    <label
-      v-if="label"
-      class="block text-sm/6 font-medium text-gray-900 dark:text-gray-100"
-    >
+    <label v-if="label" :for="id" :class="LABEL_CLASSES">
       {{ label }}
+      <span v-if="required" class="text-red-500 dark:text-red-400">*</span>
     </label>
     <Combobox
       :model-value="selectedOption"
       :by="compareOptions"
+      :disabled="disabled"
       @update:model-value="handleSelect"
     >
       <div class="relative mt-2" @keydown.capture="handleKeydownCapture">
-        <div
-          :class="[
-            'relative w-full cursor-default overflow-hidden rounded-md bg-white dark:bg-white/5 text-left outline-1 -outline-offset-1 focus-within:outline-2 focus-within:-outline-offset-2 sm:text-sm',
-            errors && errors.length > 0
-              ? 'outline-red-300 focus-within:outline-red-600 dark:outline-red-400 dark:focus-within:outline-red-500'
-              : 'outline-gray-300 dark:outline-white/10 focus-within:outline-primary-600 dark:focus-within:outline-primary-500',
-          ]"
-        >
+        <div :class="shellClasses">
           <ComboboxInput
-            class="w-full border-none py-1.5 pl-3 pr-16 text-base sm:text-sm/6 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:ring-0 bg-transparent outline-none"
+            :id="id"
+            :class="inputClasses"
             :display-value="getDisplayValue"
             :placeholder="placeholder"
+            :aria-invalid="hasErrors || undefined"
+            :aria-describedby="describedBy"
             @change="handleQueryChange"
           />
           <button
@@ -34,6 +29,7 @@
             @click.stop.prevent="handleClear"
             @mousedown.stop.prevent="handleClear"
           >
+            <span class="sr-only">{{ t('common.actions.clear') }}</span>
             <XMarkIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
           </button>
           <ComboboxButton
@@ -51,9 +47,7 @@
           leave-to="opacity-0"
           @after-leave="query = ''"
         >
-          <ComboboxOptions
-            class="absolute z-20 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
-          >
+          <ComboboxOptions :class="[FIELD_PANEL, FIELD_RADIUS]">
             <div
               v-if="isLoading"
               class="relative cursor-default select-none px-4 py-2 text-gray-700 dark:text-gray-300"
@@ -97,53 +91,20 @@
               as="template"
               :value="item"
             >
-              <li
-                class="relative cursor-pointer select-none py-2 pl-10 pr-4"
-                :class="
-                  active
-                    ? 'bg-primary-600 text-white dark:bg-primary-500'
-                    : 'text-gray-900 dark:text-gray-100'
-                "
-              >
-                <span
-                  class="block truncate"
-                  :class="isSelected ? 'font-medium' : 'font-normal'"
-                >
-                  {{ getItemLabel(item) }}
-                  <span
-                    v-if="getItemSecondaryLabel(item)"
-                    class="ml-1"
-                    :class="
-                      active
-                        ? 'text-primary-100'
-                        : 'text-gray-500 dark:text-gray-400'
-                    "
-                  >
-                    {{ getItemSecondaryLabel(item) }}
-                  </span>
-                </span>
-                <span
-                  class="absolute inset-y-0 left-0 flex items-center pl-3"
-                  :class="
-                    isSelected
-                      ? active
-                        ? 'text-white'
-                        : 'text-primary-600 dark:text-primary-500'
-                      : 'text-gray-300 dark:text-gray-600'
-                  "
-                >
-                  <IconCheck class="h-5 w-5" aria-hidden="true" />
-                </span>
-              </li>
+              <CSelectOption
+                :option="item"
+                :selected="isSelected"
+                :active="active"
+              />
             </ComboboxOption>
           </ComboboxOptions>
         </TransitionRoot>
       </div>
     </Combobox>
-    <p v-if="helperText" class="text-xs mt-1 text-gray-600 dark:text-gray-400">
+    <p v-if="helperText" :id="`${id}-helper`" :class="HELPER_CLASSES">
       {{ helperText }}
     </p>
-    <ValidationErrors v-if="errors" :errors="errors" />
+    <ValidationErrors v-if="errors" :id="`${id}-error`" :errors="errors" />
   </div>
 </template>
 
@@ -159,16 +120,29 @@ import {
 } from '@headlessui/vue'
 import { ChevronUpDownIcon, XMarkIcon } from '@heroicons/vue/20/solid'
 import { useDebounceFn } from '@vueuse/core'
-import { IconCheck } from '@tabler/icons-vue'
+import { useI18n } from 'vue-i18n'
 import ValidationErrors from '@/components/ValidationErrors.vue'
+import CSelectOption from '@/components/CSelectOption.vue'
+import type { Option } from '@/components/select.types'
+import {
+  FIELD_SHELL_BASE,
+  FIELD_SHELL_INPUT,
+  FIELD_SHELL_STATE,
+  FIELD_PANEL,
+  FIELD_RADIUS,
+  FIELD_SIZE,
+  HELPER_CLASSES,
+  LABEL_CLASSES,
+  type FieldSize,
+} from '@/components/field.styles'
 
-export interface Option<TValue> {
-  value: TValue
-  label: string
-  secondaryLabel?: string
-}
-
+/**
+ * Type-to-filter select. Use it when the candidate set is remote (`searchFn`)
+ * or too long to scan by eye; for a short fixed list, reach for CSelect, which
+ * has no text input to distract from picking.
+ */
 interface Props {
+  id: string
   // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   modelValue?: T | null
   items?: Array<Option<T>>
@@ -177,6 +151,9 @@ interface Props {
   label?: string
   errors?: string[]
   helperText?: string
+  size?: FieldSize
+  disabled?: boolean
+  required?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -187,11 +164,40 @@ const props = withDefaults(defineProps<Props>(), {
   label: undefined,
   errors: undefined,
   helperText: undefined,
+  size: 'md',
+  disabled: false,
+  required: false,
 })
 
 const emit = defineEmits<{
   'update:modelValue': [value: T | null] // eslint-disable-line @typescript-eslint/no-redundant-type-constituents
 }>()
+
+const { t } = useI18n()
+
+const hasErrors = computed(() => !!props.errors && props.errors.length > 0)
+
+const describedBy = computed(() => {
+  const ids: string[] = []
+  if (props.helperText) ids.push(`${props.id}-helper`)
+  if (hasErrors.value) ids.push(`${props.id}-error`)
+  return ids.length ? ids.join(' ') : undefined
+})
+
+const shellClasses = computed(() => [
+  FIELD_SHELL_BASE,
+  'cursor-default',
+  FIELD_RADIUS,
+  hasErrors.value ? FIELD_SHELL_STATE.error : FIELD_SHELL_STATE.default,
+])
+
+// pr-16 clears the clear + chevron buttons; it is emitted after the size map's
+// px-*, so it wins.
+const inputClasses = computed(() => [
+  FIELD_SHELL_INPUT,
+  FIELD_SIZE[props.size],
+  'pr-16',
+])
 
 const query = ref('')
 const isLoading = ref(false)
@@ -310,11 +316,6 @@ function handleClear(): void {
 // Display functions
 const getDisplayValue = (item: unknown): string =>
   (item as Option<T> | null)?.label ?? ''
-
-const getItemLabel = (item: unknown): string => (item as Option<T>).label
-
-const getItemSecondaryLabel = (item: unknown): string | undefined =>
-  (item as Option<T>).secondaryLabel
 
 const getItemKey = (item: unknown): string | number => {
   const option = item as Option<T>

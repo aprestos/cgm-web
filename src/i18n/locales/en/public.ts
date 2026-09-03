@@ -109,6 +109,8 @@ export default {
       spotsLeft: '{count} of {total} spots still free',
       rosterFull: 'Roster full — {count} participants',
       rosterFilled: '{percentage}% of the roster filled',
+      pendingSignUp: '1 participant added, not saved yet',
+      pendingSignUpPlural: '{count} participants added, not saved yet',
     },
     joinDialog: {
       participants: 'Participants',
@@ -132,6 +134,10 @@ export default {
     },
     empty: 'No tournaments found',
     emptyDescription: 'Try adjusting your search or filters.',
+    filters: {
+      title: 'Filters',
+      status: 'Status',
+    },
     // Enum-label map — keys match the status tab ids verbatim
     tabs: {
       all: 'All',
@@ -148,7 +154,6 @@ export default {
     },
     // Format labels — keys are string ids used by tournament.format
     format: {
-      swiss: 'Swiss',
       'single-elimination': 'Single Elimination',
       'double-elimination': 'Double Elimination',
       'round-robin': 'Round Robin',

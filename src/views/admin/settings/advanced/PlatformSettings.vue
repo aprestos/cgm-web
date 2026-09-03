@@ -5,87 +5,37 @@
   >
     <form @submit="handleSubmit">
       <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:max-w-xl sm:grid-cols-6">
-        <div class="sm:col-span-3">
-          <label
-            for="language"
-            class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
-          >
-            Default Language
-          </label>
-          <select
-            id="language"
-            v-model="formData.language"
-            name="language"
-            class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm bg-white dark:bg-gray-800"
-          >
-            <option value="en">English</option>
-            <option value="pt">Português</option>
-            <option value="es">Español</option>
-            <option value="fr">Français</option>
-            <option value="de">Deutsch</option>
-          </select>
-        </div>
+        <CSelect
+          id="language"
+          v-model="formData.language"
+          label="Default Language"
+          :items="languageOptions"
+          class="sm:col-span-3"
+        />
 
-        <div class="sm:col-span-3">
-          <label
-            for="timezone"
-            class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
-          >
-            Timezone
-          </label>
-          <select
-            id="timezone"
-            v-model="formData.timezone"
-            name="timezone"
-            class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm bg-white dark:bg-gray-800"
-          >
-            <option value="UTC">UTC</option>
-            <option value="Europe/Lisbon">Europe/Lisbon (WET)</option>
-            <option value="Europe/London">Europe/London (GMT)</option>
-            <option value="Europe/Paris">Europe/Paris (CET)</option>
-            <option value="America/New_York">America/New York (EST)</option>
-            <option value="America/Los_Angeles">
-              America/Los Angeles (PST)
-            </option>
-          </select>
-        </div>
+        <CSelect
+          id="timezone"
+          v-model="formData.timezone"
+          label="Timezone"
+          :items="timezoneOptions"
+          class="sm:col-span-3"
+        />
 
-        <div class="sm:col-span-3">
-          <label
-            for="date-format"
-            class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
-          >
-            Date Format
-          </label>
-          <select
-            id="date-format"
-            v-model="formData.dateFormat"
-            name="date-format"
-            class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm bg-white dark:bg-gray-800"
-          >
-            <option value="DD/MM/YYYY">DD/MM/YYYY</option>
-            <option value="MM/DD/YYYY">MM/DD/YYYY</option>
-            <option value="YYYY-MM-DD">YYYY-MM-DD</option>
-          </select>
-        </div>
+        <CSelect
+          id="date-format"
+          v-model="formData.dateFormat"
+          label="Date Format"
+          :items="dateFormatOptions"
+          class="sm:col-span-3"
+        />
 
-        <div class="sm:col-span-3">
-          <label
-            for="time-format"
-            class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
-          >
-            Time Format
-          </label>
-          <select
-            id="time-format"
-            v-model="formData.timeFormat"
-            name="time-format"
-            class="block w-full rounded-md border-0 py-2 px-3 text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-gray-700 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500 sm:text-sm bg-white dark:bg-gray-800"
-          >
-            <option value="24h">24-hour</option>
-            <option value="12h">12-hour (AM/PM)</option>
-          </select>
-        </div>
+        <CSelect
+          id="time-format"
+          v-model="formData.timeFormat"
+          label="Time Format"
+          :items="timeFormatOptions"
+          class="sm:col-span-3"
+        />
       </div>
     </form>
   </SettingsSection>
@@ -95,7 +45,36 @@
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
 import SettingsSection from '@/components/SettingsSection.vue'
+import CSelect from '@/components/CSelect.vue'
 import logger from '@/lib/logger.ts'
+
+const languageOptions = [
+  { value: 'en', label: 'English' },
+  { value: 'pt', label: 'Português' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'de', label: 'Deutsch' },
+]
+
+const timezoneOptions = [
+  { value: 'UTC', label: 'UTC' },
+  { value: 'Europe/Lisbon', label: 'Europe/Lisbon (WET)' },
+  { value: 'Europe/London', label: 'Europe/London (GMT)' },
+  { value: 'Europe/Paris', label: 'Europe/Paris (CET)' },
+  { value: 'America/New_York', label: 'America/New York (EST)' },
+  { value: 'America/Los_Angeles', label: 'America/Los Angeles (PST)' },
+]
+
+const dateFormatOptions = [
+  { value: 'DD/MM/YYYY', label: 'DD/MM/YYYY' },
+  { value: 'MM/DD/YYYY', label: 'MM/DD/YYYY' },
+  { value: 'YYYY-MM-DD', label: 'YYYY-MM-DD' },
+]
+
+const timeFormatOptions = [
+  { value: '24h', label: '24-hour' },
+  { value: '12h', label: '12-hour (AM/PM)' },
+]
 
 // Form data
 const formData = ref({

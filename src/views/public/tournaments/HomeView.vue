@@ -7,18 +7,20 @@ import TournamentStatusTabs from './TournamentStatusTabs.vue'
 import TournamentGrid from './TournamentGrid.vue'
 import TournamentGridSkeleton from './TournamentGridSkeleton.vue'
 import DialogTournamentDetails from './dialogs/details/DialogTournamentDetails.vue'
+import FilterSidebar from '@/components/FilterSidebar.vue'
+import FilterRadioGroup from '@/components/FilterRadioGroup.vue'
 import {
   countByStatus,
   filterTournaments,
   SortOption,
   sortTournaments,
+  STATUS_TABS,
   type StatusTab,
 } from './tournaments.filters.ts'
 import {
   type Tournament,
   TournamentStatus,
 } from '@/features/tournaments/tournament.model.ts'
-import tournamentService from '@/features/tournaments/service.ts'
 import { authService } from '@/features/auth/service.ts'
 import type { User } from '@/features/auth/user.model.ts'
 import { tenantStore } from '@/features/tenant/tenant.store.ts'
@@ -27,6 +29,8 @@ import type {
   CreateTournamentParticipant,
   TournamentParticipant,
 } from '@/features/tournaments/participant.model.ts'
+import tournamentParticipantsService from '@/features/tournaments/participants/service.ts'
+import tournamentService from '@/features/tournaments/events/service.ts'
 
 const { t } = useI18n()
 
@@ -41,6 +45,7 @@ const shownDialog = ref<string>('')
 const searchQuery = ref<string>('')
 const selectedStatus = ref<StatusTab>('all')
 const selectedSort = ref<SortOption>(SortOption.soonest)
+const filtersOpen = ref<boolean>(false)
 
 const availableTournaments = computed<Tournament[]>(() =>
   tournaments.value.filter(
@@ -49,6 +54,27 @@ const availableTournaments = computed<Tournament[]>(() =>
 )
 
 const statusCounts = computed(() => countByStatus(availableTournaments.value))
+
+const sortOptions = computed(() =>
+  Object.values(SortOption).map((option) => ({
+    value: option,
+    label: t(`public.tournaments.sort.${option}`),
+  })),
+)
+
+// The counts come along so the panel says how much each status would leave.
+const statusOptions = computed(() =>
+  STATUS_TABS.map((status) => ({
+    value: status,
+    label: t(`public.tournaments.tabs.${status}`),
+    count: statusCounts.value[status],
+  })),
+)
+
+// Sort always has a value, so only a narrowed status counts as "active".
+const activeFilterCount = computed<number>(() =>
+  selectedStatus.value === 'all' ? 0 : 1,
+)
 
 const visibleTournaments = computed<Tournament[]>(() =>
   sortTournaments(
@@ -87,7 +113,7 @@ const handleJoinConfirm = async (
     return
 
   try {
-    await tournamentService.join(
+    await tournamentParticipantsService.create(
       tenantStore.value.id,
       editionStore.value.id,
       tournament.id,
@@ -117,7 +143,7 @@ async function loadTournaments(): Promise<void> {
   try {
     const [allTournaments, tournamentParticipants] = await Promise.allSettled([
       tournamentService.getAll(tenantStore.value.id, editionStore.value.id),
-      tournamentService.getParticipantsByUser(
+      tournamentParticipantsService.getAllByUser(
         tenantStore.value.id,
         editionStore.value.id,
         currentUser.value?.id,
@@ -155,9 +181,34 @@ onMounted(async () => {
     <TournamentToolbar
       v-model:search="searchQuery"
       v-model:sort="selectedSort"
+      :sort-options="sortOptions"
+      :active-filter-count="activeFilterCount"
+      @open-filters="filtersOpen = true"
     />
 
     <TournamentStatusTabs v-model="selectedStatus" :counts="statusCounts" />
+
+    <!-- Narrow screens have no room for the sort control in the toolbar, so
+         the panel carries it, plus the status list so every control on the
+         page can be reached from one place -->
+    <FilterSidebar
+      v-model:open="filtersOpen"
+      :title="t('public.tournaments.filters.title')"
+    >
+      <FilterRadioGroup
+        v-model="selectedSort"
+        :label="t('public.tournaments.sort.sortBy')"
+        :options="sortOptions"
+      />
+
+      <div class="border-t border-gray-200 dark:border-gray-700">
+        <FilterRadioGroup
+          v-model="selectedStatus"
+          :label="t('public.tournaments.filters.status')"
+          :options="statusOptions"
+        />
+      </div>
+    </FilterSidebar>
 
     <TournamentGridSkeleton v-if="loading" />
 

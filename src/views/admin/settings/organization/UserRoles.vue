@@ -3,6 +3,15 @@
     :title="t('admin.settings.roles.title')"
     :description="t('admin.settings.roles.description')"
   >
+    <div v-if="hasCreatePermission" class="mb-4 flex justify-end">
+      <CButton size="sm" @click="isAddOpen = true">
+        <template #icon-left>
+          <IconPlus class="size-4" aria-hidden="true" />
+        </template>
+        {{ t('admin.settings.roles.add.button') }}
+      </CButton>
+    </div>
+
     <DataTable
       :items="userRoles"
       :columns="columns"
@@ -37,17 +46,16 @@
           size="sm"
           :text="t(`admin.settings.roles.role.${item.role}`)"
         />
-        <select
+        <CSelect
           v-else
-          :value="item.role"
+          :id="`user-role-${item.userId}`"
+          :model-value="item.role"
+          :items="roleOptions"
+          size="sm"
           :disabled="!hasUpdatePermission || !!updatingUserId"
-          class="rounded-md border border-gray-300 dark:border-white/10 bg-white dark:bg-gray-900 py-1.5 pl-3 pr-8 text-sm text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50"
-          @change="onRoleChange(item, $event)"
-        >
-          <option v-for="role in ASSIGNABLE_ROLES" :key="role" :value="role">
-            {{ t(`admin.settings.roles.role.${role}`) }}
-          </option>
-        </select>
+          class="w-44"
+          @update:model-value="(role) => onRoleChange(item, role)"
+        />
       </template>
 
       <!-- Created cell -->
@@ -78,6 +86,13 @@
       {{ t('admin.settings.roles.empty') }}
     </p>
 
+    <DialogAddUserRole
+      :open="isAddOpen"
+      :existing-user-ids="existingUserIds"
+      @added="onUserAdded"
+      @close="isAddOpen = false"
+    />
+
     <ConfirmationDialog
       :open="!!userToRemove"
       :title="t('admin.settings.roles.removeTitle')"
@@ -97,13 +112,15 @@
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import { IconTrash } from '@tabler/icons-vue'
+import { IconPlus, IconTrash } from '@tabler/icons-vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import DataTable, { type DataTableColumn } from '@/components/DataTable.vue'
 import CAvatar from '@/components/CAvatar.vue'
 import CBadge from '@/components/CBadge.vue'
 import CButton from '@/components/CButton.vue'
+import CSelect from '@/components/CSelect.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
+import DialogAddUserRole from './DialogAddUserRole.vue'
 import roleService from '@/features/roles/service.ts'
 import {
   type AppRole,
@@ -136,6 +153,10 @@ const hasDeletePermission = ref<boolean>(false)
 
 const userToRemove = ref<UserRole | null>(null)
 const isRemoving = ref(false)
+
+const isAddOpen = ref(false)
+
+const existingUserIds = computed(() => userRoles.value.map((r) => r.userId))
 
 const removeTargetName = computed(
   () =>
@@ -207,11 +228,19 @@ const loadPermissions = async (): Promise<void> => {
   }
 }
 
-const onRoleChange = async (item: UserRole, event: Event): Promise<void> => {
+const roleOptions = computed(() =>
+  ASSIGNABLE_ROLES.map((role) => ({
+    value: role,
+    label: t(`admin.settings.roles.role.${role}`),
+  })),
+)
+
+const onRoleChange = async (
+  item: UserRole,
+  newRole: AppRole | null,
+): Promise<void> => {
   const tenantId = tenantStore.value?.id
-  const select = event.target as HTMLSelectElement
-  const newRole = select.value as AppRole
-  if (!tenantId || newRole === item.role) return
+  if (!tenantId || !newRole || newRole === item.role) return
 
   updatingUserId.value = item.userId
   try {
@@ -221,11 +250,21 @@ const onRoleChange = async (item: UserRole, event: Event): Promise<void> => {
   } catch (error) {
     logger.error('Error updating role:', { error })
     toast.error(t('admin.settings.roles.updateFailed'))
-    // Revert the select to the previous value
-    select.value = item.role
+    // Nothing to roll back: the row is bound to item.role, which is only
+    // written on success — the old select held its own value and had to be
+    // pushed back by hand.
   } finally {
     updatingUserId.value = null
   }
+}
+
+// `assign` upserts, so a returning user comes back as an update of their row
+// rather than as a second one — the dialog blocks that case, but a role added
+// from another tab would still land here.
+const onUserAdded = (userRole: UserRole): void => {
+  const index = userRoles.value.findIndex((r) => r.userId === userRole.userId)
+  if (index === -1) userRoles.value.push(userRole)
+  else userRoles.value[index] = userRole
 }
 
 const requestRemove = (item: UserRole): void => {
