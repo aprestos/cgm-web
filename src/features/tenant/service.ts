@@ -3,6 +3,14 @@ import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
 
+// Anything that is not a plain hostname cannot be one we serve, so it is
+// rejected before it costs a round trip.
+const HOSTNAME =
+  /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+
+/** A tenant_domains row with the tenant it resolves to embedded. */
+type ResolvedDomain = { tenants: Record<string, unknown> | null }
+
 export const tenantService = {
   async get(): Promise<Array<Tenant>> {
     try {
@@ -14,31 +22,37 @@ export const tenantService = {
     }
   },
   async getByDomain(domain: string): Promise<Tenant> {
+    const hostname = domain.trim().toLowerCase()
+
     try {
-      const normalizedDomain = domain.toLowerCase()
-
-      // Try exact match for the domain or in other_domains array
-      const { data } = await supabase
-        .from('tenants')
-        .select()
-        .or(
-          `domain.eq.${normalizedDomain},other_domains.cs.{${normalizedDomain}}`,
-        )
-        .single()
-
-      if (data) {
-        return toCamelCaseAs<Tenant>(data)
+      if (!HOSTNAME.test(hostname)) {
+        throw new Error(`Invalid hostname: ${domain}`)
       }
 
-      // If not found and dev tenant ID is configured, use that as fallback
-      if (import.meta.env.VITE_DEV_TENANT_ID) {
+      // One round trip: find the hostname, embed the tenant it belongs to.
+      // Only active hostnames resolve, so a domain still being verified cannot
+      // serve a tenant before its ownership has been confirmed.
+      const { data } = await supabase
+        .from('tenant_domains')
+        .select('tenants(*)')
+        .eq('hostname', hostname)
+        .eq('status', 'active')
+        .maybeSingle<ResolvedDomain>()
+
+      if (data?.tenants) {
+        return toCamelCaseAs<Tenant>(data.tenants)
+      }
+
+      // Development only. In production an unrecognised host is a domain we do
+      // not serve, and must never resolve to somebody else's tenant.
+      if (import.meta.env.DEV && import.meta.env.VITE_DEV_TENANT_ID) {
         const devTenant = await this.getById(import.meta.env.VITE_DEV_TENANT_ID)
         if (devTenant) {
           return devTenant
         }
       }
 
-      throw new Error(`No tenant found for domain: ${domain}`)
+      throw new Error(`No tenant found for domain: ${hostname}`)
     } catch (error) {
       logger.error('Error on tenantService.getByDomain()', { error })
       throw error
