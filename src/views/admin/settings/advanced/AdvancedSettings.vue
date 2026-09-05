@@ -2,6 +2,7 @@
   <div class="space-y-10 divide-y divide-gray-200 dark:divide-white/10">
     <PlatformSettings ref="platformRef" />
     <IntegrationsSettings />
+    <DomainsSettings />
     <DataManagement />
   </div>
 
@@ -26,6 +27,7 @@
 import { ref } from 'vue'
 import PlatformSettings from './PlatformSettings.vue'
 import IntegrationsSettings from './IntegrationsSettings.vue'
+import DomainsSettings from './DomainsSettings.vue'
 import DataManagement from './DataManagement.vue'
 import CButton from '@/components/CButton.vue'
 import FloatingActionBar from '@/components/FloatingActionBar.vue'

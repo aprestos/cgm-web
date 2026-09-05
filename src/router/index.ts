@@ -198,49 +198,42 @@ const router = createRouter({
             {
               path: 'features',
               name: RouteNames.admin.settingsFeatures,
-              meta: { title: 'Features' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/features/FeaturesSettings.vue'),
             },
             {
               path: 'library',
               name: RouteNames.admin.settingsLibrary,
-              meta: { title: 'Library' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/library/LibrarySettings.vue'),
             },
             {
               path: 'tournaments',
               name: RouteNames.admin.settingsTournaments,
-              meta: { title: 'Tournaments' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/tournaments/TournamentsSettings.vue'),
             },
             {
               path: 'tickets',
               name: RouteNames.admin.settingsTickets,
-              meta: { title: 'Tickets' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/tickets/TicketsSettings.vue'),
             },
             {
               path: 'events',
               name: RouteNames.admin.settingsEventsModule,
-              meta: { title: 'Events' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/events/EventsSettings.vue'),
             },
             {
               path: 'flea-market',
               name: RouteNames.admin.settingsFleaMarket,
-              meta: { title: 'Flea Market' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/flea-market/FleaMarketSettings.vue'),
             },
             {
               path: 'advanced',
               name: RouteNames.admin.settingsAdvanced,
-              meta: { title: 'Advanced' },
               component: (): Promise<unknown> =>
                 import('../views/admin/settings/advanced/AdvancedSettings.vue'),
             },
