@@ -35,11 +35,14 @@ export const authService = {
   },
 
   async signInWithEmail(email: string): Promise<void> {
+    // The sign-in email carries a one-time code, not a link, so there is no
+    // redirect for Supabase to send the user back to. Keeping one would tie
+    // logging in to an allowlist holding every tenant's custom domain, and
+    // sign-in would break on each new domain until that list was updated.
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/auth/confirm`,
         data: {
           tenant_name: tenantStore.value?.name,
         },
