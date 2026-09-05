@@ -1,4 +1,9 @@
-export type DomainProvider = 'wildcard' | 'railway'
+/**
+ * Who provisions the hostname. `wildcard` and `service` are served without a
+ * registration of their own, so there is nothing to set up and no provider
+ * state to poll; `railway` is an individual custom domain, which has both.
+ */
+export type DomainProvider = 'wildcard' | 'railway' | 'service'
 
 export type DomainStatus = 'pending' | 'verifying' | 'active' | 'failed'
 
