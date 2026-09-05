@@ -220,7 +220,7 @@ const canRefresh = (domain: TenantDomain): boolean =>
   domain.provider === 'railway' && domain.providerId !== null
 
 const describe = (domain: TenantDomain): string => {
-  if (domain.provider === 'wildcard') {
+  if (domain.provider !== 'railway') {
     return 'Included with your convention, nothing to set up.'
   }
   switch (domain.status) {
