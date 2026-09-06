@@ -31,6 +31,23 @@ function normalizeQueryValue(
   return typeof value === 'string' ? value : undefined
 }
 
+// Codes the edge function sets when it redirects back here. Stripe's own
+// error codes fall through to the description it sends alongside them.
+const ERROR_MESSAGES: Record<string, string> = {
+  exchange_failed:
+    'We could not finish linking your Stripe account. Please try connecting it again.',
+  missing_code:
+    'Stripe did not send back an authorization code. Please try connecting again.',
+}
+
+function describeError(code: string, description?: string): string {
+  return (
+    (Object.hasOwn(ERROR_MESSAGES, code) ? ERROR_MESSAGES[code] : undefined) ??
+    description ??
+    'Stripe returned an error while trying to connect your account.'
+  )
+}
+
 async function redirectToAdvancedSettings(): Promise<void> {
   await router.push({ name: RouteNames.admin.settingsAdvanced })
 }
@@ -42,13 +59,25 @@ onMounted(async () => {
   )
   const queryCode = normalizeQueryValue(route.query.code)
 
+  const stripeResult = normalizeQueryValue(route.query.stripe)
+
   if (queryError) {
     isSuccess.value = false
     title.value = 'Stripe connection failed'
+    message.value = describeError(queryError, queryErrorDescription)
+  } else if (stripeResult === 'connected') {
+    // The edge function exchanged the code and stored the account before
+    // sending the browser here, so there is nothing left to do but report it.
+    isSuccess.value = true
+    title.value = 'Stripe connected successfully'
     message.value =
-      queryErrorDescription ??
-      'Stripe returned an error while trying to connect your account.'
+      'Your Stripe account has been connected. You will be redirected to settings.'
   } else if (queryCode) {
+    // Retired flow: Stripe used to redirect straight to the tenant's origin
+    // with the code, and this page posted it back. Kept so this page still
+    // works against a function that has not been redeployed yet; remove it,
+    // and stripeService.callback(), once the new callback is live.
+
     isLoading.value = true
     try {
       await stripeService.callback(
