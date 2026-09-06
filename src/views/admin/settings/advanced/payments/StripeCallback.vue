@@ -42,7 +42,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 function describeError(code: string, description?: string): string {
   return (
-    ERROR_MESSAGES[code] ??
+    (Object.hasOwn(ERROR_MESSAGES, code) ? ERROR_MESSAGES[code] : undefined) ??
     description ??
     'Stripe returned an error while trying to connect your account.'
   )
