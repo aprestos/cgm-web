@@ -8,11 +8,14 @@ import {
   IconSparkles,
 } from '@tabler/icons-vue'
 import { RouterLink } from 'vue-router'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useI18n } from 'vue-i18n'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import PosterView from './PosterView.vue'
 import { formatDateRange } from '@/utils/date.js'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t } = useI18n()
 
@@ -40,9 +43,9 @@ const emit = defineEmits<Emits>()
 
 // Get logo from tenant store
 const logoUrl = computed(() => {
-  if (!tenantStore.value) return null
+  if (!tenantStore.tenant) return null
   // Prefer long logo for hero section, fallback to generic logo
-  return tenantStore.value.logos?.long || tenantStore.value.logo || null
+  return tenantStore.tenant.logos?.long || tenantStore.tenant.logo || null
 })
 
 interface ViewportSize {
@@ -480,7 +483,7 @@ function scrollToMap(): void {
           >
             <PosterView
               :poster-url="posterUrl"
-              :edition-name="editionStore?.name"
+              :edition-name="editionStore.edition?.name"
             />
           </div>
 
@@ -513,7 +516,7 @@ function scrollToMap(): void {
           <div v-if="useLogo && logoUrl" class="mb-8">
             <img
               :src="logoUrl"
-              :alt="tenantStore?.name || 'Convention Logo'"
+              :alt="tenantStore.tenant?.name || 'Convention Logo'"
               class="mx-auto h-32 w-auto object-contain sm:h-40 lg:h-48"
               :class="{ 'lg:mx-0': posterUrl }"
             />
@@ -525,7 +528,7 @@ function scrollToMap(): void {
             class="bg-linear-to-b from-gray-900 via-gray-800 to-gray-600 bg-clip-text text-3xl font-bold tracking-tight text-transparent dark:from-white dark:via-white dark:to-white/60 sm:text-5xl md:text-7xl"
             :class="posterUrl ? 'lg:text-6xl xl:text-7xl' : 'lg:text-8xl'"
           >
-            {{ editionStore?.name || t('landing.hero.defaultTitle') }}
+            {{ editionStore.edition?.name || t('landing.hero.defaultTitle') }}
           </h1>
 
           <!--          &lt;!&ndash; Subtitle / Description &ndash;&gt;-->
@@ -535,7 +538,7 @@ function scrollToMap(): void {
           <!--            :class="{ 'lg:mx-0': posterUrl }"-->
           <!--          >-->
           <!--            {{-->
-          <!--              tenantStore?.shortDescription ||-->
+          <!--              tenantStore.tenant?.shortDescription ||-->
           <!--              t('landing.hero.defaultDescription')-->
           <!--            }}-->
           <!--          </p>-->
@@ -553,14 +556,14 @@ function scrollToMap(): void {
               />
               <span>{{
                 formatDateRange(
-                  editionStore?.start_date,
-                  editionStore?.end_date,
+                  editionStore.edition?.start_date,
+                  editionStore.edition?.end_date,
                   useI18n().locale.value,
                 )
               }}</span>
             </div>
             <button
-              v-if="editionStore?.location?.title"
+              v-if="editionStore.edition?.location?.title"
               type="button"
               class="group inline-flex"
               @click="scrollToMap"
@@ -569,7 +572,7 @@ function scrollToMap(): void {
                 <IconMapPin
                   class="h-5 w-5 text-primary-600 transition-transform group-hover:-translate-y-0.5 dark:text-primary-400"
                 />
-                <span>{{ editionStore.location.title }}</span>
+                <span>{{ editionStore.edition.location.title }}</span>
               </div>
             </button>
           </div>
@@ -617,7 +620,7 @@ function scrollToMap(): void {
         <div v-if="posterUrl" class="hidden shrink-0 lg:block lg:w-80 xl:w-96">
           <PosterView
             :poster-url="posterUrl"
-            :edition-name="editionStore?.name"
+            :edition-name="editionStore.edition?.name"
           />
         </div>
       </div>

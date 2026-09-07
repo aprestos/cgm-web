@@ -32,7 +32,9 @@ import paymentsService from '@/features/payments/service.ts'
 import { toast } from 'vue-sonner'
 import logger from '@/lib/logger.ts'
 import type { Order } from '@/features/orders/order.model.ts'
-import { getTenantEmail } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+
+const tenantStore = useTenantStore()
 
 const { t, locale } = useI18n()
 
@@ -231,7 +233,7 @@ function handleStripeReturn(): void {
         paymentIssue.value = {
           type: 'warning',
           description: t('landing.checkout.payment.confirmationTimeout', {
-            email: getTenantEmail(),
+            email: tenantStore.getEmail(),
           }),
         }
         isConfirmingPayment.value = false

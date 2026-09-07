@@ -5,16 +5,18 @@
         <img
           class="dark:hidden mx-auto h-16 w-auto"
           :src="
-            tenantStore?.logos?.['long'] || '@/assets/logo-horizontal-color.svg'
+            tenantStore.tenant?.logos?.['long'] ||
+            '@/assets/logo-horizontal-color.svg'
           "
-          :alt="tenantStore?.name || 'congrem.io'"
+          :alt="tenantStore.tenant?.name || 'congrem.io'"
         />
         <img
           class="hidden dark:block mx-auto h-16 w-auto"
           :src="
-            tenantStore?.logos?.['long'] || '@/assets/logo-horizontal-white.svg'
+            tenantStore.tenant?.logos?.['long'] ||
+            '@/assets/logo-horizontal-white.svg'
           "
-          :alt="tenantStore?.name || 'congrem.io'"
+          :alt="tenantStore.tenant?.name || 'congrem.io'"
         />
       </div>
     </div>
@@ -34,5 +36,7 @@
 
 <script lang="ts" setup>
 // Auth template component - provides common layout structure for all auth pages
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+
+const tenantStore = useTenantStore()
 </script>

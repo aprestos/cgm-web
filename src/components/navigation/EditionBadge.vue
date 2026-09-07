@@ -2,10 +2,13 @@
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { IconCalendarEvent } from '@tabler/icons-vue'
-import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { formatDateRange } from '@/utils/date.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 /**
  * Which event edition the dashboard is currently showing: the tenant mark, the
@@ -17,20 +20,20 @@ withDefaults(defineProps<{ size?: 'sm' | 'md' }>(), { size: 'md' })
 
 const { locale } = useI18n()
 
-const logo = computed(() => getTenantLogo(LogoType.square))
+const logo = computed(() => tenantStore.getLogo(LogoType.square))
 
 // Before an edition is loaded (or on a tenant that has none) the organization
 // name still names the place the user is in.
 const title = computed(
-  () => editionStore.value?.name || tenantStore.value?.name || '',
+  () => editionStore.edition?.name || tenantStore.tenant?.name || '',
 )
 
 // formatDateRange answers '-' when either end is missing; an empty line reads
 // better than a stray dash under the name.
 const dateRange = computed(() => {
   const range = formatDateRange(
-    editionStore.value?.start_date,
-    editionStore.value?.end_date,
+    editionStore.edition?.start_date,
+    editionStore.edition?.end_date,
     locale.value,
   )
   return range === '-' ? '' : range

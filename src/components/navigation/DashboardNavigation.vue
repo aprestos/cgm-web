@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useRoute } from 'vue-router'
 import type { User } from '@/features/auth/user.model.ts'
 import {
@@ -18,6 +18,8 @@ import type { NavigationItem } from '@/navigation/navigation.model.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { useHideOnScroll } from '@/composables/useHideOnScroll'
+
+const tenantStore = useTenantStore()
 
 defineProps<{
   topNavigation: NavigationItem[]
@@ -99,13 +101,13 @@ const isHidden = useHideOnScroll()
                 <div class="relative flex h-16 shrink-0 items-center">
                   <img
                     class="h-8 w-auto dark:hidden"
-                    :src="getTenantLogo(LogoType.long)"
-                    :alt="tenantStore?.name"
+                    :src="tenantStore.getLogo(LogoType.long)"
+                    :alt="tenantStore.tenant?.name"
                   />
                   <img
                     class="h-8 w-auto not-dark:hidden"
-                    :src="getTenantLogo(LogoType.long)"
-                    alt="tenantStore?.name"
+                    :src="tenantStore.getLogo(LogoType.long)"
+                    alt="tenantStore.tenant?.name"
                   />
                 </div>
                 <SidebarNavLinks

@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { settingsStore } from '@/features/settings/useSettings.store'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 // Components
 import HeaderComponent from './HeaderComponent.vue'
 import CartDrawer from '@/views/landing/CartDrawer.vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const editionStore = useEditionStore()
+const settingsStore = useSettingsStore()
 
 // Stores
-const settings = computed(() => settingsStore.value)
+const settings = computed(() => settingsStore.settings)
 
 // Data
 const SECTION_ACTIVE_OFFSET = 200
@@ -19,7 +22,7 @@ const isTicketsEnabled = computed(
   () => settings.value?.tickets?.enabled ?? false,
 )
 const hasScheduleImages = computed(
-  () => (editionStore.value?.schedule_images?.length ?? 0) > 0,
+  () => (editionStore.edition?.schedule_images?.length ?? 0) > 0,
 )
 
 // Navigation sections (dynamic based on enabled features)
@@ -34,7 +37,7 @@ const navigationSections = computed(() => {
     sections.push('tickets')
   }
 
-  if (editionStore.value?.location?.url) {
+  if (editionStore.edition?.location?.url) {
     sections.push('location')
   }
 

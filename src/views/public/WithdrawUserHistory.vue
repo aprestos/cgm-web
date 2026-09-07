@@ -7,7 +7,9 @@ import { DateTime } from 'luxon'
 import { IconCalendar, IconCircleCheck } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
 import WithdrawTimeline from './WithdrawTimeline.vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const editionStore = useEditionStore()
 
 const { t } = useI18n()
 
@@ -31,7 +33,7 @@ const displayIsLoading = computed(() => {
 })
 
 const currentEventWithdraws = computed(() => {
-  const editionId = editionStore.value?.id
+  const editionId = editionStore.edition?.id
 
   if (props.withdraws && editionId && props.withdraws.has(editionId)) {
     return props.withdraws.get(editionId) || []
@@ -136,7 +138,7 @@ function getDurationHours(
         <!-- Tenant Header -->
         <div class="mb-8">
           <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
-            {{ editionStore?.name }}
+            {{ editionStore.edition?.name }}
           </h3>
 
           <!-- Edition Groups -->

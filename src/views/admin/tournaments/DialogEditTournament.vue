@@ -40,10 +40,13 @@ import {
 import type { TournamentParticipant } from '@/features/tournaments/participant.model.ts'
 import { resolveLocalized } from '@/utils/localizedString.ts'
 import logger from '@/lib/logger'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import tournamentService from '@/features/tournaments/events/service.ts'
 import tournamentParticipantsService from '@/features/tournaments/participants/service.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -132,7 +135,7 @@ const image = computed<string | undefined>(
 )
 
 const coverFolder = computed((): string => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   return tenantId
     ? `tenants/${tenantId}/tournaments`
     : 'tenants/default/tournaments'
@@ -233,13 +236,14 @@ const persist = async (
   section: Section,
   patch: UpdateTournament,
 ): Promise<Tournament | null> => {
-  if (!current.value || !tenantStore.value || !editionStore.value) return null
+  if (!current.value || !tenantStore.tenant || !editionStore.edition)
+    return null
 
   saving.value = section
   try {
     const updated = await tournamentService.update(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       current.value.id,
       patch,
     )
@@ -340,15 +344,15 @@ const saveAbout = async (): Promise<void> => {
 }
 
 async function loadParticipants(): Promise<void> {
-  if (!current.value || !tenantStore.value || !editionStore.value) return
+  if (!current.value || !tenantStore.tenant || !editionStore.edition) return
 
   isLoadingParticipants.value = true
   participantsFailed.value = false
 
   try {
     participants.value = await tournamentParticipantsService.getAllByTournament(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       current.value.id,
     )
   } catch (error) {

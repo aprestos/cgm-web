@@ -14,10 +14,12 @@ import { useRoute, useRouter } from 'vue-router'
 import { RouteNames } from '@/router/routeNames'
 import { useCart } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
-import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
+
+const tenantStore = useTenantStore()
 
 interface Props {
   sections?: string[]
@@ -218,8 +220,10 @@ onUnmounted(() => {
       >
         <div class="flex shrink-0 items-center overflow-hidden">
           <img
-            :src="getTenantLogo(LogoType.long)"
-            :alt="tenantStore?.name || t('landing.header.logoAltFallback')"
+            :src="tenantStore.getLogo(LogoType.long)"
+            :alt="
+              tenantStore.tenant?.name || t('landing.header.logoAltFallback')
+            "
             class="h-10 w-auto max-w-40 object-contain"
           />
         </div>

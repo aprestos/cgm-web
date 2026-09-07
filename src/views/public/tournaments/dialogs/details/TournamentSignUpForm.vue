@@ -23,11 +23,15 @@ import {
 } from '@/features/tournaments/participant.model.ts'
 import type { TicketIssuance } from '@/features/tickets/ticket.model.ts'
 import ticketIssuanceService from '@/features/tickets/issuance.service.ts'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { slotsLeft as remainingSlots } from '@/views/public/tournaments/tournaments.filters.ts'
 import logger from '@/lib/logger.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
+const settingsStore = useSettingsStore()
 
 // One staged sign-up. With tickets enabled the name comes from the picked
 // issuance, otherwise it is typed by hand.
@@ -80,7 +84,7 @@ const { r$ } = useRegle(draft, {
 })
 
 const ticketsEnabled = computed<boolean>(
-  () => settingsStore.value?.tickets?.enabled ?? false,
+  () => settingsStore.settings?.tickets?.enabled ?? false,
 )
 
 const issuances = ref<TicketIssuance[]>([])
@@ -203,13 +207,13 @@ const loadIssuances = async (): Promise<void> => {
   issuancesError.value = false
 
   if (!ticketsEnabled.value) return
-  if (!props.user || !tenantStore.value || !editionStore.value) return
+  if (!props.user || !tenantStore.tenant || !editionStore.edition) return
 
   loadingIssuances.value = true
   try {
     issuances.value = await ticketIssuanceService.getByUser(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       props.user.id,
     )
   } catch (loadError) {

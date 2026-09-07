@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { editionStore } from '@/features/events/edition.store'
-import { settingsStore } from '@/features/settings/useSettings.store.js'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 import { IconBooks, IconTicket, IconUsers } from '@tabler/icons-vue'
 import { RouteNames } from '@/router/routeNames.js'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useI18n } from 'vue-i18n'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { libraryService } from '@/features/library/games/service.ts'
@@ -25,12 +25,16 @@ import TournamentsView from './TournamentsView.vue'
 import type { Schedule } from '@/features/events/edition.model.ts'
 import tournamentService from '@/features/tournaments/events/service.ts'
 
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
+const settingsStore = useSettingsStore()
+
 const { t } = useI18n()
 
 // Stores
-const edition = computed(() => editionStore.value)
-const tenant = computed(() => tenantStore.value)
-const settings = computed(() => settingsStore.value)
+const edition = computed(() => editionStore.edition)
+const tenant = computed(() => tenantStore.tenant)
+const settings = computed(() => settingsStore.settings)
 
 // Convention gallery images (tenant images take priority, fallback to defaults)
 const galleryImages = computed(() => {

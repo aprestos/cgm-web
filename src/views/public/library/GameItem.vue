@@ -10,7 +10,9 @@ import {
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { HandRaisedIcon } from '@heroicons/vue/24/outline'
 import CButton from '@/components/CButton.vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const editionStore = useEditionStore()
 
 interface Props {
   game?: LibraryGame
@@ -73,7 +75,7 @@ const imageHeightClasses = computed(() => {
 
 // Check if convention is currently happening
 const isConventionHappening = computed(() => {
-  const edition = editionStore.value
+  const edition = editionStore.edition
   if (!edition?.start_date || !edition?.end_date) {
     return false
   }

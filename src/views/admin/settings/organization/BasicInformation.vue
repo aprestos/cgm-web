@@ -45,8 +45,10 @@ import { toast } from 'vue-sonner'
 import CInput from '@/components/CInput.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import tenantService from '@/features/tenant/service.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
+
+const tenantStore = useTenantStore()
 
 export interface BasicInformationForm {
   name: string
@@ -91,10 +93,10 @@ const isSaving = ref(false)
 
 // Initialize form data with current tenant data
 const initializeFormData = (): void => {
-  if (tenantStore.value) {
-    formData.value.name = tenantStore.value.name || ''
-    formData.value.email = tenantStore.value.email || ''
-    formData.value.shortDescription = tenantStore.value.shortDescription || ''
+  if (tenantStore.tenant) {
+    formData.value.name = tenantStore.tenant.name || ''
+    formData.value.email = tenantStore.tenant.email || ''
+    formData.value.shortDescription = tenantStore.tenant.shortDescription || ''
 
     // Store initial values
     initialValues.value = {
@@ -107,7 +109,7 @@ const initializeFormData = (): void => {
 
 // Initialize form when component mounts or tenant changes
 watchEffect((): void => {
-  if (tenantStore.value) {
+  if (tenantStore.tenant) {
     initializeFormData()
   }
 })
@@ -124,7 +126,7 @@ const saveTenant = async (): Promise<void> => {
       return
     }
 
-    const tenantId = tenantStore.value?.id
+    const tenantId = tenantStore.tenant?.id
     if (!tenantId) {
       logger.error('No tenant ID found')
       toast.error('No tenant ID found. Please refresh and try again.')
@@ -161,8 +163,8 @@ const saveTenant = async (): Promise<void> => {
       })
 
       // Update the tenant store
-      if (tenantStore.value) {
-        tenantStore.value = { ...tenantStore.value, ...updatedTenant }
+      if (tenantStore.tenant) {
+        tenantStore.tenant = { ...tenantStore.tenant, ...updatedTenant }
       }
 
       // Update initial values after successful save

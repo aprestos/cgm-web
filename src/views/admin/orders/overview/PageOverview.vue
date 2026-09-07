@@ -6,8 +6,8 @@ import type {
   TicketsStats,
 } from '@/features/orders/service'
 import orderService from '@/features/orders/service'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
 import OrdersStatsGrid from './OrdersStatsGrid.vue'
@@ -20,6 +20,9 @@ import type {
 import PageHeader from '@/components/PageHeader.vue'
 import TicketsDistributionCard from '@/views/admin/orders/overview/TicketsDistributionCard.vue'
 import DialogCreateOrder from '@/views/admin/orders/DialogCreateOrder.vue'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t } = useI18n()
 
@@ -67,19 +70,19 @@ function onPeriodChange(period: Period): void {
 }
 
 async function loadStats(params: PeriodParams): Promise<void> {
-  if (!tenantStore.value?.id || !editionStore.value?.id) return
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
   const [ordersOverTime, stats, distribution] = await Promise.allSettled([
     orderService.getOrdersOverTime(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       params.from,
       params.to,
       params.granularity,
     ),
-    orderService.getOrdersCount(tenantStore.value.id),
+    orderService.getOrdersCount(tenantStore.tenant.id),
     orderService.getTicketsDistribution(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
     ),
   ])
 
@@ -108,11 +111,11 @@ async function loadStats(params: PeriodParams): Promise<void> {
 }
 
 async function loadRecentOrders(): Promise<void> {
-  if (!tenantStore.value?.id) return
+  if (!tenantStore.tenant?.id) return
   recentOrdersLoading.value = true
   try {
     recentOrders.value = await orderService.getOrders(
-      tenantStore.value.id,
+      tenantStore.tenant.id,
       emailSearch.value.trim() || undefined,
     )
   } catch (error) {

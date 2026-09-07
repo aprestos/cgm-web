@@ -1,6 +1,6 @@
 import type { Access, TenantAccess } from '@/features/auth/access.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { User } from '@/features/auth/user.model.ts'
 import logger from '@/lib/logger.ts'
 
@@ -17,7 +17,7 @@ export const authService = {
       options: {
         data: {
           name,
-          tenant_id: tenantStore.value?.id,
+          tenant_id: useTenantStore().tenant?.id,
         },
       },
     })
@@ -44,7 +44,7 @@ export const authService = {
       options: {
         shouldCreateUser: true,
         data: {
-          tenant_name: tenantStore.value?.name,
+          tenant_name: useTenantStore().tenant?.name,
         },
       },
     })
@@ -79,7 +79,7 @@ export const authService = {
       return null
     }
 
-    const tenantId: string = tenantStore.value?.id as string
+    const tenantId: string = useTenantStore().tenant?.id as string
     let access: TenantAccess | undefined = undefined
     if (data.claims?.access) {
       access = (data.claims.access as Access)[tenantId]
@@ -103,7 +103,7 @@ export const authService = {
     await supabase.functions.invoke('user-tenant', {
       body: {
         user_id: userId,
-        tenant_id: tenantStore.value?.id,
+        tenant_id: useTenantStore().tenant?.id,
       },
       method: 'POST',
     })

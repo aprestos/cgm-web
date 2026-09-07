@@ -5,13 +5,15 @@ import { IconShoppingBagPlus } from '@tabler/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import CSearchInput from '@/components/CSearchInput.vue'
 import orderService from '@/features/orders/service'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
 import OrdersDataTable from './OrdersDataTable.vue'
 import DialogOrderDetails from './DialogOrderDetails.vue'
 import DialogCreateOrder from '../DialogCreateOrder.vue'
 import type { RecentOrder } from '@/views/admin/orders/overview/orders.types.ts'
+
+const tenantStore = useTenantStore()
 
 const { t } = useI18n()
 const route = useRoute()
@@ -48,11 +50,11 @@ const recentOrders = ref<RecentOrder[]>([])
 const emailSearch = ref('')
 
 async function loadRecentOrders(): Promise<void> {
-  if (!tenantStore.value?.id) return
+  if (!tenantStore.tenant?.id) return
   recentOrdersLoading.value = true
   try {
     recentOrders.value = await orderService.getOrders(
-      tenantStore.value.id,
+      tenantStore.tenant.id,
       emailSearch.value.trim() || undefined,
     )
   } catch (error) {

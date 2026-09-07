@@ -1,8 +1,9 @@
+import { defineStore, storeToRefs } from 'pinia'
 import { ref, computed, type ComputedRef } from 'vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { cartService } from '@/features/cart/service.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { ticketService } from '@/features/tickets/service.ts'
 
@@ -27,16 +28,6 @@ export interface CartItem {
   quantity: number
 }
 
-const items = ref<CartItem[]>([])
-const cartId = ref<string | null>(null)
-const syncStatus = ref<CartSyncStatus>('idle')
-const lastSyncError = ref<string | null>(null)
-
-let isHydrating = false
-let isInitialized = false
-let pendingSyncTimer: ReturnType<typeof setTimeout> | null = null
-let flushPromise: Promise<void> | null = null
-
 interface UseCartReturn {
   cartItems: ComputedRef<CartItem[]>
   totalItems: ComputedRef<number>
@@ -53,279 +44,285 @@ interface UseCartReturn {
 }
 
 /**
- * Persists the current in-memory cart snapshot to localStorage.
- * This keeps user actions resilient across refreshes and offline transitions.
+ * The visitor's cart, its local snapshot and its background sync.
+ *
+ * A Pinia store rather than module-level refs so the cart, its timers and its
+ * in-flight sync belong to one app instance. On a server module state is
+ * shared by every request handled at once, which would let one visitor's cart
+ * be served to another.
  */
-function persistLocally(): void {
-  if (typeof window === 'undefined') {
-    return
-  }
+export const useCartStore = defineStore('cart', () => {
+  const tenantStore = useTenantStore()
 
-  const payload: PersistedCart = {
-    cartId: cartId.value,
-    items: items.value,
-  }
+  const items = ref<CartItem[]>([])
+  const cartId = ref<string | null>(null)
+  const syncStatus = ref<CartSyncStatus>('idle')
+  const lastSyncError = ref<string | null>(null)
 
-  localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload))
-}
+  let isHydrating = false
+  let isInitialized = false
+  let pendingSyncTimer: ReturnType<typeof setTimeout> | null = null
+  let flushPromise: Promise<void> | null = null
 
-/**
- * Restores the latest cart snapshot from localStorage when available.
- * Invalid payloads are discarded to avoid keeping corrupted state.
- */
-function loadLocalCart(): void {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  const raw = localStorage.getItem(LOCAL_STORAGE_KEY)
-  if (!raw) {
-    return
-  }
-
-  try {
-    const parsed = JSON.parse(raw) as PersistedCart
-    cartId.value = parsed.cartId
-    items.value = parsed.items
-  } catch (error) {
-    logger.warn('Unable to parse local cart cache, clearing cache', {
-      error,
-    })
-    localStorage.removeItem(LOCAL_STORAGE_KEY)
-  }
-}
-
-/**
- * Resolves tenant and authenticated owner identifiers required for remote sync.
- * Returns null when sync context is not available yet.
- */
-async function resolveTenantAndOwner(): Promise<{
-  tenantId: string
-  ownerId: string
-} | null> {
-  const tenantId = tenantStore.value?.id
-  if (!tenantId) {
-    return null
-  }
-
-  const { data, error } = await supabase.auth.getUser()
-  if (error || !data.user?.id) {
-    return null
-  }
-
-  return {
-    tenantId,
-    ownerId: data.user.id,
-  }
-}
-
-/**
- * Queues a debounced background synchronization after local optimistic mutations.
- */
-function queueSync(): void {
-  if (isHydrating) {
-    return
-  }
-
-  persistLocally()
-
-  if (pendingSyncTimer) {
-    clearTimeout(pendingSyncTimer)
-  }
-
-  pendingSyncTimer = setTimeout(() => {
-    void flushSync()
-  }, SYNC_DEBOUNCE_MS)
-}
-
-/**
- * Saves the current cart snapshot to the backend using a single batched write.
- */
-async function saveSnapshot(): Promise<void> {
-  const context = await resolveTenantAndOwner()
-  if (!context) {
-    return
-  }
-
-  const remoteCart = await cartService.getOrCreate(
-    context.tenantId,
-    context.ownerId,
-  )
-
-  cartId.value = remoteCart.id
-
-  await cartService.saveItems({
-    tenantId: context.tenantId,
-    cartId: remoteCart.id,
-    items: items.value.map((item) => ({
-      ticketId: item.ticket.id,
-      quantity: item.quantity,
-    })),
-  })
-
-  persistLocally()
-}
-
-/**
- * Flushes pending cart changes to the backend with retry/backoff.
- * This is used both by debounce and explicit lifecycle/checkout flushes.
- */
-async function flushSync(): Promise<void> {
-  if (flushPromise) {
-    return flushPromise
-  }
-
-  if (pendingSyncTimer) {
-    clearTimeout(pendingSyncTimer)
-    pendingSyncTimer = null
-  }
-
-  flushPromise = (async (): Promise<void> => {
-    syncStatus.value = 'saving'
-    lastSyncError.value = null
-
-    try {
-      await saveSnapshot()
-      syncStatus.value = 'saved'
+  /**
+   * Persists the current in-memory cart snapshot to localStorage.
+   * This keeps user actions resilient across refreshes and offline transitions.
+   */
+  function persistLocally(): void {
+    if (typeof window === 'undefined') {
       return
-    } catch (initialError) {
-      for (const delay of SYNC_RETRY_DELAYS_MS) {
-        await new Promise((resolve) => setTimeout(resolve, delay))
-        try {
-          await saveSnapshot()
-          syncStatus.value = 'saved'
-          return
-        } catch {
-          // Keep retrying with backoff.
-        }
-      }
-
-      syncStatus.value = 'error'
-      lastSyncError.value = 'Unable to sync cart changes right now.'
-      logger.error('Cart sync failed after retries', {
-        error: initialError,
-      })
     }
-  })()
 
-  try {
-    await flushPromise
-  } finally {
-    flushPromise = null
-  }
-}
-
-/**
- * Hydrates cart items from the backend when local state is empty.
- * Local data takes precedence to preserve in-progress user actions.
- */
-async function hydrateFromRemote(): Promise<void> {
-  const context = await resolveTenantAndOwner()
-  if (!context) {
-    return
-  }
-
-  const remoteCart = await cartService.getOrCreate(
-    context.tenantId,
-    context.ownerId,
-  )
-
-  cartId.value = remoteCart.id
-
-  if (items.value.length > 0 || remoteCart.items.length === 0) {
-    persistLocally()
-    return
-  }
-
-  const loadedItems = await Promise.all(
-    remoteCart.items.map(async (item): Promise<CartItem | null> => {
-      const ticket = await ticketService.getById(item.ticketId)
-      if (!ticket) {
-        return null
-      }
-
-      return {
-        ticket,
-        quantity: item.quantity,
-      }
-    }),
-  )
-
-  items.value = loadedItems.filter((item): item is CartItem => item !== null)
-  persistLocally()
-}
-
-/**
- * Installs best-effort flush hooks for tab hide and page unload events.
- */
-function installLifecycleSync(): void {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.addEventListener('beforeunload', () => {
-    void flushSync()
-  })
-
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-      void flushSync()
+    const payload: PersistedCart = {
+      cartId: cartId.value,
+      items: items.value,
     }
-  })
-}
 
-/**
- * Performs one-time cart store bootstrap:
- * - load local snapshot
- * - install lifecycle hooks
- * - try remote hydration
- */
-function initializeCartStore(): void {
-  if (isInitialized) {
-    return
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(payload))
   }
 
-  isInitialized = true
-  isHydrating = true
+  /**
+   * Restores the latest cart snapshot from localStorage when available.
+   * Invalid payloads are discarded to avoid keeping corrupted state.
+   */
+  function loadLocalCart(): void {
+    if (typeof window === 'undefined') {
+      return
+    }
 
-  loadLocalCart()
-  installLifecycleSync()
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (!raw) {
+      return
+    }
 
-  void (async (): Promise<void> => {
     try {
-      await hydrateFromRemote()
-      syncStatus.value = 'idle'
+      const parsed = JSON.parse(raw) as PersistedCart
+      cartId.value = parsed.cartId
+      items.value = parsed.items
     } catch (error) {
-      logger.warn('Unable to hydrate cart from remote, using local cart only', {
+      logger.warn('Unable to parse local cart cache, clearing cache', {
         error,
       })
-    } finally {
-      isHydrating = false
+      localStorage.removeItem(LOCAL_STORAGE_KEY)
     }
-  })()
-}
+  }
 
-/**
- * Exposes the cart API with optimistic mutations and background synchronization.
- */
-export function useCart(): UseCartReturn {
-  initializeCartStore()
+  /**
+   * Resolves tenant and authenticated owner identifiers required for remote sync.
+   * Returns null when sync context is not available yet.
+   */
+  async function resolveTenantAndOwner(): Promise<{
+    tenantId: string
+    ownerId: string
+  } | null> {
+    const tenantId = tenantStore.tenant?.id
+    if (!tenantId) {
+      return null
+    }
 
-  const cartItems = computed(() => items.value)
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data.user?.id) {
+      return null
+    }
 
-  const totalItems = computed(() =>
-    items.value.reduce((sum, item) => sum + item.quantity, 0),
-  )
+    return {
+      tenantId,
+      ownerId: data.user.id,
+    }
+  }
 
-  const totalPrice = computed(() =>
-    items.value.reduce(
-      (sum, item) => sum + item.ticket.price * item.quantity,
-      0,
-    ),
-  )
+  /**
+   * Queues a debounced background synchronization after local optimistic mutations.
+   */
+  function queueSync(): void {
+    if (isHydrating) {
+      return
+    }
 
-  const cartSyncStatus = computed(() => syncStatus.value)
-  const cartSyncError = computed(() => lastSyncError.value)
+    persistLocally()
+
+    if (pendingSyncTimer) {
+      clearTimeout(pendingSyncTimer)
+    }
+
+    pendingSyncTimer = setTimeout(() => {
+      void flushSync()
+    }, SYNC_DEBOUNCE_MS)
+  }
+
+  /**
+   * Saves the current cart snapshot to the backend using a single batched write.
+   */
+  async function saveSnapshot(): Promise<void> {
+    const context = await resolveTenantAndOwner()
+    if (!context) {
+      return
+    }
+
+    const remoteCart = await cartService.getOrCreate(
+      context.tenantId,
+      context.ownerId,
+    )
+
+    cartId.value = remoteCart.id
+
+    await cartService.saveItems({
+      tenantId: context.tenantId,
+      cartId: remoteCart.id,
+      items: items.value.map((item) => ({
+        ticketId: item.ticket.id,
+        quantity: item.quantity,
+      })),
+    })
+
+    persistLocally()
+  }
+
+  /**
+   * Flushes pending cart changes to the backend with retry/backoff.
+   * This is used both by debounce and explicit lifecycle/checkout flushes.
+   */
+  async function flushSync(): Promise<void> {
+    if (flushPromise) {
+      return flushPromise
+    }
+
+    if (pendingSyncTimer) {
+      clearTimeout(pendingSyncTimer)
+      pendingSyncTimer = null
+    }
+
+    flushPromise = (async (): Promise<void> => {
+      syncStatus.value = 'saving'
+      lastSyncError.value = null
+
+      try {
+        await saveSnapshot()
+        syncStatus.value = 'saved'
+        return
+      } catch (initialError) {
+        for (const delay of SYNC_RETRY_DELAYS_MS) {
+          await new Promise((resolve) => setTimeout(resolve, delay))
+          try {
+            await saveSnapshot()
+            syncStatus.value = 'saved'
+            return
+          } catch {
+            // Keep retrying with backoff.
+          }
+        }
+
+        syncStatus.value = 'error'
+        lastSyncError.value = 'Unable to sync cart changes right now.'
+        logger.error('Cart sync failed after retries', {
+          error: initialError,
+        })
+      }
+    })()
+
+    try {
+      await flushPromise
+    } finally {
+      flushPromise = null
+    }
+  }
+
+  /**
+   * Hydrates cart items from the backend when local state is empty.
+   * Local data takes precedence to preserve in-progress user actions.
+   */
+  async function hydrateFromRemote(): Promise<void> {
+    const context = await resolveTenantAndOwner()
+    if (!context) {
+      return
+    }
+
+    const remoteCart = await cartService.getOrCreate(
+      context.tenantId,
+      context.ownerId,
+    )
+
+    cartId.value = remoteCart.id
+
+    if (items.value.length > 0 || remoteCart.items.length === 0) {
+      persistLocally()
+      return
+    }
+
+    const loadedItems = await Promise.all(
+      remoteCart.items.map(async (item): Promise<CartItem | null> => {
+        const ticket = await ticketService.getById(item.ticketId)
+        if (!ticket) {
+          return null
+        }
+
+        return {
+          ticket,
+          quantity: item.quantity,
+        }
+      }),
+    )
+
+    items.value = loadedItems.filter((item): item is CartItem => item !== null)
+    persistLocally()
+  }
+
+  /**
+   * Installs best-effort flush hooks for tab hide and page unload events.
+   */
+  function installLifecycleSync(): void {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.addEventListener('beforeunload', () => {
+      void flushSync()
+    })
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        void flushSync()
+      }
+    })
+  }
+
+  /**
+   * Performs one-time cart store bootstrap:
+   * - load local snapshot
+   * - install lifecycle hooks
+   * - try remote hydration
+   *
+   * Browser-only: the snapshot lives in localStorage and the hooks are window
+   * events, so on a server there is nothing here to do and nothing to leak
+   * into the next request.
+   */
+  function initialize(): void {
+    if (isInitialized || typeof window === 'undefined') {
+      return
+    }
+
+    isInitialized = true
+    isHydrating = true
+
+    loadLocalCart()
+    installLifecycleSync()
+
+    void (async (): Promise<void> => {
+      try {
+        await hydrateFromRemote()
+        syncStatus.value = 'idle'
+      } catch (error) {
+        logger.warn(
+          'Unable to hydrate cart from remote, using local cart only',
+          {
+            error,
+          },
+        )
+      } finally {
+        isHydrating = false
+      }
+    })()
+  }
 
   /** Returns the current quantity for a ticket in cart. */
   function getQuantity(ticketId: number): number {
@@ -385,11 +382,11 @@ export function useCart(): UseCartReturn {
   }
 
   return {
-    cartItems,
-    totalItems,
-    totalPrice,
-    cartSyncStatus,
-    cartSyncError,
+    items,
+    cartId,
+    syncStatus,
+    lastSyncError,
+    initialize,
     getQuantity,
     addToCart,
     removeFromCart,
@@ -397,5 +394,49 @@ export function useCart(): UseCartReturn {
     decreaseQuantity,
     clearCart,
     flushSync,
+  }
+})
+
+/**
+ * Exposes the cart API with optimistic mutations and background synchronization.
+ *
+ * Kept as a composable over the store so callers keep destructuring a plain
+ * object of refs and handlers rather than reaching for `storeToRefs`.
+ */
+export function useCart(): UseCartReturn {
+  const store = useCartStore()
+  store.initialize()
+
+  const { items, syncStatus, lastSyncError } = storeToRefs(store)
+
+  const cartItems = computed(() => items.value)
+
+  const totalItems = computed(() =>
+    items.value.reduce((sum, item) => sum + item.quantity, 0),
+  )
+
+  const totalPrice = computed(() =>
+    items.value.reduce(
+      (sum, item) => sum + item.ticket.price * item.quantity,
+      0,
+    ),
+  )
+
+  const cartSyncStatus = computed(() => syncStatus.value)
+  const cartSyncError = computed(() => lastSyncError.value)
+
+  return {
+    cartItems,
+    totalItems,
+    totalPrice,
+    cartSyncStatus,
+    cartSyncError,
+    getQuantity: store.getQuantity,
+    addToCart: store.addToCart,
+    removeFromCart: store.removeFromCart,
+    increaseQuantity: store.increaseQuantity,
+    decreaseQuantity: store.decreaseQuantity,
+    clearCart: store.clearCart,
+    flushSync: store.flushSync,
   }
 }

@@ -1,5 +1,6 @@
 import { Logtail } from '@logtail/browser'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { getActivePinia } from 'pinia'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const isDevelopment =
   import.meta.env.VITE_ENVIRONMENT === 'development' || false
@@ -24,6 +25,16 @@ const parseLogLevel = (level: string): number => {
   return levelMap[level.toLowerCase()] ?? LogLevel.INFO
 }
 
+/**
+ * Tenant id for the log context, when there is an app to read it from.
+ *
+ * Logging must never be the thing that throws, and it is reachable from
+ * module scope and from failure paths that run before the app is installed,
+ * so no active Pinia simply means the line carries no tenant.
+ */
+const tenantId = (): string | undefined =>
+  getActivePinia() ? useTenantStore().tenant?.id : undefined
+
 const currentLogLevel = parseLogLevel(logLevel)
 
 let logtail: Logtail | undefined = undefined
@@ -45,8 +56,8 @@ class Logger {
     if (this.shouldLog(LogLevel.INFO)) {
       void logtail?.info(message, {
         context: {
-          tenant_id: tenantStore.value?.id,
-          event_id: tenantStore.value?.id,
+          tenant_id: tenantId(),
+          event_id: tenantId(),
         },
         content,
       })
@@ -60,8 +71,8 @@ class Logger {
     if (this.shouldLog(LogLevel.WARN)) {
       void logtail?.warn(message, {
         context: {
-          tenant_id: tenantStore.value?.id,
-          event_id: tenantStore.value?.id,
+          tenant_id: tenantId(),
+          event_id: tenantId(),
         },
         content,
       })
@@ -75,8 +86,8 @@ class Logger {
     if (this.shouldLog(LogLevel.ERROR)) {
       void logtail?.error(message, {
         context: {
-          tenant_id: tenantStore.value?.id,
-          event_id: tenantStore.value?.id,
+          tenant_id: tenantId(),
+          event_id: tenantId(),
         },
         content,
       })
@@ -90,8 +101,8 @@ class Logger {
     if (this.shouldLog(LogLevel.DEBUG)) {
       void logtail?.debug(message, {
         context: {
-          tenant_id: tenantStore.value?.id,
-          event_id: tenantStore.value?.id,
+          tenant_id: tenantId(),
+          event_id: tenantId(),
         },
         content,
       })

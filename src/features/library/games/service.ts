@@ -1,8 +1,8 @@
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs } from '@/utils/caseConverter.ts'
 
@@ -36,8 +36,8 @@ export const libraryService = {
         .select(
           'id,owner,notes,game:games(*),location:locations(id,name),edition_id,status,reserved_until',
         )
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
       return data ? toCamelCaseAs<LibraryGame>(data) : []
     } catch (error) {
       logger.error('Error on libraryService.get()', { error })
@@ -67,8 +67,8 @@ export const libraryService = {
     notes?: string,
   ): Promise<void> {
     const { error } = await supabase.from('library_games').insert({
-      tenant_id: tenantStore.value?.id,
-      edition_id: editionStore.value?.id,
+      tenant_id: useTenantStore().tenant?.id,
+      edition_id: useEditionStore().edition?.id,
       game_id: gameId,
       location_id: locationId,
       status,
@@ -222,8 +222,8 @@ export const libraryService = {
     const { data, error } = await supabase
       .from('library_games')
       .select('*')
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
       .or(
         `game_name.ilike.%${query}%,owner.ilike.%${query}%,notes.ilike.%${query}%`,
       )

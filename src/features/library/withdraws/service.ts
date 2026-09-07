@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 export interface LibraryWithdraw {
@@ -25,8 +25,8 @@ export const libraryWithdrawService = {
         .select(
           '*,user:profiles(name),library_game:library_games(game:games(name,year,image))',
         )
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
 
       return result.data as LibraryWithdraw[]
     } catch (error) {
@@ -37,8 +37,8 @@ export const libraryWithdrawService = {
 
   async create(libraryGameId: number, userId: string): Promise<void> {
     const { error } = await supabase.from('library_withdraws').insert({
-      tenant_id: tenantStore.value?.id,
-      edition_id: editionStore.value?.id,
+      tenant_id: useTenantStore().tenant?.id,
+      edition_id: useEditionStore().edition?.id,
       library_game_id: libraryGameId,
       started_at: new Date().toISOString(),
       user_id: userId,
@@ -57,8 +57,8 @@ export const libraryWithdrawService = {
         ended_at: new Date().toISOString(),
       })
       .eq('library_game_id', libraryGameId)
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
       .is('ended_at', null)
 
     if (error) {
@@ -74,8 +74,8 @@ export const libraryWithdrawService = {
         .from('library_withdraws')
         .select('*,user:profiles(name)')
         .eq('library_game_id', libraryGameId)
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
         .is('ended_at', null)
         .order('started_at', { ascending: false })
         .single<LibraryWithdraw>()
@@ -92,8 +92,8 @@ export const libraryWithdrawService = {
       const result = await supabase
         .from('library_withdraws')
         .select('*')
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
         .is('ended_at', null)
         .order('started_at', { ascending: false })
 
@@ -110,8 +110,8 @@ export const libraryWithdrawService = {
         .from('library_withdraws')
         .select('*', { count: 'exact', head: true })
         .eq('library_game_id', libraryGameId)
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
 
       return result.count || 0
     } catch (error) {
@@ -128,7 +128,7 @@ export const libraryWithdrawService = {
           '*,library_game:library_games(game:games(name,year,image)),edition:editions(name)',
         )
         .eq('user_id', userId)
-        .eq('tenant_id', tenantStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
         .order('started_at', { ascending: false })
 
       return result.data as LibraryWithdraw[]
@@ -143,8 +143,8 @@ export const libraryWithdrawService = {
       .from('library_withdraws')
       .select('*,library_game:library_games(game:games(name,year,image))')
       .eq('library_game_id', libraryGameId)
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
       .order('started_at', { ascending: false })
       .overrideTypes<LibraryWithdraw[]>()
 

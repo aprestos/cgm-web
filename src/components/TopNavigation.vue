@@ -12,11 +12,11 @@
           <div class="flex flex-1">
             <RouterLink :to="{ name: RouteNames.landing.home }">
               <span class="sr-only">{{
-                tenantStore?.name || 'Your Company'
+                tenantStore.tenant?.name || 'Your Company'
               }}</span>
               <!-- Logo SkeletonLoader -->
               <SkeletonLoader
-                v-if="!getTenantLogo(LogoType.long)"
+                v-if="!tenantStore.getLogo(LogoType.long)"
                 class="h-12 w-auto"
               />
               <!-- Actual Logo -->
@@ -24,9 +24,10 @@
                 v-else
                 class="h-12 w-auto"
                 :src="
-                  getTenantLogo(LogoType.long) || '@/assets/logoipsum-381.svg'
+                  tenantStore.getLogo(LogoType.long) ||
+                  '@/assets/logoipsum-381.svg'
                 "
-                :alt="tenantStore?.name + ' logo'"
+                :alt="tenantStore.tenant?.name + ' logo'"
               />
             </RouterLink>
           </div>
@@ -197,15 +198,18 @@ import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 import { authService } from '@/features/auth/service.ts'
-import { getTenantLogo, tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import { RouteNames } from '@/router/routeNames'
 import type { User } from '@/features/auth/user.model.ts'
 import LanguageSwitcher from '@/components/LanguageSwitcher.vue'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 import { useRoute } from 'vue-router'
 import { useHideOnScroll } from '@/composables/useHideOnScroll'
+
+const tenantStore = useTenantStore()
+const settingsStore = useSettingsStore()
 
 const { t } = useI18n()
 
@@ -264,12 +268,12 @@ const navigation = ref<NavigationItem[]>([
   {
     name: 'public.navigation.library',
     route: RouteNames.public.library,
-    enabled: settingsStore.value?.library?.enabled ?? false,
+    enabled: settingsStore.settings?.library?.enabled ?? false,
   },
   {
     name: 'public.navigation.tournaments',
     route: RouteNames.public.tournaments,
-    enabled: settingsStore.value?.tournaments?.enabled ?? false,
+    enabled: settingsStore.settings?.tournaments?.enabled ?? false,
   },
 ])
 

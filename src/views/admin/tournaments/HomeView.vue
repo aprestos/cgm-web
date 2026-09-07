@@ -14,9 +14,12 @@ import type {
   CreateTournament,
   Tournament,
 } from '@/features/tournaments/tournament.model.ts'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import tournamentService from '@/features/tournaments/events/service.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t } = useI18n()
 
@@ -63,15 +66,15 @@ const handleParticipants = (tournament: Tournament): void => {
 }
 
 async function loadTournaments(): Promise<void> {
-  if (!tenantStore.value || !editionStore.value) {
+  if (!tenantStore.tenant || !editionStore.edition) {
     isLoading.value = false
     return
   }
 
   try {
     tournaments.value = await tournamentService.getAll(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
     )
   } catch (error) {
     console.error('Failed to load tournaments:', error)

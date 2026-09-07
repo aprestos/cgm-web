@@ -175,10 +175,13 @@ import CInputCurrency from '@/components/CInputCurrency.vue'
 import ValidationErrors from '@/components/ValidationErrors.vue'
 import ticketService from '@/features/tickets/service'
 import type { TicketDay } from '@/features/tickets/ticket.model'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import { formatDayLabel } from '@/utils/date'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t, locale } = useI18n()
 
@@ -246,13 +249,13 @@ const toggleDay = (dayId: string): void => {
 const dayLabel = (day: string): string => formatDayLabel(day, locale.value)
 
 const loadTicketDays = async (): Promise<void> => {
-  if (!tenantStore.value?.id || !editionStore.value?.id) return
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
 
   loadingDays.value = true
   try {
     ticketDays.value = await ticketService.getDays(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
     )
   } catch (error) {
     logger.error('Error loading ticket days:', { error })
@@ -300,7 +303,7 @@ const submit = async (): Promise<void> => {
     return
   }
 
-  if (!tenantStore.value?.id || !editionStore.value?.id) {
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) {
     toast.error(t('admin.tickets.missingTenantOrEdition'))
     return
   }
@@ -308,7 +311,7 @@ const submit = async (): Promise<void> => {
   isSubmitting.value = true
 
   try {
-    await ticketService.create(tenantStore.value.id, editionStore.value.id, {
+    await ticketService.create(tenantStore.tenant.id, editionStore.edition.id, {
       name: formData.value.name,
       price: parseFloat(formData.value.price) * 100, // save value in cents
       isPopular: formData.value.isPopular,

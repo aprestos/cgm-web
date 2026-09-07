@@ -26,7 +26,7 @@ import { computed, onMounted, ref } from 'vue'
 import DashboardNavigation from '@/components/navigation/DashboardNavigation.vue'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames.ts'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 import {
   IconBooks,
   IconHome,
@@ -37,6 +37,8 @@ import {
   IconTrophy,
 } from '@tabler/icons-vue'
 import type { User } from '@/features/auth/user.model.ts'
+
+const settingsStore = useSettingsStore()
 
 const userEmail = ref<string | null>(null)
 const user = ref<User | null>(null)
@@ -52,37 +54,37 @@ const navigation = computed(() => [
     id: 'library',
     routeName: RouteNames.admin.library,
     icon: IconBooks,
-    enabled: settingsStore?.value?.library?.enabled ?? false,
+    enabled: settingsStore.settings?.library?.enabled ?? false,
   },
   {
     id: 'events',
     routeName: RouteNames.admin.events,
     icon: CalendarDaysIcon,
-    enabled: settingsStore?.value?.events?.enabled ?? false,
+    enabled: settingsStore.settings?.events?.enabled ?? false,
   },
   {
     id: 'tournaments',
     routeName: RouteNames.admin.tournaments as string,
     icon: IconTrophy,
-    enabled: settingsStore?.value?.tournaments?.enabled ?? false,
+    enabled: settingsStore.settings?.tournaments?.enabled ?? false,
   },
   {
     id: 'tickets',
     routeName: RouteNames.admin.tickets.root as string,
     icon: IconTicket,
-    enabled: settingsStore?.value?.tickets?.enabled ?? false,
+    enabled: settingsStore.settings?.tickets?.enabled ?? false,
   },
   {
     id: 'orders',
     routeName: RouteNames.admin.ordersRoot,
     icon: IconShoppingBag,
-    enabled: settingsStore?.value?.tickets?.enabled ?? false,
+    enabled: settingsStore.settings?.tickets?.enabled ?? false,
   },
   {
     id: 'check-in',
     routeName: RouteNames.admin.checkIn,
     icon: IconScanTraces,
-    enabled: settingsStore?.value?.tickets?.enabled ?? false,
+    enabled: settingsStore.settings?.tickets?.enabled ?? false,
   },
 ])
 
@@ -102,7 +104,7 @@ const publicPages = computed(() => [
     id: 'library',
     routeName: RouteNames.public.library,
     initial: 'L',
-    enabled: settingsStore?.value?.library?.enabled ?? false,
+    enabled: settingsStore.settings?.library?.enabled ?? false,
   },
 ])
 

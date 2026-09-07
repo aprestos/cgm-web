@@ -23,14 +23,17 @@ import {
 } from '@/features/tournaments/tournament.model.ts'
 import { authService } from '@/features/auth/service.ts'
 import type { User } from '@/features/auth/user.model.ts'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import type {
   CreateTournamentParticipant,
   TournamentParticipant,
 } from '@/features/tournaments/participant.model.ts'
 import tournamentParticipantsService from '@/features/tournaments/participants/service.ts'
 import tournamentService from '@/features/tournaments/events/service.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t } = useI18n()
 
@@ -109,13 +112,18 @@ const handleJoinConfirm = async (
   participants: CreateTournamentParticipant[],
 ): Promise<void> => {
   const tournament = selectedTournament.value
-  if (!tenantStore.value || !editionStore.value || !tournament || !participants)
+  if (
+    !tenantStore.tenant ||
+    !editionStore.edition ||
+    !tournament ||
+    !participants
+  )
     return
 
   try {
     await tournamentParticipantsService.create(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       tournament.id,
       participants,
     )
@@ -135,17 +143,17 @@ const handleJoinConfirm = async (
 }
 
 async function loadTournaments(): Promise<void> {
-  if (!tenantStore.value || !editionStore.value) {
+  if (!tenantStore.tenant || !editionStore.edition) {
     loading.value = false
     return
   }
 
   try {
     const [allTournaments, tournamentParticipants] = await Promise.allSettled([
-      tournamentService.getAll(tenantStore.value.id, editionStore.value.id),
+      tournamentService.getAll(tenantStore.tenant.id, editionStore.edition.id),
       tournamentParticipantsService.getAllByUser(
-        tenantStore.value.id,
-        editionStore.value.id,
+        tenantStore.tenant.id,
+        editionStore.edition.id,
         currentUser.value?.id,
       ),
     ])

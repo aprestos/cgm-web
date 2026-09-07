@@ -15,10 +15,13 @@ import { shortId } from '@/utils/order.ts'
 import { formatPrice } from '@/utils/price.ts'
 import ticketIssuanceService from '@/features/tickets/issuance.service.ts'
 import { toast } from 'vue-sonner'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import CButton from '@/components/CButton.vue'
 import { formatDayLabel } from '@/utils/date.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const props = defineProps<{
   open: boolean
@@ -134,11 +137,11 @@ const buyerInitials = computed<string>(() => {
 
 const sendEmails = async (): Promise<void> => {
   try {
-    if (tenantStore?.value?.id && editionStore?.value?.id && order.value?.id) {
+    if (tenantStore.tenant?.id && editionStore.edition?.id && order.value?.id) {
       sendingTickets.value = true
       await ticketIssuanceService.sendEmails(
-        tenantStore?.value?.id,
-        editionStore?.value?.id,
+        tenantStore.tenant?.id,
+        editionStore.edition?.id,
         [order.value.id],
       )
       toast.success('Successfully sent tickets by email.')

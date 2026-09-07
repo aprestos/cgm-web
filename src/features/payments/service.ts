@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import { toSnakeCase } from '@/utils/caseConverter.ts'
 
@@ -14,8 +14,8 @@ export const paymentsService = {
       recipientEmail: string
     }>,
   ): Promise<{ url: string; sessionId: string }> {
-    const tenantId = tenantStore.value?.id
-    const editionId = editionStore.value?.id
+    const tenantId = useTenantStore().tenant?.id
+    const editionId = useEditionStore().edition?.id
 
     if (!tenantId || !editionId) {
       throw new Error('Missing tenant or edition')

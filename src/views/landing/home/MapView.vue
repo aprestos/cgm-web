@@ -2,14 +2,18 @@
 import { computed } from 'vue'
 import { IconMapPin } from '@tabler/icons-vue'
 import { useI18n } from 'vue-i18n'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const editionStore = useEditionStore()
 
 const { t, locale } = useI18n()
 
 const embedApiKey = import.meta.env.VITE_GOOGLE_MAPS_EMBED_KEY as string
 
-const locationTitle = computed(() => editionStore.value?.location?.title ?? '')
-const locationUrl = computed(() => editionStore.value?.location?.url ?? '')
+const locationTitle = computed(
+  () => editionStore.edition?.location?.title ?? '',
+)
+const locationUrl = computed(() => editionStore.edition?.location?.url ?? '')
 
 // Google only allows framing its /maps/embed endpoints. A shared place link
 // (maps.app.goo.gl/…, /maps/place/…) is refused by X-Frame-Options, so anything

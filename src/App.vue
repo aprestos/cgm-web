@@ -5,17 +5,20 @@ import { Toaster } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
 import { useHead } from '@unhead/vue'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useFavicon } from '@vueuse/core'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { ref } from 'vue'
 
-if (tenantStore?.value?.logo) {
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
+
+if (tenantStore.tenant?.logo) {
   const icon = useFavicon()
-  icon.value = tenantStore?.value?.logo
+  icon.value = tenantStore.tenant?.logo
 }
 
-const editionName = ref<string>(editionStore.value?.name ?? 'congrem')
+const editionName = ref<string>(editionStore.edition?.name ?? 'congrem')
 
 useHead({
   title: editionName,

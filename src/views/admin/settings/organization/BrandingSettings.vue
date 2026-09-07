@@ -257,13 +257,15 @@ import FilePondUploadDialog from '@/components/FilePondUploadDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import tenantService from '@/features/tenant/service.ts'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
 
+const tenantStore = useTenantStore()
+
 // Logo state
-const squareLogoUrl = ref<string | undefined>(tenantStore.value?.logos?.square)
-const longLogoUrl = ref<string | undefined>(tenantStore.value?.logos?.long)
+const squareLogoUrl = ref<string | undefined>(tenantStore.tenant?.logos?.square)
+const longLogoUrl = ref<string | undefined>(tenantStore.tenant?.logos?.long)
 const showSquareUploadDialog = ref(false)
 const showLongUploadDialog = ref(false)
 
@@ -280,22 +282,22 @@ const pendingImages = ref<UploadedFile[]>([])
 
 // Computed folder paths
 const logoFolder = computed((): string => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   return tenantId ? `tenants/${tenantId}/logos` : 'tenants/default/logos'
 })
 
 const imagesFolder = computed((): string => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   return tenantId ? `tenants/${tenantId}/images` : 'tenants/default/images'
 })
 
 // Initialize from store
 watchEffect((): void => {
-  if (tenantStore.value) {
+  if (tenantStore.tenant) {
     squareLogoUrl.value =
-      tenantStore.value.logos?.square ?? tenantStore.value.logo
-    longLogoUrl.value = tenantStore.value.logos?.long
-    uploadedImages.value = tenantStore.value.images ?? []
+      tenantStore.tenant.logos?.square ?? tenantStore.tenant.logo
+    longLogoUrl.value = tenantStore.tenant.logos?.long
+    uploadedImages.value = tenantStore.tenant.images ?? []
   }
 })
 
@@ -391,16 +393,16 @@ const discardPendingUploads = async (): Promise<void> => {
 
   clearPendingUploads()
   squareLogoUrl.value =
-    tenantStore.value?.logos?.square ?? tenantStore.value?.logo
-  longLogoUrl.value = tenantStore.value?.logos?.long
-  uploadedImages.value = tenantStore.value?.images ?? []
+    tenantStore.tenant?.logos?.square ?? tenantStore.tenant?.logo
+  longLogoUrl.value = tenantStore.tenant?.logos?.long
+  uploadedImages.value = tenantStore.tenant?.images ?? []
 
   await deleteUploadedFiles(orphans)
 }
 
 // Save branding
 const saveBranding = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId) {
     toast.error('No tenant ID found. Please refresh and try again.')
     return
@@ -410,7 +412,7 @@ const saveBranding = async (): Promise<void> => {
 
   try {
     const existingLogos: Partial<Record<LogoType, string | undefined>> =
-      tenantStore.value?.logos ?? {}
+      tenantStore.tenant?.logos ?? {}
     const updatedLogos: Partial<Record<LogoType, string | undefined>> = {
       ...existingLogos,
       ...(squareLogoUrl.value
@@ -435,8 +437,8 @@ const saveBranding = async (): Promise<void> => {
     const updatedTenant = await tenantService.updateTenant(tenantId, updates)
 
     if (updatedTenant) {
-      if (tenantStore.value) {
-        tenantStore.value = { ...tenantStore.value, ...updatedTenant }
+      if (tenantStore.tenant) {
+        tenantStore.tenant = { ...tenantStore.tenant, ...updatedTenant }
       }
       // Everything is persisted now, so there is nothing left to roll back.
       clearPendingUploads()

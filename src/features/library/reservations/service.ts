@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import logger from '@/lib/logger.ts'
 import { DateTime } from 'luxon'
@@ -26,8 +26,8 @@ export const libraryReservationService = {
       .select(
         'id,display_id,user_id,expires_at,library_game:library_games(id,game:games(name,year,image),location:locations(id,name))',
       )
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
       .eq('status', 'active')
       .eq('display_id', displayId)
       .gte('expires_at', now)
@@ -48,8 +48,8 @@ export const libraryReservationService = {
       .select(
         'id,status,display_id,expires_at,user_id,library_game:library_games(id,game:games(name,year,image),location:locations(id,name))',
       )
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
       .eq('user_id', userId)
       .eq('status', 'active')
       .gt('expires_at', now)
@@ -68,8 +68,8 @@ export const libraryReservationService = {
         .from('library_reservations')
         .select('*', { count: 'exact', head: true })
         .eq('library_game_id', libraryGameId)
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
 
       return result.count || 0
     } catch (error) {
@@ -83,8 +83,8 @@ export const libraryReservationService = {
       method: 'POST',
       body: {
         library_game_id: libraryGameId,
-        tenant_id: tenantStore.value?.id,
-        edition_id: editionStore.value?.id,
+        tenant_id: useTenantStore().tenant?.id,
+        edition_id: useEditionStore().edition?.id,
       },
     })
 
@@ -99,8 +99,8 @@ export const libraryReservationService = {
       .from('library_reservations')
       .update({ status: 'cancelled' })
       .eq('id', reservationId)
-      .eq('tenant_id', tenantStore.value?.id)
-      .eq('edition_id', editionStore.value?.id)
+      .eq('tenant_id', useTenantStore().tenant?.id)
+      .eq('edition_id', useEditionStore().edition?.id)
 
     if (error) {
       logger.error('Error cancelling reservation', { error })

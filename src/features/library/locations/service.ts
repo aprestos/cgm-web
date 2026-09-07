@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import logger from '@/lib/logger.ts'
 
@@ -10,8 +10,8 @@ export const libraryLocationService = {
       const result = await supabase
         .from('locations')
         .select('*')
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
         .ilike('name', `%${query}%`)
 
       return result.data as LibraryLocation[]
@@ -25,8 +25,8 @@ export const libraryLocationService = {
       const result = await supabase
         .from('locations')
         .select('*')
-        .eq('tenant_id', tenantStore.value?.id)
-        .eq('edition_id', editionStore.value?.id)
+        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('edition_id', useEditionStore().edition?.id)
 
       return result.data as LibraryLocation[]
     } catch (error) {
@@ -38,8 +38,8 @@ export const libraryLocationService = {
     const { data, error } = await supabase
       .from('locations')
       .insert({
-        tenant_id: tenantStore.value?.id,
-        edition_id: editionStore.value?.id,
+        tenant_id: useTenantStore().tenant?.id,
+        edition_id: useEditionStore().edition?.id,
         name,
       })
       .select()

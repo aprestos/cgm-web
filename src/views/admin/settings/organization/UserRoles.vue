@@ -127,9 +127,11 @@ import {
   ASSIGNABLE_ROLES,
   type UserRole,
 } from '@/features/roles/role.model.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { authService } from '@/features/auth/service.ts'
+
+const tenantStore = useTenantStore()
 
 const { t } = useI18n()
 
@@ -181,7 +183,7 @@ const formatDate = (value: string): string => {
 }
 
 const loadUserRoles = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId) return
 
   isLoading.value = true
@@ -196,7 +198,7 @@ const loadUserRoles = async (): Promise<void> => {
 }
 
 const loadPermissions = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId) return
 
   // NOTE: keep `isLoading` scoped to role loading to avoid races with `loadUserRoles()`
@@ -239,7 +241,7 @@ const onRoleChange = async (
   item: UserRole,
   newRole: AppRole | null,
 ): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId || !newRole || newRole === item.role) return
 
   updatingUserId.value = item.userId
@@ -272,7 +274,7 @@ const requestRemove = (item: UserRole): void => {
 }
 
 const confirmRemove = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   const target = userToRemove.value
   if (!tenantId || !target) return
 

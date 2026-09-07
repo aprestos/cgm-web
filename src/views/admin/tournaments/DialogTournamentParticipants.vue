@@ -25,8 +25,8 @@ import FormTabs, { type TabConfig } from '@/components/FormTabs.vue'
 import CCombobox from '@/components/CCombobox.vue'
 import type { Option } from '@/components/select.types'
 import logger from '@/lib/logger.ts'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { type User, userService } from '@/features/users/service.ts'
 import type { Tournament } from '@/features/tournaments/tournament.model.ts'
 import {
@@ -37,6 +37,9 @@ import {
   type TournamentParticipant,
 } from '@/features/tournaments/participant.model.ts'
 import tournamentParticipantsService from '@/features/tournaments/participants/service.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 /** Flattened for the table: sorting and searching both work off these fields. */
 interface ParticipantRow {
@@ -171,15 +174,15 @@ const columns = computed<DataTableColumn<ParticipantRow>[]>(() => [
 ])
 
 async function loadParticipants(): Promise<void> {
-  if (!props.tournament || !tenantStore.value || !editionStore.value) return
+  if (!props.tournament || !tenantStore.tenant || !editionStore.edition) return
 
   isLoading.value = true
   hasFailed.value = false
 
   try {
     participants.value = await tournamentParticipantsService.getAllByTournament(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       props.tournament.id,
     )
   } catch (error) {
@@ -246,7 +249,7 @@ async function buildParticipant(): Promise<CreateTournamentParticipant | null> {
 
 async function addParticipant(): Promise<void> {
   if (isAdding.value || isFull.value) return
-  if (!props.tournament || !tenantStore.value || !editionStore.value) return
+  if (!props.tournament || !tenantStore.tenant || !editionStore.edition) return
 
   const participant = await buildParticipant()
   if (!participant) return
@@ -270,8 +273,8 @@ async function addParticipant(): Promise<void> {
 
   try {
     await tournamentParticipantsService.create(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
       props.tournament.id,
       [participant],
     )

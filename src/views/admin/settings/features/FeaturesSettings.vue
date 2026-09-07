@@ -116,19 +116,18 @@ import {
 import FeatureCard from '@/components/FeatureCard.vue'
 import CButton from '@/components/CButton.vue'
 import FloatingActionBar from '@/components/FloatingActionBar.vue'
-import {
-  saveEnabledFeatures,
-  settingsStore,
-} from '@/features/settings/useSettings.store.ts'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 import type { Setting } from '@/features/settings/setting.model.ts'
 import { RouteNames } from '@/router/routeNames'
 import logger from '@/lib/logger.ts'
+
+const settingsStore = useSettingsStore()
 
 const router = useRouter()
 
 // Features state
 const features = ref(
-  Object.entries(settingsStore.value || {}).reduce(
+  Object.entries(settingsStore.settings || {}).reduce(
     (
       acc: Record<string, boolean>,
       [key, value]: [string, Setting<unknown>],
@@ -175,7 +174,7 @@ const saveFeatures = async (): Promise<void> => {
   try {
     isSaving.value = true
 
-    await saveEnabledFeatures(features.value)
+    await settingsStore.saveEnabledFeatures(features.value)
 
     logger.debug('Feature settings saved successfully:', {
       value: features.value,

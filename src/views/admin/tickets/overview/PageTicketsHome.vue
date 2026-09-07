@@ -3,14 +3,14 @@ import { onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import { IconTicket } from '@tabler/icons-vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import ticketService from '@/features/tickets/service'
 import type {
   Ticket,
   TicketDay,
   TicketGroup,
 } from '@/features/tickets/ticket.model'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { getTicketTitle } from '@/utils/ticket'
 import { formatPrice } from '@/utils/price'
@@ -21,6 +21,9 @@ import DialogCreateTicket from '@/views/admin/tickets/DialogCreateTicket.vue'
 import TicketDayLimits from '@/views/admin/tickets/overview/TicketDayLimits.vue'
 import TicketListRow from '@/views/admin/tickets/overview/TicketListRow.vue'
 import TicketDetailPanel from '@/views/admin/tickets/overview/TicketDetailPanel.vue'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t, locale } = useI18n()
 
@@ -97,7 +100,7 @@ const handleDialogClose = (): void => {
 
 // Methods
 async function loadTickets(): Promise<void> {
-  if (!tenantStore.value?.id || !editionStore.value?.id) {
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) {
     logger.warn('No edition selected')
     return
   }
@@ -105,14 +108,14 @@ async function loadTickets(): Promise<void> {
   loading.value = true
   try {
     tickets.value = await ticketService.getAll(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
     )
   } catch (error) {
     logger.error('Error loading tickets:', {
       error,
-      editionId: editionStore.value.id,
-      tenantId: tenantStore.value.id,
+      editionId: editionStore.edition.id,
+      tenantId: tenantStore.tenant.id,
     })
     toast.error(t('admin.tickets.loadFailed'))
   } finally {
@@ -121,7 +124,7 @@ async function loadTickets(): Promise<void> {
 }
 
 async function loadCapacity(): Promise<void> {
-  if (!tenantStore.value?.id || !editionStore.value?.id) {
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) {
     logger.warn('No edition selected')
     return
   }
@@ -129,14 +132,14 @@ async function loadCapacity(): Promise<void> {
   loading.value = true
   try {
     days.value = await ticketService.getDays(
-      tenantStore.value.id,
-      editionStore.value.id,
+      tenantStore.tenant.id,
+      editionStore.edition.id,
     )
   } catch (error) {
     logger.error('Error loading tickets:', {
       error,
-      editionId: editionStore.value.id,
-      tenantId: tenantStore.value.id,
+      editionId: editionStore.edition.id,
+      tenantId: tenantStore.tenant.id,
     })
     toast.error(t('admin.tickets.loadFailed'))
   } finally {

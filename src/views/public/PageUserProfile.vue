@@ -11,7 +11,9 @@ import UserHeader from './UserHeader.vue'
 import WithdrawUserHistory from './WithdrawUserHistory.vue'
 import { RouteNames } from '@/router/routeNames.ts'
 import CButton from '@/components/CButton.vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const editionStore = useEditionStore()
 
 const route = useRoute()
 const userId = route.params.id as string
@@ -39,7 +41,7 @@ async function loadWithdraws(): Promise<void> {
   isLoadingWithdraws.value = true
   try {
     withdraws.value.set(
-      editionStore.value?.id as number,
+      editionStore.edition?.id as number,
       await libraryWithdrawService.getByUserId(userId),
     )
   } catch (error) {

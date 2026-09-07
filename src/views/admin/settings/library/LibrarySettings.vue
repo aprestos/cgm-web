@@ -16,9 +16,12 @@ import {
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
 import { queueService } from '@/features/queues/queue.service.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const locations = ref<LibraryLocation[]>([])
 const isLoading = ref(false)
@@ -128,8 +131,8 @@ const clearImportList = (): void => {
 
 const importGames = async (): Promise<void> => {
   await queueService.add(
-    tenantStore.value?.id,
-    editionStore.value?.id,
+    tenantStore.tenant?.id,
+    editionStore.edition?.id,
     'library-games',
     gamesToImport.value,
   )

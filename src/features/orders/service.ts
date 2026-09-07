@@ -1,7 +1,7 @@
 import { supabase } from '@/lib/supabase.ts'
 import type { CreateOrderInput } from '@/features/orders/createOrder.input.model.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order, OrderItem } from '@/features/orders/order.model.ts'
@@ -251,8 +251,8 @@ export const orderService = {
     }>(`orders`, {
       method: 'POST',
       headers: {
-        'Tenant-Id': tenantStore.value?.id as string,
-        'Edition-Id': String(editionStore.value?.id),
+        'Tenant-Id': useTenantStore().tenant?.id as string,
+        'Edition-Id': String(useEditionStore().edition?.id),
       },
       body,
     })

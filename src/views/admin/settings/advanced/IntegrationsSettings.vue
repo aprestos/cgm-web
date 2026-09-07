@@ -293,9 +293,11 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import logger from '@/lib/logger.ts'
 import { stripeService } from '@/features/settings/stripe.service.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import CBadge from '@/components/CBadge.vue'
 import type { StripeConfiguration } from '@/features/settings/stripe.model.ts'
+
+const tenantStore = useTenantStore()
 
 // Email configuration
 const emailConfig = ref({
@@ -321,7 +323,7 @@ const isStripeConnected = computed(
 onMounted(async () => {
   // subscribe to service updates
   stripeConfiguration.value = await stripeService.getConfiguration(
-    tenantStore.value?.id as string,
+    tenantStore.tenant?.id as string,
   )
 })
 
@@ -361,7 +363,7 @@ const connectStripe = async (): Promise<void> => {
   if (!selectedAccountType.value) return
   isLoadingStripeConnect.value = true
   const res = await stripeService.connect(
-    tenantStore.value?.id as string,
+    tenantStore.tenant?.id as string,
     window.location.origin,
     selectedAccountType.value,
   )
@@ -373,7 +375,7 @@ const connectStripe = async (): Promise<void> => {
 const disconnectStripe = async (): Promise<void> => {
   isLoadingStripeConnect.value = true
   try {
-    await stripeService.disconnect(tenantStore.value?.id as string)
+    await stripeService.disconnect(tenantStore.tenant?.id as string)
   } catch (error) {
     logger.error('Error disconnecting Stripe:', { error })
     toast.error('Failed to disconnect Stripe')

@@ -9,7 +9,9 @@ import {
 import { RouterLink } from 'vue-router'
 import { RouteNames } from '@/router/routeNames.js'
 import { useI18n } from 'vue-i18n'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+
+const tenantStore = useTenantStore()
 
 const { t } = useI18n()
 </script>
@@ -64,27 +66,27 @@ const { t } = useI18n()
       <!-- Social Links -->
       <div class="mt-16 flex items-center justify-center gap-6">
         <a
-          v-if="tenantStore?.socialNetworks?.instagram"
+          v-if="tenantStore.tenant?.socialNetworks?.instagram"
           target="_blank"
-          :href="tenantStore.socialNetworks.instagram"
+          :href="tenantStore.tenant.socialNetworks.instagram"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Instagram"
         >
           <IconBrandInstagram class="h-6 w-6" />
         </a>
         <a
-          v-if="tenantStore?.socialNetworks?.facebook"
+          v-if="tenantStore.tenant?.socialNetworks?.facebook"
           target="_blank"
-          :href="tenantStore?.socialNetworks?.facebook"
+          :href="tenantStore.tenant?.socialNetworks?.facebook"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Facebook"
         >
           <IconBrandFacebook class="h-6 w-6" />
         </a>
         <a
-          v-if="tenantStore?.socialNetworks?.x"
+          v-if="tenantStore.tenant?.socialNetworks?.x"
           target="_blank"
-          :href="tenantStore?.socialNetworks?.x"
+          :href="tenantStore.tenant?.socialNetworks?.x"
           class="text-gray-400 dark:text-gray-500 transition-colors hover:text-gray-900 dark:hover:text-white"
           aria-label="Twitter"
         >

@@ -59,9 +59,11 @@ import { toast } from 'vue-sonner'
 import CButton from '@/components/CButton.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import FilePondUploadDialog from '@/components/FilePondUploadDialog.vue'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import type { UploadedFile } from '@/utils/fileUpload'
+
+const tenantStore = useTenantStore()
 
 interface Props {
   poster: string
@@ -89,7 +91,7 @@ watch(
 
 // Computed folder path for poster uploads
 const posterFolder = computed((): string => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   return tenantId ? `tenants/${tenantId}/posters` : 'tenants/default/posters'
 })
 

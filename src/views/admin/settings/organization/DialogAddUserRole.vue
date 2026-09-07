@@ -70,8 +70,10 @@ import {
 } from '@/features/roles/role.model.ts'
 import roleService from '@/features/roles/service.ts'
 import { userService } from '@/features/users/service.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
+
+const tenantStore = useTenantStore()
 
 interface Props {
   open: boolean
@@ -134,7 +136,7 @@ const searchUsers = async (query: string): Promise<Option<string>[]> => {
 const submit = async (): Promise<void> => {
   if (isSubmitting.value || isDuplicate.value) return
 
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId) return
 
   const { valid, data } = await r$.$validate()

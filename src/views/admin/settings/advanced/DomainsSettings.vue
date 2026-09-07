@@ -172,13 +172,15 @@ import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import domainsService from '@/features/domains/service'
 import type {
   DnsRecord,
   DomainStatus,
   TenantDomain,
 } from '@/features/domains/domain.model'
+
+const tenantStore = useTenantStore()
 
 type BadgeType = 'gray' | 'green' | 'yellow' | 'red'
 
@@ -238,7 +240,7 @@ const describe = (domain: TenantDomain): string => {
 }
 
 const load = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   if (!tenantId) return
   try {
     domains.value = await domainsService.getByTenant(tenantId)
@@ -250,7 +252,7 @@ const load = async (): Promise<void> => {
 }
 
 const handleAdd = async (): Promise<void> => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   const hostname = newHostname.value.trim()
   addErrors.value = []
 

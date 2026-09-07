@@ -23,8 +23,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import CInput from '@/components/CInput.vue'
-import { editionStore } from '@/features/events/edition.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { getCurrencyIcon } from '@/composables/useCurrency.ts'
+
+const editionStore = useEditionStore()
 
 interface Props {
   id: string
@@ -58,7 +60,7 @@ const emit = defineEmits<{
 const isFocused = ref(false)
 
 const currencyIcon = computed(() => {
-  const curr = props.currency || editionStore.value?.currency || ''
+  const curr = props.currency || editionStore.edition?.currency || ''
   return getCurrencyIcon(curr)
 })
 

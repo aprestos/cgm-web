@@ -13,12 +13,12 @@ import VueCountdown from '@chenfengyuan/vue-countdown'
 import { editionService } from '@/features/events/service.ts'
 import tenantService from '@/features/tenant/service'
 import type { Tenant } from '@/features/tenant/tenant.model.ts'
-import { editionStore } from '@/features/events/edition.store'
-import { tenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import App from './App.vue'
 import router from './router'
 import { createHead } from '@unhead/vue/client'
-import { settingsStore } from '@/features/settings/useSettings.store.ts'
+import { useSettingsStore } from '@/features/settings/useSettings.store'
 import { settingsService } from '@/features/settings/service.ts'
 import type { Edition } from '@/features/events/edition.model.ts'
 import i18n from '@/i18n'
@@ -30,7 +30,7 @@ import logger from '@/lib/logger.ts'
 // state that can change, so it is never read from a client-side cache.
 async function loadTenant(): Promise<Tenant> {
   const tenant = await tenantService.getByDomain(window.location.hostname)
-  tenantStore.value = tenant
+  useTenantStore().tenant = tenant
   return tenant
 }
 
@@ -52,8 +52,9 @@ async function mountUnconfiguredDomain(hostname: string): Promise<void> {
 
 async function loadEdition(tenantId: string): Promise<Edition | null> {
   if (tenantId) {
-    editionStore.value = await editionService.getCurrentEdition(tenantId)
-    return editionStore?.value || null
+    const editionStore = useEditionStore()
+    editionStore.edition = await editionService.getCurrentEdition(tenantId)
+    return editionStore.edition
   }
   return null
 }
@@ -63,13 +64,17 @@ async function loadSettings(
   editionId: number,
 ): Promise<void> {
   if (tenantId && editionId) {
-    settingsStore.value = await settingsService.get(tenantId, editionId)
+    useSettingsStore().settings = await settingsService.get(tenantId, editionId)
   }
 }
 
 // Initialize app
 async function initializeApp(): Promise<void> {
   const app = createApp(App)
+
+  // Pinia goes on first: tenant, edition and settings are Pinia stores now,
+  // and the loads below write straight into them.
+  app.use(createPinia())
 
   // Load tenant first before setting up router
   let tenant: Tenant
@@ -92,7 +97,6 @@ async function initializeApp(): Promise<void> {
     await loadSettings(tenant.id, edition.id)
   }
 
-  app.use(createPinia())
   app.use(router)
   app.use(i18n)
   app.component(VueCountdown.name as string, VueCountdown)

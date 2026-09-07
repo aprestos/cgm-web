@@ -7,14 +7,17 @@ import CButton from '@/components/CButton.vue'
 import ticketService from '@/features/tickets/service'
 import orderService from '@/features/orders/service'
 import type { Ticket } from '@/features/tickets/ticket.model'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import StepSelectTickets from './StepSelectTickets.vue'
 import StepTicketHolders from './StepTicketHolders.vue'
 import type { HolderEntry } from './createOrder.types'
 import { userService } from '@/features/users/service.ts'
 import { getTicketTitle } from '@/utils/ticket.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const props = defineProps<{ open: boolean }>()
 
@@ -45,10 +48,10 @@ watch(
     holders.value = []
     loadingTickets.value = true
     try {
-      if (tenantStore.value?.id && editionStore.value?.id) {
+      if (tenantStore.tenant?.id && editionStore.edition?.id) {
         const all = await ticketService.get(
-          tenantStore.value.id,
-          editionStore.value.id,
+          tenantStore.tenant.id,
+          editionStore.edition.id,
         )
         tickets.value = all.filter((tk) => tk.active)
       }
@@ -123,7 +126,7 @@ async function submit(): Promise<void> {
 
     await orderService.create({
       customerId: user.id,
-      currency: editionStore.value?.currency ?? 'EUR',
+      currency: editionStore.edition?.currency ?? 'EUR',
       items,
       issuances,
       payment: {

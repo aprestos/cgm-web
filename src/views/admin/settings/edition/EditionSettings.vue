@@ -105,8 +105,8 @@ import { ref, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
 import EditionPoster from './EditionPoster.vue'
 import { editionService } from '@/features/events/service.ts'
-import { tenantStore } from '@/features/tenant/tenant.store'
-import { editionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import CInput from '@/components/CInput.vue'
 import CButton from '@/components/CButton.vue'
@@ -114,6 +114,9 @@ import FloatingActionBar from '@/components/FloatingActionBar.vue'
 import SettingsSection from '@/components/SettingsSection.vue'
 import { IconDeviceFloppy } from '@tabler/icons-vue'
 import { deleteUploadedFiles, type UploadedFile } from '@/utils/fileUpload'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 // Form data
 const formData = ref({
@@ -160,37 +163,37 @@ const handlePosterUploaded = async (file: UploadedFile): Promise<void> => {
 
 // Load initial data from editionStore
 onMounted(() => {
-  if (editionStore.value) {
+  if (editionStore.edition) {
     // Parse start_date (ISO datetime) into date and time
-    if (editionStore.value.start_date) {
-      const startDateTime = new Date(editionStore.value.start_date)
+    if (editionStore.edition.start_date) {
+      const startDateTime = new Date(editionStore.edition.start_date)
       formData.value.startDate = startDateTime.toISOString().split('T')[0] ?? ''
       formData.value.startTime =
         startDateTime.toTimeString().slice(0, 5) ?? '09:00'
     }
     // Parse end_date (ISO datetime) into date and time
-    if (editionStore.value.end_date) {
-      const endDateTime = new Date(editionStore.value.end_date)
+    if (editionStore.edition.end_date) {
+      const endDateTime = new Date(editionStore.edition.end_date)
       formData.value.endDate = endDateTime.toISOString().split('T')[0] ?? ''
       formData.value.endTime = endDateTime.toTimeString().slice(0, 5) ?? '18:00'
     }
-    if (editionStore.value.name) {
-      formData.value.name = editionStore.value.name
+    if (editionStore.edition.name) {
+      formData.value.name = editionStore.edition.name
     }
-    if (editionStore.value.location?.title) {
-      formData.value.locationTitle = editionStore.value.location.title
+    if (editionStore.edition.location?.title) {
+      formData.value.locationTitle = editionStore.edition.location.title
     }
-    if (editionStore.value.location?.url) {
-      formData.value.locationUrl = editionStore.value.location.url
+    if (editionStore.edition.location?.url) {
+      formData.value.locationUrl = editionStore.edition.location.url
     }
-    if (editionStore.value.description) {
-      formData.value.description = editionStore.value.description
+    if (editionStore.edition.description) {
+      formData.value.description = editionStore.edition.description
     }
-    if (editionStore.value.long_description) {
-      formData.value.longDescription = editionStore.value.long_description
+    if (editionStore.edition.long_description) {
+      formData.value.longDescription = editionStore.edition.long_description
     }
-    if (editionStore.value.poster_url) {
-      formData.value.poster = editionStore.value.poster_url
+    if (editionStore.edition.poster_url) {
+      formData.value.poster = editionStore.edition.poster_url
     }
 
     // Store initial values
@@ -213,27 +216,31 @@ const saveEdition = async (): Promise<void> => {
         ? `${formData.value.endDate}T${formData.value.endTime}:00`
         : undefined
 
-    await editionService.save(tenantStore.value?.id, editionStore.value?.id, {
-      ...(startDateTime && { start_date: startDateTime }),
-      ...(endDateTime && { end_date: endDateTime }),
-      ...(formData.value.name && { name: formData.value.name }),
-      ...(formData.value.description && {
-        description: formData.value.description,
-      }),
-      ...(formData.value.longDescription && {
-        long_description: formData.value.longDescription,
-      }),
-      ...(formData.value.poster && { poster_url: formData.value.poster }),
-      location: {
-        title: formData.value.locationTitle,
-        url: formData.value.locationUrl,
+    await editionService.save(
+      tenantStore.tenant?.id,
+      editionStore.edition?.id,
+      {
+        ...(startDateTime && { start_date: startDateTime }),
+        ...(endDateTime && { end_date: endDateTime }),
+        ...(formData.value.name && { name: formData.value.name }),
+        ...(formData.value.description && {
+          description: formData.value.description,
+        }),
+        ...(formData.value.longDescription && {
+          long_description: formData.value.longDescription,
+        }),
+        ...(formData.value.poster && { poster_url: formData.value.poster }),
+        location: {
+          title: formData.value.locationTitle,
+          url: formData.value.locationUrl,
+        },
       },
-    })
+    )
 
     // Update editionStore with new values
-    if (editionStore.value) {
-      editionStore.value = {
-        ...editionStore.value,
+    if (editionStore.edition) {
+      editionStore.edition = {
+        ...editionStore.edition,
         ...(startDateTime && { start_date: startDateTime }),
         ...(endDateTime && { end_date: endDateTime }),
         ...(formData.value.name && { name: formData.value.name }),

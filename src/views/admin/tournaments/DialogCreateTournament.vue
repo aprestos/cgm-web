@@ -235,10 +235,13 @@ import {
   TournamentStatus,
 } from '@/features/tournaments/tournament.model.ts'
 import logger from '@/lib/logger'
-import { tenantStore } from '@/features/tenant/tenant.store.ts'
-import { editionStore } from '@/features/events/edition.store.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { toast } from 'vue-sonner'
 import tournamentService from '@/features/tournaments/events/service.ts'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t, locale } = useI18n()
 
@@ -300,7 +303,7 @@ const activePane = ref<Pane>('edit')
 const coverUploader = useTemplateRef<FilePondUploaderInstance>('coverUploader')
 
 const coverFolder = computed((): string => {
-  const tenantId = tenantStore.value?.id
+  const tenantId = tenantStore.tenant?.id
   return tenantId
     ? `tenants/${tenantId}/tournaments`
     : 'tenants/default/tournaments'
@@ -384,7 +387,7 @@ const resetForm = (): void => {
 }
 
 const submit = async (): Promise<void> => {
-  if (!tenantStore.value || !editionStore.value) return
+  if (!tenantStore.tenant || !editionStore.edition) return
 
   if (isSubmitting.value) return
 
@@ -416,8 +419,8 @@ const submit = async (): Promise<void> => {
 
     try {
       await tournamentService.create(
-        tenantStore.value.id,
-        editionStore.value.id,
+        tenantStore.tenant.id,
+        editionStore.edition.id,
         tournament,
       )
       emit('created', tournament)
