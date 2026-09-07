@@ -1,34 +1,57 @@
 <script setup lang="ts">
+import { computed, onMounted, onUnmounted, reactive, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { useRoute, useRouter } from 'vue-router'
+import { useRegle } from '@regle/core'
+import { minLength, required, withMessage } from '@regle/rules'
 import {
-  InformationCircleIcon,
-  XMarkIcon,
-  UserIcon,
-} from '@heroicons/vue/24/outline'
-import {
+  IconAlertTriangle,
   IconArrowNarrowLeft,
   IconArrowNarrowRight,
   IconCheck,
+  IconLoader2,
+  IconUser,
 } from '@tabler/icons-vue'
-import { onMounted, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { authService } from '@/features/auth/service.ts'
-import router from '@/router'
-import { RouteNames } from '@/router/routeNames.ts'
+import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
-import logger from '@/lib/logger.ts'
-import { useRoute } from 'vue-router'
+import { authService } from '@/features/auth/service'
+import logger from '@/lib/logger'
+import { RouteNames } from '@/router/routeNames'
 
 const { t } = useI18n()
+
+const MIN_NAME_LENGTH = 2
+const REDIRECT_SECONDS = 5
 
 const isValidating = ref(true)
 const isSuccess = ref(false)
 const needsDisplayName = ref(false)
 const isUpdatingDisplayName = ref(false)
 const errorMessage = ref('')
-const countdown = ref(5)
-const displayName = ref('')
-const displayNameErrors = ref<string[]>([])
+const countdown = ref(REDIRECT_SECONDS)
 const route = useRoute()
+const router = useRouter()
+
+// Where a name gets collected from everyone who did not come through sign-up —
+// which sign-in deliberately allows, so this is a normal path and not a
+// leftover. A sign-up carries the name in user metadata, which the user-tenant
+// function copies into the profile row, so those users skip straight past this.
+const form = reactive({ displayName: '' })
+
+const { r$ } = useRegle(form, {
+  displayName: {
+    required: withMessage(required, () => t('auth.displayNameRequired')),
+    minLength: withMessage(minLength(MIN_NAME_LENGTH), () =>
+      t('auth.displayNameMinLength'),
+    ),
+  },
+})
+
+let timer: ReturnType<typeof setInterval> | null = null
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
 
 onMounted(async () => {
   try {
@@ -48,18 +71,13 @@ onMounted(async () => {
       })
     }
 
-    // Check if user has name defined
-    if (!user.name) {
-      // User needs to set display name
-      isValidating.value = false
-      needsDisplayName.value = true
-    } else {
-      // Show success state
-      isValidating.value = false
-      isSuccess.value = true
+    isValidating.value = false
 
-      // Start countdown timer
+    if (user.name) {
+      isSuccess.value = true
       startCountdown()
+    } else {
+      needsDisplayName.value = true
     }
   } catch (error) {
     console.error('Authentication confirmation failed:', error)
@@ -71,29 +89,19 @@ onMounted(async () => {
 })
 
 const updateDisplayName = async (): Promise<void> => {
-  displayNameErrors.value = []
-
-  if (!displayName.value.trim()) {
-    displayNameErrors.value.push(t('auth.displayNameRequired'))
-    return
-  }
-
-  if (displayName.value.trim().length < 2) {
-    displayNameErrors.value.push(t('auth.displayNameMinLength'))
-    return
-  }
+  const { valid } = await r$.$validate()
+  if (!valid || isUpdatingDisplayName.value) return
 
   isUpdatingDisplayName.value = true
+  const name = form.displayName.trim()
 
   try {
     const user = await authService.getUser()
 
     await Promise.all([
-      authService.updateUserMetadata({
-        display_name: displayName.value.trim(),
-      }),
+      authService.updateUserMetadata({ display_name: name }),
       authService.updateProfile(user?.id as string, {
-        name: displayName.value.trim(),
+        name,
         email: user?.email,
       }),
     ])
@@ -104,19 +112,19 @@ const updateDisplayName = async (): Promise<void> => {
     startCountdown()
   } catch (error) {
     console.error('Failed to update display name:', error)
-    displayNameErrors.value.push(
-      error instanceof Error ? error.message : 'Failed to update display name',
-    )
+    errorMessage.value =
+      error instanceof Error ? error.message : 'Failed to update display name'
+    needsDisplayName.value = false
   } finally {
     isUpdatingDisplayName.value = false
   }
 }
 
 const startCountdown = (): void => {
-  const timer = setInterval(() => {
+  timer = setInterval(() => {
     countdown.value--
     if (countdown.value <= 0) {
-      clearInterval(timer)
+      if (timer) clearInterval(timer)
       void redirectToHome()
     }
   }, 1000)
@@ -126,184 +134,161 @@ const redirectToHome = async (): Promise<void> => {
   const redirect = route.query.redirect
 
   await router.replace(typeof redirect === 'string' ? redirect : '/')
-  //await router.push({ name: RouteNames.public.library })
 }
 
 const backToSignIn = async (): Promise<void> => {
   await router.push({ name: RouteNames.auth.signIn })
 }
+
+const state = computed<'validating' | 'success' | 'name' | 'error'>(() => {
+  if (isValidating.value) return 'validating'
+  if (isSuccess.value) return 'success'
+  if (needsDisplayName.value) return 'name'
+  return 'error'
+})
+
+// One tinted disc per state, so the four outcomes read as the same screen
+// changing rather than as four different screens.
+const BADGE: Record<
+  'validating' | 'success' | 'name' | 'error',
+  { icon: typeof IconCheck; classes: string }
+> = {
+  validating: {
+    icon: IconLoader2,
+    classes:
+      'bg-primary-100 text-primary-600 dark:bg-primary-500/15 dark:text-primary-400',
+  },
+  success: {
+    icon: IconCheck,
+    classes:
+      'bg-green-100 text-green-600 dark:bg-green-500/15 dark:text-green-400',
+  },
+  name: {
+    icon: IconUser,
+    classes:
+      'bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400',
+  },
+  error: {
+    icon: IconAlertTriangle,
+    classes: 'bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400',
+  },
+}
+
+const badge = computed(() => BADGE[state.value])
+
+const heading = computed(() => {
+  switch (state.value) {
+    case 'validating':
+      return t('auth.confirmingSignIn')
+    case 'success':
+      return t('auth.welcomeBack')
+    case 'name':
+      return t('auth.almostThere')
+    default:
+      return t('auth.authenticationFailed')
+  }
+})
+
+const description = computed(() => {
+  switch (state.value) {
+    case 'validating':
+      return t('auth.pleaseWaitVerify')
+    case 'success':
+      return t('auth.successfullySignedIn')
+    case 'name':
+      return t('auth.provideDisplayName')
+    default:
+      return t('auth.verifySignInFailed')
+  }
+})
 </script>
 
 <template>
-  <div v-if="isValidating" class="mt-6 text-center">
-    <!-- Loading state -->
+  <div class="text-center">
     <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30"
+      class="mx-auto flex size-14 items-center justify-center rounded-full"
+      :class="badge.classes"
     >
-      <svg
-        class="h-8 w-8 animate-spin text-primary-600 dark:text-primary-400"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          class="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          stroke-width="4"
-        />
-        <path
-          class="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-        />
-      </svg>
-    </div>
-    <h2 class="mt-6 text-lg font-semibold text-gray-900 dark:text-white">
-      {{ t('auth.confirmingSignIn') }}
-    </h2>
-    <p class="mt-2 text-md text-gray-600 dark:text-gray-400">
-      {{ t('auth.pleaseWaitVerify') }}
-    </p>
-  </div>
-
-  <div v-else-if="isSuccess" class="mt-6 text-center">
-    <!-- Success state -->
-    <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30"
-    >
-      <IconCheck
-        class="h-8 w-8 text-green-600 dark:text-green-400"
+      <component
+        :is="badge.icon"
+        class="size-7"
+        :class="{ 'animate-spin': state === 'validating' }"
         aria-hidden="true"
       />
     </div>
 
-    <h2 class="mt-6 text-lg font-semibold text-gray-900 dark:text-white">
-      {{ t('auth.welcomeBack') }}
-    </h2>
-    <p class="mt-2 text-md text-gray-600 dark:text-gray-400">
-      {{ t('auth.successfullySignedIn') }}
-    </p>
-
-    <!-- Countdown and redirect info -->
-    <div class="mt-8 rounded-md bg-green-50 dark:bg-green-900/20 p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <InformationCircleIcon
-            class="h-5 w-5 text-green-400 dark:text-green-500"
-            aria-hidden="true"
-          />
-        </div>
-        <div class="ml-3">
-          <p class="text-sm text-green-800 dark:text-green-300">
-            {{ t('auth.redirectingIn', { seconds: countdown }) }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Manual redirect button -->
-    <div class="mt-6">
-      <button
-        class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500"
-        @click="redirectToHome"
-      >
-        <IconArrowNarrowRight class="h-4 w-4" aria-hidden="true" />
-        {{ t('auth.continueToHome') }}
-      </button>
-    </div>
-  </div>
-
-  <div v-else-if="needsDisplayName" class="mt-6 text-center">
-    <!-- Display Name required state -->
-    <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30"
+    <h1
+      class="mt-6 font-display text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
     >
-      <UserIcon
-        class="h-8 w-8 text-yellow-600 dark:text-yellow-400"
-        aria-hidden="true"
-      />
-    </div>
-
-    <h2 class="mt-6 text-lg font-semibold text-gray-900 dark:text-white">
-      {{ t('auth.almostThere') }}
-    </h2>
-    <p class="mt-2 text-md text-gray-600 dark:text-gray-400">
-      {{ t('auth.provideDisplayName') }}
+      {{ heading }}
+    </h1>
+    <p class="mt-2 text-sm text-balance text-gray-600 dark:text-gray-400">
+      {{ description }}
     </p>
 
-    <!-- Display Name form -->
-    <div class="mt-4">
+    <template v-if="state === 'success'">
+      <CButton size="lg" full-width class="mt-8" @click="redirectToHome"
+        >{{ t('auth.continueToHome') }}
+        <template #icon-right>
+          <IconArrowNarrowRight class="size-5" aria-hidden="true" />
+        </template>
+      </CButton>
+      <p class="mt-3 text-xs text-gray-500 dark:text-gray-500">
+        {{ t('auth.redirectingIn', { seconds: countdown }) }}
+      </p>
+    </template>
+
+    <form
+      v-else-if="state === 'name'"
+      class="mt-8 text-left"
+      novalidate
+      @submit.prevent="updateDisplayName"
+    >
       <CInput
         id="display-name"
-        v-model="displayName"
-        :label="t('auth.displayName')"
+        v-model="form.displayName"
         type="text"
+        name="name"
+        autocomplete="name"
+        size="lg"
+        :label="t('auth.displayName')"
         :placeholder="t('auth.enterDisplayName')"
-        :errors="displayNameErrors"
+        :errors="r$.$errors.displayName"
       />
-    </div>
-
-    <div class="mt-6">
-      <button
-        class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        :disabled="isUpdatingDisplayName"
-        @click="updateDisplayName"
+      <CButton
+        type="submit"
+        size="lg"
+        full-width
+        class="mt-5"
+        :loading="isUpdatingDisplayName"
+        :loading-text="t('auth.updating')"
       >
-        <IconCheck class="h-4 w-4" aria-hidden="true" />
-        <span v-if="isUpdatingDisplayName">{{ t('auth.updating') }}</span>
-        <span v-else>{{ t('auth.updateDisplayName') }}</span>
-      </button>
-    </div>
-  </div>
+        {{ t('auth.updateDisplayName') }}
+        <template #icon-right>
+          <IconArrowNarrowRight class="size-5" aria-hidden="true" />
+        </template>
+      </CButton>
+    </form>
 
-  <div v-else class="mt-6 text-center">
-    <!-- Error state -->
-    <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30"
-    >
-      <XMarkIcon
-        class="h-8 w-8 text-red-600 dark:text-red-400"
-        aria-hidden="true"
-      />
-    </div>
-
-    <h2 class="mt-6 text-lg font-semibold text-gray-900 dark:text-white">
-      {{ t('auth.authenticationFailed') }}
-    </h2>
-    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-      {{ t('auth.verifySignInFailed') }}
-    </p>
-
-    <!-- Error details -->
-    <div class="mt-8 rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <XMarkIcon
-            class="h-5 w-5 text-red-400 dark:text-red-500"
-            aria-hidden="true"
-          />
-        </div>
-        <div class="ml-3">
-          <p class="text-sm text-red-800 dark:text-red-300">
-            {{ errorMessage }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Back to sign in button -->
-    <div class="mt-6">
-      <button
-        class="flex w-full justify-center items-center gap-2 rounded-md bg-white dark:bg-white/5 px-3 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-offset-0"
+    <template v-else-if="state === 'error'">
+      <p
+        v-if="errorMessage"
+        class="mt-6 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-500/10 dark:text-red-300"
+      >
+        {{ errorMessage }}
+      </p>
+      <CButton
+        variant="secondary"
+        size="lg"
+        full-width
+        class="mt-6"
         @click="backToSignIn"
       >
-        <IconArrowNarrowLeft class="h-4 w-4" aria-hidden="true" />
+        <template #icon-left>
+          <IconArrowNarrowLeft class="size-5" aria-hidden="true" />
+        </template>
         {{ t('auth.backToSignIn') }}
-      </button>
-    </div>
+      </CButton>
+    </template>
   </div>
 </template>
-
-<style scoped></style>

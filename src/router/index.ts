@@ -86,6 +86,12 @@ const router = createRouter({
             import('../views/auth/SignInView.vue'),
         },
         {
+          path: 'sign-up',
+          name: RouteNames.auth.signUp,
+          component: (): Promise<unknown> =>
+            import('../views/auth/SignUpView.vue'),
+        },
+        {
           path: 'verify',
           name: RouteNames.auth.verify,
           component: (): Promise<unknown> =>

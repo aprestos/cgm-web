@@ -4,41 +4,45 @@ import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { User } from '@/features/auth/user.model.ts'
 import logger from '@/lib/logger.ts'
 
+/*
+ * Both entry points send the same one-time code and both create the account if
+ * the address is new — the only difference is whether we have a name by the
+ * time the code is verified.
+ *
+ * Sign-up carries the name in `data`, which Supabase writes to user metadata at
+ * creation and the `user-tenant` function copies into the profile row, so those
+ * users are never asked again. Someone who arrives at sign-in without an
+ * account is not turned away for it; the confirmation screen asks them for a
+ * name after they verify. Turning an unknown address away here would be a dead
+ * end for exactly the people a tenant is trying to attract, and it would strand
+ * anyone who simply picked the wrong door.
+ *
+ * Neither passes `emailRedirectTo`: the email carries a code, not a link, so
+ * there is nowhere to send anyone back to. A redirect would tie logging in to
+ * an allowlist holding every tenant's custom domain, and sign-in would break on
+ * each new domain until that list was updated.
+ */
+
 export const authService = {
-  // Authentication methods
-  async signUp(
-    name: string,
-    email: string,
-    password: string,
-  ): Promise<unknown> {
-    const { data } = await supabase.auth.signUp({
+  async signUpWithEmail(name: string, email: string): Promise<void> {
+    const { error } = await supabase.auth.signInWithOtp({
       email,
-      password,
       options: {
+        shouldCreateUser: true,
         data: {
-          name,
-          tenant_id: useTenantStore().tenant?.id,
+          display_name: name,
+          tenant_name: useTenantStore().tenant?.name,
         },
       },
     })
 
-    if (data.user) {
-      await supabase.functions.invoke(`user-tenant`, {
-        body: {
-          user_id: data.user.id,
-        },
-        method: 'POST',
-      })
+    if (error) {
+      logger.error('Failed to send sign-up email', { error })
+      throw new Error('Unable to send email. Please try again later.')
     }
-
-    return data
   },
 
   async signInWithEmail(email: string): Promise<void> {
-    // The sign-in email carries a one-time code, not a link, so there is no
-    // redirect for Supabase to send the user back to. Keeping one would tie
-    // logging in to an allowlist holding every tenant's custom domain, and
-    // sign-in would break on each new domain until that list was updated.
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
@@ -48,6 +52,7 @@ export const authService = {
         },
       },
     })
+
     if (error) {
       logger.error('Failed to send sign-in email', { error })
       throw new Error('Unable to send email. Please try again later.')
