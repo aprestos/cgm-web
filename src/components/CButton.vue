@@ -39,6 +39,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { FIELD_RADIUS, FIELD_RADIUS_PILL } from '@/components/field.styles'
 
 interface Props {
   variant?:
@@ -102,17 +103,25 @@ const buttonClasses = computed(() => {
     'disabled:cursor-not-allowed',
   ]
 
-  // Two scales, not one. Below md: touch sizing — every size from `md` up
-  // clears the 44px minimum tap target, and the label grows with the size so
-  // an `xl` reads as large rather than as a tiny label in a tall pill.
-  // From md: dashboard sizing — ~28/32/40/44px tall, compact enough to sit in
-  // toolbars and table rows. Gaps live on the content span (the actual flex
-  // container), not here.
+  // Vertical padding is FIELD_SIZE's, so a button is exactly as tall as the
+  // input it sits beside — 48/44 at md, 52 at lg, 60/56 at xl. It used to thin
+  // out from the md breakpoint for toolbars, which left a 12px step between a
+  // desktop button and the field next to it: the "add location" row in
+  // LibrarySettings put a 32px button against a 44px input. `sm` is the size
+  // that actually rides in toolbars and table rows, and it is untouched — it
+  // already matched its field at both breakpoints.
+  //
+  // Horizontal padding stays the button's own, and deliberately: a button pads
+  // around centred text so its px grows with its size, while a field's text is
+  // left-aligned against the leading edge, where wide px only pushes the caret
+  // inward. See the note in field.styles.ts.
+  //
+  // Gaps live on the content span (the actual flex container), not here.
   const sizeClasses = {
     sm: ['px-3', 'py-1.5', 'text-sm', 'md:px-2.5', 'md:py-1.5', 'md:text-xs'],
-    md: ['px-4', 'py-2.5', 'text-base', 'md:px-3', 'md:py-1.5', 'md:text-sm'],
-    lg: ['px-5', 'py-3', 'text-base', 'md:px-4', 'md:py-2', 'md:text-base'],
-    xl: ['px-6', 'py-3.5', 'text-lg', 'md:px-5', 'md:py-2.5', 'md:text-base'],
+    md: ['px-4', 'py-3', 'text-base', 'md:px-3', 'md:text-sm'],
+    lg: ['px-5', 'py-3.5', 'text-base', 'md:px-4', 'md:text-base'],
+    xl: ['px-6', 'py-4', 'text-lg', 'md:px-5', 'md:text-base'],
   }
 
   // Variant classes — flat surfaces, colour-only hover. No coloured glows and
@@ -224,8 +233,10 @@ const buttonClasses = computed(() => {
     ],
   }
 
-  // Border radius classes
-  const roundedClasses = props.rounded ? ['rounded-full'] : ['rounded-lg']
+  // Shares the fields' radius rather than carrying its own: a button and the
+  // input above it are the same control shape, and an 8px button under a 12px
+  // field reads as two different systems.
+  const roundedClasses = props.rounded ? [FIELD_RADIUS_PILL] : [FIELD_RADIUS]
 
   // Full width classes
   const widthClasses = props.fullWidth ? ['w-full'] : []
