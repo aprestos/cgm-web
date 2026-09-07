@@ -1,5 +1,10 @@
 import { createI18n } from 'vue-i18n'
 import type { TranslationSchema } from './locales/en'
+import {
+  migrateLegacyLocale,
+  readBrowserLocale,
+  readStoredLocale,
+} from './localePreference'
 
 // Auto-import all locale directories using Vite's glob import
 // Each locale is a directory named with the locale code (e.g., en/, pt/, es/)
@@ -71,26 +76,23 @@ function isValidLocale(code: string): boolean {
   return availableLocaleCodes.includes(code)
 }
 
-// Load saved locale (this needs to be done before createI18n)
+/**
+ * The language to start in: what the visitor chose, else what their browser
+ * asks for, else English.
+ *
+ * Runs while this module is evaluated, so it must hold up with no browser
+ * around. Every source answers null on a server and the default wins; the
+ * request's own language is applied by the server once it renders.
+ */
 function getInitialLocale(): string {
-  const LOCALE_STORAGE_KEY = 'app-locale'
-  try {
-    const saved = localStorage.getItem(LOCALE_STORAGE_KEY)
-    if (saved && isValidLocale(saved)) {
-      return saved
-    }
-  } catch (error) {
-    console.error('Failed to load locale from localStorage:', error)
+  const stored = readStoredLocale() ?? migrateLegacyLocale()
+  if (stored && isValidLocale(stored)) {
+    return stored
   }
 
-  // Fallback to browser locale
-  try {
-    const browserLang = navigator.language.split('-')[0] ?? ''
-    if (browserLang && isValidLocale(browserLang)) {
-      return browserLang
-    }
-  } catch (error) {
-    console.error('Failed to get browser locale:', error)
+  const browser = readBrowserLocale()
+  if (browser && isValidLocale(browser)) {
+    return browser
   }
 
   return DEFAULT_LOCALE
