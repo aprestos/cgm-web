@@ -103,25 +103,26 @@ const buttonClasses = computed(() => {
     'disabled:cursor-not-allowed',
   ]
 
-  // Vertical padding is FIELD_SIZE's, so a button is exactly as tall as the
-  // input it sits beside — 48/44 at md, 52 at lg, 60/56 at xl. It used to thin
-  // out from the md breakpoint for toolbars, which left a 12px step between a
-  // desktop button and the field next to it: the "add location" row in
-  // LibrarySettings put a 32px button against a 44px input. `sm` is the size
-  // that actually rides in toolbars and table rows, and it is untouched — it
-  // already matched its field at both breakpoints.
+  // A button sits a little tighter than the field beside it — 48/36 at md,
+  // 48/48 at lg, 56/52 at xl — rather than matching it outright. Deliberately
+  // close but not equal: the desktop step used to be 12px, which read as
+  // misalignment, while a 4px difference reads as a button being a button.
   //
-  // Horizontal padding stays the button's own, and deliberately: a button pads
-  // around centred text so its px grows with its size, while a field's text is
-  // left-aligned against the leading edge, where wide px only pushes the caret
-  // inward. See the note in field.styles.ts.
+  // Horizontal padding never steps down. A button pads around centred text, so
+  // its px should stay visibly wider than the field's at every width; the old
+  // `md:px-*` step collapsed the two to the same 12px at `md`, which made a
+  // desktop button look pinched against the input above it. Field px for
+  // comparison: 10 / 12 / 14 / 16.
+  //
+  // `sm` keeps its own thinner vertical scale: it is the size that rides in
+  // toolbars and table rows, where height is the scarce thing.
   //
   // Gaps live on the content span (the actual flex container), not here.
   const sizeClasses = {
-    sm: ['px-3', 'py-1.5', 'text-sm', 'md:px-2.5', 'md:py-1.5', 'md:text-xs'],
-    md: ['px-4', 'py-3', 'text-base', 'md:px-3', 'md:text-sm'],
-    lg: ['px-5', 'py-3.5', 'text-base', 'md:px-4', 'md:text-base'],
-    xl: ['px-6', 'py-4', 'text-lg', 'md:px-5', 'md:text-base'],
+    sm: ['px-3', 'py-1.5', 'text-sm', 'md:text-xs'],
+    md: ['px-4', 'py-3', 'text-base', 'md:py-2', 'md:text-sm'],
+    lg: ['px-5', 'py-3', 'text-base'],
+    xl: ['px-6', 'py-3.5', 'text-lg', 'md:text-base'],
   }
 
   // Variant classes — flat surfaces, colour-only hover. No coloured glows and

@@ -1,8 +1,7 @@
 /**
  * Shared class maps for form fields (CInput, CTextArea, CSelect,
- * CCombobox). CButton reaches in here too, for the radius and for the vertical
- * half of FIELD_SIZE, so a button is the same shape and height as the field it
- * sits beside.
+ * CCombobox). CButton imports the radius from here so the two round off
+ * together; its padding is its own, for the reasons under FIELD_SIZE.
  *
  * These used to be copy-pasted class strings living inside each component,
  * which is how CInput and CTextArea ended up with two different helper-text
@@ -79,15 +78,18 @@ export type FieldSize = 'sm' | 'md' | 'lg' | 'xl'
  *
  * There is also no `md:` step-down on `py`: a field that thin reads as cramped
  * next to its label — only the font size steps down, and the height holds.
- * CButton follows the same rule from `md` up, so the two line up on desktop
- * instead of the button sitting 12px short of the field beside it. Only `sm`
- * keeps a genuinely compact desktop step, for toolbars and table rows.
+ * CButton stays a little shorter than the field at each size (4px at lg and
+ * xl) rather than matching it: close enough not to read as misalignment, far
+ * enough that a button still reads as a button. Its horizontal padding is
+ * wider than the values below at every size, which is the point of the
+ * paragraph above.
  *
  * `text-base` on small screens is load-bearing: iOS zooms the page when a
  * focused input renders below 16px.
  *
  * Measured heights (mobile / desktop), line-height + padding:
  *   sm 32/28px · md 48/44px · lg 52/52px · xl 60/56px
+ * The matching CButton heights are 32/28 · 48/36 · 48/48 · 56/52.
  */
 export const FIELD_SIZE: Record<FieldSize, string> = {
   sm: 'px-2.5 py-1.5 text-sm md:text-xs',
