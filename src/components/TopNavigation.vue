@@ -3,7 +3,7 @@
     class="sticky top-0 z-40 bg-white dark:bg-gray-950 transition-transform duration-300 motion-reduce:transition-none"
     :class="isHidden ? '-translate-y-full' : 'translate-y-0'"
   >
-    <nav aria-label="Top" class="mx-auto max-w-7xl sm:px-6 lg:px-8 xl:px-0">
+    <nav aria-label="Top" class="mx-auto max-w-7xl sm:px-4 md-px-6 lg:px-8">
       <div
         class="border-b border-gray-200 dark:border-white/5 px-4 pb-14 sm:px-0 sm:pb-0"
       >

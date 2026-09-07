@@ -188,6 +188,7 @@ const router = createRouter({
           component: (): Promise<unknown> =>
             import('../views/admin/settings/SettingsView.vue'),
           meta: { title: 'Settings' },
+          beforeEnter: (): Promise<boolean> => hasAnyOfRoles(['admin']),
           children: [
             {
               path: 'organization',
