@@ -29,6 +29,7 @@
     "@logtail/browser": "^0.5.8",
     "@regle/core": "^1.28.3",
     "@regle/rules": "^1.28.3",
+    "@supabase/ssr": "^0.12.6",
     "@supabase/supabase-js": "^2.110.7",
     "@tabler/icons-vue": "^3.45.0",
     "@unhead/vue": "^3.1.8",

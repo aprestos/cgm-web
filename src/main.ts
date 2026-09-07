@@ -25,6 +25,7 @@ import i18n from '@/i18n'
 import domainsService from '@/features/domains/service'
 import DomainNotConfigured from '@/views/DomainNotConfigured.vue'
 import logger from '@/lib/logger.ts'
+import { migrateLegacySession } from '@/lib/supabase.ts'
 
 // Always resolve from the hostname. The tenant a host maps to is server-side
 // state that can change, so it is never read from a client-side cache.
@@ -75,6 +76,10 @@ async function initializeApp(): Promise<void> {
   // Pinia goes on first: tenant, edition and settings are Pinia stores now,
   // and the loads below write straight into them.
   app.use(createPinia())
+
+  // Before the router, so the first navigation's guards see a session that is
+  // still in localStorage from before sessions moved to cookies.
+  await migrateLegacySession()
 
   // Load tenant first before setting up router
   let tenant: Tenant
