@@ -86,6 +86,12 @@ const router = createRouter({
             import('../views/auth/SignInView.vue'),
         },
         {
+          path: 'sign-up',
+          name: RouteNames.auth.signUp,
+          component: (): Promise<unknown> =>
+            import('../views/auth/SignUpView.vue'),
+        },
+        {
           path: 'verify',
           name: RouteNames.auth.verify,
           component: (): Promise<unknown> =>
@@ -182,6 +188,7 @@ const router = createRouter({
           component: (): Promise<unknown> =>
             import('../views/admin/settings/SettingsView.vue'),
           meta: { title: 'Settings' },
+          beforeEnter: (): Promise<boolean> => hasAnyOfRoles(['admin']),
           children: [
             {
               path: 'organization',

@@ -1,39 +1,30 @@
 <template>
   <div>
-    <!-- Inbox icon -->
-    <div
-      class="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30"
-    >
-      <InboxIcon
-        class="h-8 w-8 text-blue-600 dark:text-blue-400"
-        aria-hidden="true"
-      />
-    </div>
-
-    <!-- Main content -->
-    <div class="mt-6 text-center">
-      <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+    <div class="text-center">
+      <h1
+        class="font-display text-2xl font-bold tracking-tight text-gray-900 dark:text-white"
+      >
         {{ t('auth.checkInbox') }}
-      </h3>
-      <p class="mt-3 text-sm text-gray-600 dark:text-gray-400">
+      </h1>
+      <p class="mt-2 text-sm text-balance text-gray-600 dark:text-gray-400">
         {{ t('auth.verificationCodeSent') }}
-        <span class="font-medium text-gray-900 dark:text-white">
-          {{ email }}
-        </span>
-        . {{ t('auth.enterCodeDescription') }}
+        <span class="font-medium text-gray-900 dark:text-white">{{
+          email
+        }}</span>
       </p>
     </div>
 
-    <!-- OTP Input Form -->
-    <form class="mt-8" @submit.prevent="handleSubmit">
-      <div>
-        <label
-          for="otp"
-          class="block text-sm font-medium leading-6 text-gray-900 dark:text-white text-center"
+    <form class="mt-8" novalidate @submit.prevent="handleSubmit">
+      <fieldset>
+        <legend
+          class="w-full text-center text-xs font-semibold tracking-wider text-gray-500 uppercase dark:text-gray-100"
         >
           {{ t('auth.enterVerificationCode') }}
-        </label>
-        <div class="mt-3 flex justify-center gap-2">
+        </legend>
+
+        <!-- A grid rather than fixed-width boxes: six 48px cells plus gaps
+             overflow the 320px screens this has to fit. -->
+        <div class="mt-3 grid grid-cols-6 gap-2">
           <input
             v-for="(_digit, index) in otpDigits"
             :key="index"
@@ -42,101 +33,72 @@
             type="text"
             inputmode="numeric"
             maxlength="1"
-            class="block w-12 h-12 text-center rounded-md border-0 py-3 text-xl font-semibold text-gray-900 dark:text-white dark:bg-white/5 shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 focus:ring-2 focus:ring-inset focus:ring-primary-600 dark:focus:ring-primary-500"
+            autocomplete="one-time-code"
+            :aria-label="t('auth.digitLabel', { position: index + 1 })"
+            :class="otpInputClasses"
             @input="handleInput(index, $event)"
             @keydown="handleKeydown(index, $event)"
             @paste="handlePaste"
           />
         </div>
-      </div>
+      </fieldset>
 
-      <div class="mt-6">
-        <button
-          type="submit"
-          :disabled="!isOtpComplete || isLoading"
-          class="flex w-full justify-center items-center gap-2 rounded-md bg-primary-600 dark:bg-primary-500 px-3 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 dark:hover:bg-primary-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-600 dark:focus-visible:outline-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <svg
-            v-if="isLoading"
-            class="h-4 w-4 animate-spin"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <circle
-              class="opacity-25"
-              cx="12"
-              cy="12"
-              r="10"
-              stroke="currentColor"
-              stroke-width="4"
-            />
-            <path
-              class="opacity-75"
-              fill="currentColor"
-              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-            />
-          </svg>
-          {{ isLoading ? t('auth.verifying') : t('auth.verifyCode') }}
-        </button>
-      </div>
+      <CButton
+        type="submit"
+        size="lg"
+        full-width
+        class="mt-6"
+        :disabled="!isOtpComplete"
+        :loading="isLoading"
+        :loading-text="t('auth.verifying')"
+      >
+        {{ t('auth.verifyCode') }}
+        <template #icon-right>
+          <IconArrowNarrowRight class="size-5" aria-hidden="true" />
+        </template>
+      </CButton>
     </form>
 
-    <!-- Additional help -->
-    <div class="mt-6 text-center">
-      <p class="text-xs text-gray-500 dark:text-gray-400">
-        {{ t('auth.didntReceiveCode') }}
-        <button
-          class="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-500 dark:hover:text-primary-300"
-          @click="goBack"
-        >
-          {{ t('auth.tryAgain') }}
-        </button>
-      </p>
-    </div>
-
-    <!-- Security note -->
-    <div class="mt-6 rounded-md bg-gray-50 dark:bg-white/5 p-4">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <LockClosedIcon
-            class="h-5 w-5 text-gray-400 dark:text-gray-500"
-            aria-hidden="true"
-          />
-        </div>
-        <div class="ml-3">
-          <p class="text-xs text-gray-600 dark:text-gray-400">
-            {{ t('auth.codeExpiresNote') }}
-          </p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Back to form -->
-    <div class="mt-8">
+    <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
+      {{ t('auth.didntReceiveCode') }}
       <button
-        class="flex w-full justify-center rounded-md bg-white dark:bg-white/5 px-3 py-2 text-sm font-semibold text-gray-900 dark:text-white shadow-sm ring-1 ring-inset ring-gray-300 dark:ring-white/10 hover:bg-gray-50 dark:hover:bg-white/10 focus-visible:outline-offset-0"
+        type="button"
+        class="cursor-pointer font-semibold text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300"
         @click="goBack"
       >
-        <ArrowLeftIcon class="mr-2 h-4 w-4" aria-hidden="true" />
-        {{ t('auth.sendToDifferentEmail') }}
+        {{ t('auth.tryAgain') }}
       </button>
+    </p>
+
+    <p class="mt-2 text-center text-xs text-gray-500 dark:text-gray-500">
+      {{ t('auth.codeExpiresNote') }}
+    </p>
+
+    <div class="mt-8 text-center">
+      <CButton variant="transparent" size="sm" @click="goBack">
+        <template #icon-left>
+          <IconArrowNarrowLeft class="size-4" aria-hidden="true" />
+        </template>
+        {{ t('auth.sendToDifferentEmail') }}
+      </CButton>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {
-  ArrowLeftIcon,
-  InboxIcon,
-  LockClosedIcon,
-} from '@heroicons/vue/24/outline'
-import { computed, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { authService } from '@/features/auth/service.ts'
-import router from '@/router'
-import { RouteNames } from '@/router/routeNames.ts'
+import { useRoute, useRouter } from 'vue-router'
+import { IconArrowNarrowLeft, IconArrowNarrowRight } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
-import { useRoute } from 'vue-router'
+import CButton from '@/components/CButton.vue'
+import {
+  FIELD_BASE,
+  FIELD_RADIUS,
+  FIELD_STATE,
+} from '@/components/field.styles'
+import { authService } from '@/features/auth/service'
+import { RouteNames } from '@/router/routeNames'
 
 const { t } = useI18n()
 
@@ -145,6 +107,16 @@ const otpDigits = ref<string[]>(Array.from({ length: OTP_LENGTH }, () => ''))
 const inputRefs = ref<HTMLInputElement[]>([])
 const isLoading = ref(false)
 const route = useRoute()
+const router = useRouter()
+
+// The boxes are the same field as everywhere else in the app, only square and
+// centred, so they take the shared shell instead of a private copy of it.
+const otpInputClasses = [
+  FIELD_BASE,
+  FIELD_STATE.default,
+  FIELD_RADIUS,
+  'px-0 py-3 text-center text-xl font-semibold',
+]
 
 const email = computed<string>(() =>
   typeof route.query.email === 'string' ? route.query.email : '',
@@ -157,10 +129,19 @@ if (!email.value) {
   })
 }
 
+onMounted(() => {
+  inputRefs.value[0]?.focus()
+})
+
+// Back goes where the code was asked for. Returning a sign-up to the sign-in
+// screen would silently drop the name they had already given us.
 const goBack = (): void => {
   void router.push({
-    name: RouteNames.auth.signIn,
-    query: { redirect: route.query.redirect },
+    name:
+      route.query.flow === 'sign-up'
+        ? RouteNames.auth.signUp
+        : RouteNames.auth.signIn,
+    query: { email: email.value, redirect: route.query.redirect },
   })
 }
 
@@ -236,9 +217,13 @@ const handleSubmit = async (): Promise<void> => {
       })
     } catch (error) {
       console.error('OTP verification error:', error)
-      toast.error('Unable to verify OTP. Please try again.')
-    } finally {
+      toast.error(t('auth.invalidCode'))
       otpDigits.value = Array.from({ length: OTP_LENGTH }, () => '')
+      // Cleared boxes with the caret left at the end would look like a dead
+      // form; put them back at the start of the code they have to retype.
+      await nextTick()
+      inputRefs.value[0]?.focus()
+    } finally {
       isLoading.value = false
     }
   }

@@ -10,6 +10,12 @@ import {
 import { IconCheck, IconLanguage } from '@tabler/icons-vue'
 import CButton from '@/components/CButton.vue'
 
+// Defaults to dropping below the button. `top` is for callers that sit on the
+// bottom edge of the viewport, where a downward menu would be unreachable.
+withDefaults(defineProps<{ placement?: 'bottom' | 'top' }>(), {
+  placement: 'bottom',
+})
+
 const { availableLocales, currentLocale, setLocale } = useLocale()
 
 const handleLocaleChange = (localeCode: string): void => {
@@ -40,7 +46,8 @@ const handleLocaleChange = (localeCode: string): void => {
         leave-to="opacity-0"
       >
         <ListboxOptions
-          class="absolute right-0 z-20 mt-1 max-h-60 w-[min(10rem,calc(100vw-2rem))] overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
+          class="absolute right-0 z-20 max-h-60 w-[min(10rem,calc(100vw-2rem))] overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
+          :class="placement === 'top' ? 'bottom-full mb-1' : 'mt-1'"
         >
           <ListboxOption
             v-for="locale in availableLocales"

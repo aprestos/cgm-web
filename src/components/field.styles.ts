@@ -1,6 +1,7 @@
 /**
  * Shared class maps for form fields (CInput, CTextArea, CSelect,
- * CCombobox).
+ * CCombobox). CButton imports the radius from here so the two round off
+ * together; its padding is its own, for the reasons under FIELD_SIZE.
  *
  * These used to be copy-pasted class strings living inside each component,
  * which is how CInput and CTextArea ended up with two different helper-text
@@ -15,7 +16,8 @@
  * component — changing it repaints CInput, CTextArea, CSelect and CCombobox
  * together.
  * It stays out of FIELD_BASE only so the pill variant can swap it without
- * fighting class order.
+ * fighting class order, and CButton imports both so buttons and fields round
+ * off together.
  */
 export const FIELD_RADIUS = 'rounded-xl'
 export const FIELD_RADIUS_PILL = 'rounded-full'
@@ -74,15 +76,20 @@ export type FieldSize = 'sm' | 'md' | 'lg' | 'xl'
  * inward and wastes the field. So horizontal padding stays nearly flat and
  * height is carried by `py`.
  *
- * There is also no `md:` step-down on `py`. Buttons shrink on desktop to fit
- * toolbars, but a field that thin reads as cramped next to its label — only
- * the font size steps down, and the height holds.
+ * There is also no `md:` step-down on `py`: a field that thin reads as cramped
+ * next to its label — only the font size steps down, and the height holds.
+ * CButton stays a little shorter than the field at each size (4px at lg and
+ * xl) rather than matching it: close enough not to read as misalignment, far
+ * enough that a button still reads as a button. Its horizontal padding is
+ * wider than the values below at every size, which is the point of the
+ * paragraph above.
  *
  * `text-base` on small screens is load-bearing: iOS zooms the page when a
  * focused input renders below 16px.
  *
- * Resulting heights (mobile / desktop), line-height + padding:
- *   sm 32/28px · md 44/40px · lg 52px · xl 60/56px
+ * Measured heights (mobile / desktop), line-height + padding:
+ *   sm 32/28px · md 48/44px · lg 52/52px · xl 60/56px
+ * The matching CButton heights are 32/28 · 48/36 · 48/48 · 56/52.
  */
 export const FIELD_SIZE: Record<FieldSize, string> = {
   sm: 'px-2.5 py-1.5 text-sm md:text-xs',
