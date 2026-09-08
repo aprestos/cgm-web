@@ -13,6 +13,7 @@ import CInfoPopover from '@/components/CInfoPopover.vue'
 import { formatPrice } from '@/utils/price'
 import { formatDateRange } from '@/utils/date'
 import { getTicketTitle } from '@/utils/ticket'
+import { useEditionStore } from '@/features/events/edition.store'
 
 interface Props {
   ticket: Ticket | null
@@ -25,6 +26,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
+const editionStore = useEditionStore()
 
 const title = computed(() =>
   props.ticket
@@ -137,7 +139,7 @@ const status = computed(() => {
           {{ t('admin.tickets.price') }}
         </dt>
         <dd class="text-sm font-semibold text-gray-900 dark:text-white">
-          {{ formatPrice(ticket.price) }}
+          {{ formatPrice(ticket.price, editionStore.currency) }}
         </dd>
       </div>
       <div class="flex items-center justify-between gap-4 px-4 py-3">

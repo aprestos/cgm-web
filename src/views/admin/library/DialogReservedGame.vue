@@ -133,8 +133,12 @@ import type { LibraryReservation } from '@/features/library/reservations/service
 import { type User, userService } from '@/features/users/service.ts'
 import { IconMail, IconCalendar, IconMapPinFilled } from '@tabler/icons-vue'
 import libraryWithdrawService from '@/features/library/withdraws/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface LibraryGameWithDetails {
   game?: {
@@ -229,13 +233,17 @@ const handleImageError = (event: Event): void => {
 
 const handleReservationWithdraw = async (): Promise<void> => {
   // Find the game associated with this reservation
-  if (!props.reservation) return
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!props.reservation || !tenantId || !editionId) return
   isWithdrawing.value = true
 
   try {
     await libraryWithdrawService.create(
-      props.reservation?.library_game.id as number,
-      props.reservation?.user_id,
+      tenantId,
+      editionId,
+      props.reservation.library_game.id as number,
+      props.reservation.user_id,
     )
 
     toast.success(t('admin.library.withdrawSuccess', { name: gameName.value }))

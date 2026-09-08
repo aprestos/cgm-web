@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import { authService } from '@/features/auth/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
 
 export interface FileUploadOptions {
@@ -92,7 +93,8 @@ export async function uploadFileToSupabase(
 
   try {
     // Check authentication first
-    const user = await authService.getUser()
+    const tenantId = useTenantStore().tenant?.id
+    const user = tenantId ? await authService.getUser(tenantId) : null
     if (!user) {
       return {
         originalFile: file,

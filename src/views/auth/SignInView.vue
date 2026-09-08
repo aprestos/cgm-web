@@ -67,8 +67,10 @@ import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import { authService } from '@/features/auth/service'
 import { RouteNames } from '@/router/routeNames'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -101,7 +103,10 @@ const handleSubmit = async (): Promise<void> => {
   isLoading.value = true
 
   try {
-    await authService.signInWithEmail(form.email)
+    await authService.signInWithEmail(
+      tenantStore.tenant?.name ?? '',
+      form.email,
+    )
     await router.push({
       name: RouteNames.auth.verify,
       query: { email: form.email, redirect: route.query.redirect },

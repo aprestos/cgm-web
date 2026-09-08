@@ -7,6 +7,11 @@ import { IconCalendar, IconCircleCheck, IconStopwatch } from '@tabler/icons-vue'
 import logger from '@/lib/logger.ts'
 import { useTimeAgo } from '@vueuse/core'
 import { userService } from '@/features/users/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   libraryGameId?: number
@@ -24,10 +29,14 @@ const users = ref<Map<string, string>>(new Map())
 
 onMounted(async () => {
   // If libraryGameId is provided, load withdraws for this game
-  if (props.libraryGameId) {
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (props.libraryGameId && tenantId && editionId) {
     isLoading.value = true
     try {
       withdraws.value = await libraryWithdrawService.getByLibraryGameId(
+        tenantId,
+        editionId,
         props.libraryGameId,
       )
     } catch (error) {

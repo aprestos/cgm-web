@@ -9,8 +9,12 @@ import { toast } from 'vue-sonner'
 import libraryService from '@/features/library/games/service.ts'
 import libraryReservationService from '@/features/library/reservations/service.ts'
 import logger from '@/lib/logger.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -35,11 +39,21 @@ onMounted(() => {
 watch(
   () => props.open,
   async (): Promise<void> => {
-    if (!props.selectedGame) return
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (!props.selectedGame || !tenantId || !editionId) return
     isLoading.value = true
     const [loansCount, reservationsCount] = await Promise.all([
-      libraryWithdrawService.countByGame(props.selectedGame.id),
-      libraryReservationService.countByGame(props.selectedGame.id),
+      libraryWithdrawService.countByGame(
+        tenantId,
+        editionId,
+        props.selectedGame.id,
+      ),
+      libraryReservationService.countByGame(
+        tenantId,
+        editionId,
+        props.selectedGame.id,
+      ),
     ])
     if (loansCount === 0 && reservationsCount === 0) {
       canBeDeleted.value = true
@@ -49,11 +63,12 @@ watch(
 )
 
 const deleteGame = async (): Promise<void> => {
-  if (!props.selectedGame) return
+  const tenantId = tenantStore.tenant?.id
+  if (!props.selectedGame || !tenantId) return
   isDeletingGame.value = true
 
   try {
-    await libraryService.deleteGame(props.selectedGame.id)
+    await libraryService.deleteGame(tenantId, props.selectedGame.id)
     toast.success(
       t('admin.library.deleteSuccess', { name: props.selectedGame.game.name }),
     )

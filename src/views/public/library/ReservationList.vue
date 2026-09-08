@@ -61,6 +61,11 @@ import libraryReservationService, {
 import CircularCountdown from '@/components/CircularCountdown.vue'
 import ReservationDetail from '@/views/public/library/ReservationDetail.vue'
 import { authService } from '@/features/auth/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const reservations = ref<LibraryReservation[]>([])
 const loading = ref(true)
@@ -101,9 +106,15 @@ const closeReservationDetail = () => {
 }
 
 onMounted(async () => {
-  const user = await authService.getUser()
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) return
+
+  const user = await authService.getUser(tenantId)
   if (user) {
     unsubscribe = libraryReservationService.subscribeToUpdates(
+      tenantId,
+      editionId,
       user.id,
       (updatedReservations) => {
         reservations.value = updatedReservations

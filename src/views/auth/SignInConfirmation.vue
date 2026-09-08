@@ -17,8 +17,10 @@ import CInput from '@/components/CInput.vue'
 import { authService } from '@/features/auth/service'
 import logger from '@/lib/logger'
 import { RouteNames } from '@/router/routeNames'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
 
 const MIN_NAME_LENGTH = 2
 const REDIRECT_SECONDS = 5
@@ -56,15 +58,16 @@ onUnmounted(() => {
 onMounted(async () => {
   try {
     // Check if user is authenticated
-    const user = await authService.getUser()
+    const tenantId = tenantStore.tenant?.id
+    const user = tenantId ? await authService.getUser(tenantId) : null
 
-    if (!user) {
+    if (!user || !tenantId) {
       throw new Error('No authenticated user found')
     }
 
     if (!user.access) {
       // User doesn't have roles for this tenant, set up the relationship
-      await authService.setTenant(user.id)
+      await authService.setTenant(tenantId, user.id)
     } else {
       logger.debug('User already has role for this tenant:', {
         access: user.access,
@@ -96,7 +99,8 @@ const updateDisplayName = async (): Promise<void> => {
   const name = form.displayName.trim()
 
   try {
-    const user = await authService.getUser()
+    const tenantId = tenantStore.tenant?.id
+    const user = tenantId ? await authService.getUser(tenantId) : null
 
     await Promise.all([
       authService.updateUserMetadata({ display_name: name }),

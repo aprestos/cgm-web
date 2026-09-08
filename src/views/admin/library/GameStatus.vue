@@ -25,8 +25,12 @@ import {
 } from '@tabler/icons-vue'
 import { useTimeAgo } from '@vueuse/core'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const props = defineProps<{ data: LibraryGame }>()
 
@@ -42,9 +46,13 @@ const withdrawDate = computed(() => {
 })
 
 const fetchWithdrawDetails = async (): Promise<void> => {
-  if (!withdraw.value) {
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!withdraw.value && tenantId && editionId) {
     isLoadingWithdraw.value = true
     withdraw.value = await libraryWithdrawService.getActiveByLibraryGameId(
+      tenantId,
+      editionId,
       props.data.id,
     )
     isLoadingWithdraw.value = false

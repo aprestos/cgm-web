@@ -33,8 +33,10 @@ import { toast } from 'vue-sonner'
 import logger from '@/lib/logger.ts'
 import type { Order } from '@/features/orders/order.model.ts'
 import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const { t, locale } = useI18n()
 
@@ -149,7 +151,8 @@ watch(
 
 onMounted(async (): Promise<void> => {
   try {
-    user.value = await authService.getUser()
+    const tenantId = tenantStore.tenant?.id
+    user.value = tenantId ? await authService.getUser(tenantId) : null
     if (user.value) {
       accountForm.value.name = user.value.name
       accountForm.value.email = user.value.email
@@ -352,8 +355,16 @@ async function handlePaymentSubmit(): Promise<void> {
   isProcessingPayment.value = true
 
   try {
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (!tenantId || !editionId) {
+      throw new Error('Missing tenant or edition')
+    }
+
     const { url, sessionId } =
       await paymentsService.createStripeCheckoutSession(
+        tenantId,
+        editionId,
         cartItems.value.map((cartItem) => ({
           ticketId: cartItem.ticket.id,
           quantity: cartItem.quantity,

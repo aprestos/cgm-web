@@ -18,9 +18,13 @@ import { RouteNames } from '@/router/routeNames.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
 import { useRouter } from 'vue-router'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t, locale } = useI18n()
 const router = useRouter()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 const {
   getQuantity,
   addToCart,
@@ -34,7 +38,8 @@ const user = ref<User | null>(null)
 const isAuthenticated = computed<boolean>(() => user.value !== null)
 
 onMounted(async () => {
-  user.value = await authService.getUser()
+  const tenantId = tenantStore.tenant?.id
+  user.value = tenantId ? await authService.getUser(tenantId) : null
 })
 
 async function goToSignIn(): Promise<void> {
@@ -51,7 +56,9 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const hasItems = computed(() => !props.showComingSoon && totalItems.value > 0)
-const formattedTotal = computed(() => formatPrice(totalPrice.value))
+const formattedTotal = computed(() =>
+  formatPrice(totalPrice.value, editionStore.currency),
+)
 
 const isAvailableToBuy = (ticket: Ticket): boolean => {
   const now = Date.now()
@@ -159,7 +166,7 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
                     : 'text-gray-900 dark:text-white',
                 ]"
               >
-                {{ formatPrice(ticket.price) }}
+                {{ formatPrice(ticket.price, editionStore.currency) }}
               </span>
             </div>
             <!-- Action area -->

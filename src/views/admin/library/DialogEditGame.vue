@@ -13,8 +13,12 @@ import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import DialogComponent from '@/components/DialogComponent.vue'
 import libraryService from '@/features/library/games/service.ts'
 import { toast } from 'vue-sonner'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -95,7 +99,12 @@ defineExpose({
 })
 
 onMounted(async () => {
-  const result = await libraryLocationService.get()
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
+
+  const result = await libraryLocationService.get(
+    tenantStore.tenant.id,
+    editionStore.edition.id,
+  )
 
   locations.value = result.map((location) => {
     return {

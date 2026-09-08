@@ -229,7 +229,8 @@ const isActive = (routeName: string): boolean => {
 // Load user email and check admin role on component mount
 onMounted(async () => {
   try {
-    user.value = await authService.getUser()
+    const tenantId = tenantStore.tenant?.id
+    user.value = tenantId ? await authService.getUser(tenantId) : null
     if (user.value) {
       isAuthenticated.value = true
 

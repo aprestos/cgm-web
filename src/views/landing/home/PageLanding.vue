@@ -222,9 +222,13 @@ onUnmounted(() => {
 })
 
 async function loadTrendingGames(): Promise<void> {
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) return
+
   try {
     isLoadingGames.value = true
-    const games = await libraryService.get()
+    const games = await libraryService.get(tenantId, editionId)
     trendingGames.value = getRandomItems(games, TRENDING_GAMES_COUNT)
   } catch {
     trendingGames.value = []

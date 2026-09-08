@@ -104,7 +104,9 @@ function goToStep2(): void {
 }
 
 async function submit(): Promise<void> {
-  if (submitting.value || !canSubmit.value) return
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (submitting.value || !canSubmit.value || !tenantId || !editionId) return
   submitting.value = true
   try {
     const items = selectedTickets.value.map((tk) => ({
@@ -124,9 +126,9 @@ async function submit(): Promise<void> {
       user = await userService.create(null, buyerEmail.value.trim())
     }
 
-    await orderService.create({
+    await orderService.create(tenantId, editionId, {
       customerId: user.id,
-      currency: editionStore.edition?.currency ?? 'EUR',
+      currency: editionStore.currency,
       items,
       issuances,
       payment: {

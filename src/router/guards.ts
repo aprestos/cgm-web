@@ -1,6 +1,7 @@
 import type { NavigationGuardReturn, RouteLocationNormalized } from 'vue-router'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
 
 // Guard function type
@@ -8,8 +9,11 @@ export type RouteGuard = () => Promise<boolean>
 
 // Authentication check guard
 export const requiresAuth = async (): Promise<boolean> => {
+  const tenantId = useTenantStore().tenant?.id
+  if (!tenantId) return false
+
   try {
-    const user = await authService.getUser()
+    const user = await authService.getUser(tenantId)
     return !!user
   } catch (error) {
     logger.error('Error on guards.requiresAuth()', { error })
@@ -20,8 +24,12 @@ export const requiresAuth = async (): Promise<boolean> => {
 // Staff permission check guard
 export const hasAnyOfRoles = async (roles: string[]): Promise<boolean> => {
   if (!roles || roles.length === 0) return false
+
+  const tenantId = useTenantStore().tenant?.id
+  if (!tenantId) return false
+
   try {
-    const user = await authService.getUser()
+    const user = await authService.getUser(tenantId)
     if (!user?.access?.role) return false
     if (user.access.role === 'super-admin') return true
     return roles.includes(user.access.role)

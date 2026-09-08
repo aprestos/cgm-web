@@ -292,7 +292,7 @@ const sendEmails = async (): Promise<void> => {
                     <p
                       class="font-display text-base font-bold tabular-nums text-gray-900 dark:text-white"
                     >
-                      {{ formatPrice(order.total) }}
+                      {{ formatPrice(order.total, editionStore.currency) }}
                     </p>
                   </div>
                 </div>
@@ -441,7 +441,7 @@ const sendEmails = async (): Promise<void> => {
                       <span
                         class="font-display text-base font-bold tabular-nums text-gray-900 dark:text-white"
                       >
-                        {{ formatPrice(order.total) }}
+                        {{ formatPrice(order.total, editionStore.currency) }}
                       </span>
                     </div>
                   </div>

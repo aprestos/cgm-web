@@ -141,8 +141,12 @@ import {
   IconMapPin,
   IconArrowBarUp,
 } from '@tabler/icons-vue'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -208,9 +212,18 @@ const submit = async (): Promise<void> => {
     return
   }
 
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) {
+    isSubmitting.value = false
+    return
+  }
+
   try {
     // Call the withdraw service
     await libraryWithdrawService.create(
+      tenantId,
+      editionId,
       props.game?.id as number,
       data.selectedUser,
     )

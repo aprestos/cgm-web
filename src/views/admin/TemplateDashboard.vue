@@ -27,6 +27,7 @@ import DashboardNavigation from '@/components/navigation/DashboardNavigation.vue
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { useSettingsStore } from '@/features/settings/useSettings.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 import {
   IconBooks,
   IconHome,
@@ -39,6 +40,7 @@ import {
 import type { User } from '@/features/auth/user.model.ts'
 
 const settingsStore = useSettingsStore()
+const tenantStore = useTenantStore()
 
 const userEmail = ref<string | null>(null)
 const user = ref<User | null>(null)
@@ -113,7 +115,8 @@ const sidebarOpen = ref(false)
 // Load user email on component mount
 onMounted(async () => {
   try {
-    const userResponse = await authService.getUser()
+    const tenantId = tenantStore.tenant?.id
+    const userResponse = tenantId ? await authService.getUser(tenantId) : null
 
     if (userResponse) {
       userEmail.value = userResponse.email || ''

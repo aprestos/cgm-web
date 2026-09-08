@@ -3,6 +3,7 @@ import { useI18n } from 'vue-i18n'
 import type { CartItem } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
 import { formatWeekday } from '@/utils/date.ts'
+import { useEditionStore } from '@/features/events/edition.store'
 
 interface Props {
   items: CartItem[]
@@ -12,6 +13,7 @@ interface Props {
 defineProps<Props>()
 
 const { t, locale } = useI18n()
+const editionStore = useEditionStore()
 </script>
 
 <template>
@@ -45,7 +47,12 @@ const { t, locale } = useI18n()
           </p>
         </div>
         <p class="text-sm font-semibold">
-          {{ formatPrice(item.ticket.price * item.quantity) }}
+          {{
+            formatPrice(
+              item.ticket.price * item.quantity,
+              editionStore.currency,
+            )
+          }}
         </p>
       </li>
     </ul>
@@ -57,7 +64,7 @@ const { t, locale } = useI18n()
         class="flex items-center justify-between pt-2 text-base font-semibold text-gray-900 dark:text-white"
       >
         <dt>{{ t('landing.checkout.summary.total') }}</dt>
-        <dd>{{ formatPrice(total) }}</dd>
+        <dd>{{ formatPrice(total, editionStore.currency) }}</dd>
       </div>
     </dl>
   </aside>

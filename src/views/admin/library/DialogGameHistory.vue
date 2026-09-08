@@ -13,8 +13,12 @@ import WithdrawTimeline from '../../public/WithdrawTimeline.vue'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { IconExternalLink } from '@tabler/icons-vue'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -39,10 +43,14 @@ watch(
   () => props.open,
   async () => {
     // If libraryGameId is provided, load withdraws for this game
-    if (props.selectedGame) {
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (props.selectedGame && tenantId && editionId) {
       isLoading.value = true
       try {
         withdraws.value = await libraryWithdrawService.getByLibraryGameId(
+          tenantId,
+          editionId,
           props.selectedGame.id,
         )
       } catch (error) {

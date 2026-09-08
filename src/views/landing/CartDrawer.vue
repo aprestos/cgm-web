@@ -89,7 +89,12 @@
                                       }}
                                     </h3>
                                     <p class="ml-4">
-                                      {{ formatPrice(item.ticket.price) }}
+                                      {{
+                                        formatPrice(
+                                          item.ticket.price,
+                                          editionStore.currency,
+                                        )
+                                      }}
                                     </p>
                                   </div>
                                   <p class="mt-1 text-sm text-gray-500">
@@ -135,7 +140,9 @@
                         class="flex justify-between text-base font-medium text-gray-900"
                       >
                         <p>{{ t('landing.cart.subtotal') }}</p>
-                        <p>{{ formatPrice(totalPrice) }}</p>
+                        <p>
+                          {{ formatPrice(totalPrice, editionStore.currency) }}
+                        </p>
                       </div>
                       <div class="mt-6">
                         <RouterLink
@@ -182,10 +189,13 @@ import {
 import { XMarkIcon } from '@heroicons/vue/24/outline'
 import { useCart } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
+import { useEditionStore } from '@/features/events/edition.store'
 import { IconTicketFilled } from '@tabler/icons-vue'
 import { formatDateRange, formatWeekday } from '@/utils/date'
 import { useI18n } from 'vue-i18n'
 import { RouteNames } from '@/router/routeNames.ts'
+
+const editionStore = useEditionStore()
 
 const { locale, t } = useI18n()
 
