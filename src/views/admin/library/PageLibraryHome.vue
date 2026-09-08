@@ -463,7 +463,10 @@ watch(reservationInput, (newVal) => {
 onMounted(() => {
   const tenantId = tenantStore.tenant?.id
   const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) return
+  if (!tenantId || !editionId) {
+    loading.value = false
+    return
+  }
 
   // subscribe to service updates
   unsubscribe = libraryService.subscribeToUpdates(

@@ -224,7 +224,10 @@ onUnmounted(() => {
 async function loadTrendingGames(): Promise<void> {
   const tenantId = tenantStore.tenant?.id
   const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) return
+  if (!tenantId || !editionId) {
+    isLoadingGames.value = false
+    return
+  }
 
   try {
     isLoadingGames.value = true
