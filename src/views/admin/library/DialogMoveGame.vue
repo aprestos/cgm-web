@@ -69,8 +69,12 @@ import type { LibraryLocation } from '@/features/library/locations/location.mode
 import { toast } from 'vue-sonner'
 import libraryService from '@/features/library/games/service.ts'
 import { libraryLocationService } from '@/features/library/locations/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open?: boolean
@@ -97,8 +101,11 @@ const isSaving = ref(false)
 watch(
   () => props.selectedGame,
   async (game) => {
-    if (game) {
-      locations.value = await libraryLocationService.get()
+    if (game && tenantStore.tenant?.id && editionStore.edition?.id) {
+      locations.value = await libraryLocationService.get(
+        tenantStore.tenant.id,
+        editionStore.edition.id,
+      )
       selectedLocationId.value = game.location?.id || null
     }
   },

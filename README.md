@@ -2,7 +2,7 @@
 
 **The ultimate platform for managing your board game convention - board game library, events, tournaments, flea market and more.**
 
-congrem.io is a modern, full-featured web application designed to help organizers manage every aspect of board game gatherings—from large conventions to local libraries and tournaments. Whether you're running a community event, maintaining a game library, or organizing a competitive tournament, Congremio provides the tools you need.
+congrem is a modern, full-featured web application designed to help organizers manage every aspect of board game gatherings—from large conventions to local libraries and tournaments. Whether you're running a community event, maintaining a game library, or organizing a competitive tournament, Congremio provides the tools you need.
 
 ---
 

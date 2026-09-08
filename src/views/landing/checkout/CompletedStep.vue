@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { formatPrice } from '@/utils/price'
 import { RouteNames } from '@/router/routeNames.ts'
 import type { TicketAttendee } from '@/views/landing/checkout/checkout.model.ts'
+import { useEditionStore } from '@/features/events/edition.store'
 
 interface Props {
   orderId: string | undefined
@@ -14,6 +15,7 @@ interface Props {
 defineProps<Props>()
 
 const { t } = useI18n()
+const editionStore = useEditionStore()
 </script>
 
 <template>
@@ -49,7 +51,7 @@ const { t } = useI18n()
       <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
         {{ t('landing.checkout.completed.total') }}:
         <span class="font-semibold text-gray-900 dark:text-white">{{
-          formatPrice(total)
+          formatPrice(total, editionStore.currency)
         }}</span>
       </p>
     </div>

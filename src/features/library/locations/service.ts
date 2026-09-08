@@ -1,17 +1,19 @@
 import { supabase } from '@/lib/supabase.ts'
-import { useEditionStore } from '@/features/events/edition.store'
-import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { LibraryLocation } from '@/features/library/locations/location.model.ts'
 import logger from '@/lib/logger.ts'
 
 export const libraryLocationService = {
-  async search(query: string): Promise<Array<LibraryLocation>> {
+  async search(
+    tenantId: string,
+    editionId: number,
+    query: string,
+  ): Promise<Array<LibraryLocation>> {
     try {
       const result = await supabase
         .from('locations')
         .select('*')
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
         .ilike('name', `%${query}%`)
 
       return result.data as LibraryLocation[]
@@ -20,13 +22,16 @@ export const libraryLocationService = {
       return []
     }
   },
-  async get(): Promise<Array<LibraryLocation>> {
+  async get(
+    tenantId: string,
+    editionId: number,
+  ): Promise<Array<LibraryLocation>> {
     try {
       const result = await supabase
         .from('locations')
         .select('*')
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
 
       return result.data as LibraryLocation[]
     } catch (error) {
@@ -34,12 +39,16 @@ export const libraryLocationService = {
       return []
     }
   },
-  async create(name: string): Promise<LibraryLocation | null> {
+  async create(
+    tenantId: string,
+    editionId: number,
+    name: string,
+  ): Promise<LibraryLocation | null> {
     const { data, error } = await supabase
       .from('locations')
       .insert({
-        tenant_id: useTenantStore().tenant?.id,
-        edition_id: useEditionStore().edition?.id,
+        tenant_id: tenantId,
+        edition_id: editionId,
         name,
       })
       .select()

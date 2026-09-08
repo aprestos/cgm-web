@@ -54,13 +54,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import libraryReservationService, {
   type LibraryReservation,
 } from '@/features/library/reservations/service.ts'
 import CircularCountdown from '@/components/CircularCountdown.vue'
 import ReservationDetail from '@/views/public/library/ReservationDetail.vue'
 import { authService } from '@/features/auth/service.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const reservations = ref<LibraryReservation[]>([])
 const loading = ref(true)
@@ -75,11 +80,6 @@ const now = ref(Date.now())
 
 let timer: number | undefined
 
-onMounted(() => {
-  timer = window.setInterval(() => {
-    now.value = Date.now()
-  }, 1000) // update once per second
-})
 onUnmounted(() => {
   if (timer !== undefined) {
     clearInterval(timer)
@@ -101,9 +101,18 @@ const closeReservationDetail = () => {
 }
 
 onMounted(async () => {
-  const user = await authService.getUser()
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) {
+    loading.value = false
+    return
+  }
+
+  const user = await authService.getUser(tenantId)
   if (user) {
     unsubscribe = libraryReservationService.subscribeToUpdates(
+      tenantId,
+      editionId,
       user.id,
       (updatedReservations) => {
         reservations.value = updatedReservations
@@ -111,6 +120,9 @@ onMounted(async () => {
       },
     )
   }
+  timer = window.setInterval(() => {
+    now.value = Date.now()
+  }, 1000) // update once per second
 })
 
 onUnmounted(() => {

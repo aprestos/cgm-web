@@ -72,10 +72,10 @@
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('common.actions.submitting')"
+          :loading-text="t('common.actions.saving')"
           @click="submit"
         >
-          {{ t('common.actions.submit') }}
+          {{ t('common.actions.save') }}
         </CButton>
       </div>
     </form>
@@ -101,8 +101,12 @@ import CCombobox from '@/components/CCombobox.vue'
 import CSelect from '@/components/CSelect.vue'
 import type { Option } from '@/components/select.types'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -145,6 +149,10 @@ const submit = async (): Promise<void> => {
     return
   }
 
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) return
+
   isSubmitting.value = true
 
   try {
@@ -154,6 +162,8 @@ const submit = async (): Promise<void> => {
       )
 
       await libraryService.post(
+        tenantId,
+        editionId,
         game.id,
         data.selectedLocation as number,
         data.owner,
@@ -177,7 +187,12 @@ defineExpose({
 })
 
 onMounted(async () => {
-  const result = await libraryLocationService.get()
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
+
+  const result = await libraryLocationService.get(
+    tenantStore.tenant.id,
+    editionStore.edition.id,
+  )
 
   locations.value = result.map((result) => {
     return {

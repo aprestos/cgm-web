@@ -209,7 +209,8 @@ onMounted(async () => {
             : 'text-gray-400 dark:text-gray-500'
         "
       >
-        {{ item.accessDays?.length }} days - {{ formatPrice(item.price) }}
+        {{ item.accessDays?.length }} days -
+        {{ formatPrice(item.price, editionStore.currency) }}
       </span>
     </template>
 

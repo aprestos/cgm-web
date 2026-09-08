@@ -17,9 +17,13 @@ import { toast } from 'vue-sonner'
 import { authService } from '@/features/auth/service.ts'
 import DialogGameDetail from '@/views/public/library/DialogGameDetail.vue'
 import { RouteNames } from '@/router/routeNames.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
 const router = useRouter()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 const allGames = ref<LibraryGame[]>([])
 const loading = ref(true)
@@ -141,11 +145,17 @@ const handleReserveClick = (game: LibraryGame): void => {
 }
 
 const confirmReservation = async (): Promise<void> => {
-  if (!selectedGameForReservation.value) return
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!selectedGameForReservation.value || !tenantId || !editionId) return
 
   try {
     loadingReservation.value = true
-    await libraryReservationService.post(selectedGameForReservation.value.id)
+    await libraryReservationService.post(
+      tenantId,
+      editionId,
+      selectedGameForReservation.value.id,
+    )
     showReservationDialog.value = false
     selectedGameForReservation.value = null
     toast.success('Game reserved successfully!')
@@ -171,19 +181,30 @@ const closeAuthDialog = (): void => {
 }
 
 onMounted(async () => {
-  isAuthenticated.value = !!(await authService.getUser())
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) {
+    loading.value = false
+    return
+  }
+
+  isAuthenticated.value = !!(await authService.getUser(tenantId))
 
   // Subscribe to realtime updates without filters - filters are applied reactively
-  unsubscribe = libraryService.subscribeToUpdates((updatedGames) => {
-    allGames.value = updatedGames
-    loading.value = false
-    // Setup intersection observer after data loads
-    if (updatedGames.length > 0) {
-      void nextTick(() => {
-        setupIntersectionObserver()
-      })
-    }
-  })
+  unsubscribe = libraryService.subscribeToUpdates(
+    tenantId,
+    editionId,
+    (updatedGames) => {
+      allGames.value = updatedGames
+      loading.value = false
+      // Setup intersection observer after data loads
+      if (updatedGames.length > 0) {
+        void nextTick(() => {
+          setupIntersectionObserver()
+        })
+      }
+    },
+  )
 })
 
 onUnmounted(() => {

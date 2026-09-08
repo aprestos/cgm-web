@@ -1,6 +1,5 @@
 import type { Access, TenantAccess } from '@/features/auth/access.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { useTenantStore } from '@/features/tenant/tenant.store'
 import type { User } from '@/features/auth/user.model.ts'
 import logger from '@/lib/logger.ts'
 
@@ -24,14 +23,18 @@ import logger from '@/lib/logger.ts'
  */
 
 export const authService = {
-  async signUpWithEmail(name: string, email: string): Promise<void> {
+  async signUpWithEmail(
+    tenantName: string,
+    name: string,
+    email: string,
+  ): Promise<void> {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
         data: {
           display_name: name,
-          tenant_name: useTenantStore().tenant?.name,
+          tenant_name: tenantName,
         },
       },
     })
@@ -42,13 +45,13 @@ export const authService = {
     }
   },
 
-  async signInWithEmail(email: string): Promise<void> {
+  async signInWithEmail(tenantName: string, email: string): Promise<void> {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
         shouldCreateUser: true,
         data: {
-          tenant_name: useTenantStore().tenant?.name,
+          tenant_name: tenantName,
         },
       },
     })
@@ -77,14 +80,13 @@ export const authService = {
   },
 
   // User data methods (using getClaims)
-  async getUser(): Promise<User | null> {
+  async getUser(tenantId: string): Promise<User | null> {
     const { data } = await supabase.auth.getClaims()
 
     if (!data?.claims?.sub) {
       return null
     }
 
-    const tenantId: string = useTenantStore().tenant?.id as string
     let access: TenantAccess | undefined = undefined
     if (data.claims?.access) {
       access = (data.claims.access as Access)[tenantId]
@@ -104,11 +106,11 @@ export const authService = {
   },
 
   // Utility methods
-  async setTenant(userId: string): Promise<void> {
+  async setTenant(tenantId: string, userId: string): Promise<void> {
     await supabase.functions.invoke('user-tenant', {
       body: {
         user_id: userId,
-        tenant_id: useTenantStore().tenant?.id,
+        tenant_id: tenantId,
       },
       method: 'POST',
     })
@@ -149,8 +151,12 @@ export const authService = {
     return roles.includes(user.access.role)
   },
 
-  async hasPermission(domain: string, action: string): Promise<boolean> {
-    const user = await this.getUser()
+  async hasPermission(
+    tenantId: string,
+    domain: string,
+    action: string,
+  ): Promise<boolean> {
+    const user = await this.getUser(tenantId)
 
     if (user?.access?.role === 'super-admin') return true
     else return (user?.access?.permissions[domain] ?? []).includes(action)

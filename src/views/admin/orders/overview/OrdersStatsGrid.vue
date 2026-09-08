@@ -9,6 +9,9 @@ import {
 } from '@tabler/icons-vue'
 import StatisticCard from '@/components/StatisticCard.vue'
 import { formatPrice } from '@/utils/price'
+import { useEditionStore } from '@/features/events/edition.store.ts'
+
+const editionStore = useEditionStore()
 
 const props = defineProps<{
   ordersCount: number
@@ -36,7 +39,7 @@ const avgOrderValue = computed(() =>
     />
     <StatisticCard
       :label="t('admin.orders.totalRevenue')"
-      :value="formatPrice(ordersRevenue)"
+      :value="formatPrice(ordersRevenue, editionStore.currency)"
       :icon="IconCurrencyEuro"
       :loading="loading"
       color="green"
@@ -52,7 +55,7 @@ const avgOrderValue = computed(() =>
     />
     <StatisticCard
       :label="t('admin.orders.avgOrderValue')"
-      :value="formatPrice(avgOrderValue)"
+      :value="formatPrice(avgOrderValue, editionStore.currency)"
       :icon="IconTrendingUp"
       :loading="loading"
       color="amber"

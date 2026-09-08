@@ -8,8 +8,10 @@ import { IconCalendar, IconCircleCheck } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
 import WithdrawTimeline from './WithdrawTimeline.vue'
 import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const editionStore = useEditionStore()
+const tenantStore = useTenantStore()
 
 const { t } = useI18n()
 
@@ -44,10 +46,12 @@ const currentEventWithdraws = computed(() => {
 
 onMounted(async () => {
   // If userId is provided, load withdraws for this user
-  if (props.userId) {
+  const tenantId = tenantStore.tenant?.id
+  if (props.userId && tenantId) {
     isLoadingLocal.value = true
     try {
       localWithdraws.value = await libraryWithdrawService.getByUserId(
+        tenantId,
         props.userId,
       )
     } catch (error) {

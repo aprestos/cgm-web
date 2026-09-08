@@ -1,6 +1,4 @@
 import { supabase } from '@/lib/supabase.ts'
-import { useEditionStore } from '@/features/events/edition.store'
-import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 
 export interface LibraryWithdraw {
@@ -18,15 +16,18 @@ export interface LibraryWithdraw {
 }
 
 export const libraryWithdrawService = {
-  async get(): Promise<Array<LibraryWithdraw>> {
+  async get(
+    tenantId: string,
+    editionId: number,
+  ): Promise<Array<LibraryWithdraw>> {
     try {
       const result = await supabase
         .from('library_withdraws')
         .select(
           '*,user:profiles(name),library_game:library_games(game:games(name,year,image))',
         )
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
 
       return result.data as LibraryWithdraw[]
     } catch (error) {
@@ -35,10 +36,15 @@ export const libraryWithdrawService = {
     }
   },
 
-  async create(libraryGameId: number, userId: string): Promise<void> {
+  async create(
+    tenantId: string,
+    editionId: number,
+    libraryGameId: number,
+    userId: string,
+  ): Promise<void> {
     const { error } = await supabase.from('library_withdraws').insert({
-      tenant_id: useTenantStore().tenant?.id,
-      edition_id: useEditionStore().edition?.id,
+      tenant_id: tenantId,
+      edition_id: editionId,
       library_game_id: libraryGameId,
       started_at: new Date().toISOString(),
       user_id: userId,
@@ -49,7 +55,11 @@ export const libraryWithdrawService = {
     }
   },
 
-  async returnGame(libraryGameId: number): Promise<void> {
+  async returnGame(
+    tenantId: string,
+    editionId: number,
+    libraryGameId: number,
+  ): Promise<void> {
     // Update the active withdraw and return the updated record in a single operation
     const { error } = await supabase
       .from('library_withdraws')
@@ -57,8 +67,8 @@ export const libraryWithdrawService = {
         ended_at: new Date().toISOString(),
       })
       .eq('library_game_id', libraryGameId)
-      .eq('tenant_id', useTenantStore().tenant?.id)
-      .eq('edition_id', useEditionStore().edition?.id)
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
       .is('ended_at', null)
 
     if (error) {
@@ -67,6 +77,8 @@ export const libraryWithdrawService = {
   },
 
   async getActiveByLibraryGameId(
+    tenantId: string,
+    editionId: number,
     libraryGameId: number,
   ): Promise<LibraryWithdraw | null> {
     try {
@@ -74,8 +86,8 @@ export const libraryWithdrawService = {
         .from('library_withdraws')
         .select('*,user:profiles(name)')
         .eq('library_game_id', libraryGameId)
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
         .is('ended_at', null)
         .order('started_at', { ascending: false })
         .single<LibraryWithdraw>()
@@ -87,13 +99,16 @@ export const libraryWithdrawService = {
     }
   },
 
-  async getActiveWithdraws(): Promise<Array<LibraryWithdraw>> {
+  async getActiveWithdraws(
+    tenantId: string,
+    editionId: number,
+  ): Promise<Array<LibraryWithdraw>> {
     try {
       const result = await supabase
         .from('library_withdraws')
         .select('*')
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
         .is('ended_at', null)
         .order('started_at', { ascending: false })
 
@@ -104,14 +119,18 @@ export const libraryWithdrawService = {
     }
   },
 
-  async countByGame(libraryGameId: number): Promise<number> {
+  async countByGame(
+    tenantId: string,
+    editionId: number,
+    libraryGameId: number,
+  ): Promise<number> {
     try {
       const result = await supabase
         .from('library_withdraws')
         .select('*', { count: 'exact', head: true })
         .eq('library_game_id', libraryGameId)
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
 
       return result.count || 0
     } catch (error) {
@@ -120,7 +139,10 @@ export const libraryWithdrawService = {
     }
   },
 
-  async getByUserId(userId: string): Promise<Array<LibraryWithdraw>> {
+  async getByUserId(
+    tenantId: string,
+    userId: string,
+  ): Promise<Array<LibraryWithdraw>> {
     try {
       const result = await supabase
         .from('library_withdraws')
@@ -128,7 +150,7 @@ export const libraryWithdrawService = {
           '*,library_game:library_games(game:games(name,year,image)),edition:editions(name)',
         )
         .eq('user_id', userId)
-        .eq('tenant_id', useTenantStore().tenant?.id)
+        .eq('tenant_id', tenantId)
         .order('started_at', { ascending: false })
 
       return result.data as LibraryWithdraw[]
@@ -138,13 +160,17 @@ export const libraryWithdrawService = {
     }
   },
 
-  async getByLibraryGameId(libraryGameId: number): Promise<LibraryWithdraw[]> {
+  async getByLibraryGameId(
+    tenantId: string,
+    editionId: number,
+    libraryGameId: number,
+  ): Promise<LibraryWithdraw[]> {
     const { data, error } = await supabase
       .from('library_withdraws')
       .select('*,library_game:library_games(game:games(name,year,image))')
       .eq('library_game_id', libraryGameId)
-      .eq('tenant_id', useTenantStore().tenant?.id)
-      .eq('edition_id', useEditionStore().edition?.id)
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
       .order('started_at', { ascending: false })
       .overrideTypes<LibraryWithdraw[]>()
 

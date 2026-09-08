@@ -44,9 +44,14 @@ onMounted(async () => {
 })
 
 const loadLocations = async (): Promise<void> => {
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
+
   try {
     isLoading.value = true
-    locations.value = await libraryLocationService.get()
+    locations.value = await libraryLocationService.get(
+      tenantStore.tenant.id,
+      editionStore.edition.id,
+    )
   } catch (error) {
     console.error('Error loading locations:', error)
     toast.error('Failed to load locations')
@@ -61,9 +66,15 @@ const addLocation = async (): Promise<void> => {
     return
   }
 
+  if (!tenantStore.tenant?.id || !editionStore.edition?.id) return
+
   try {
     isAddingLocation.value = true
-    await libraryLocationService.create(newLocationName.value.trim())
+    await libraryLocationService.create(
+      tenantStore.tenant.id,
+      editionStore.edition.id,
+      newLocationName.value.trim(),
+    )
     toast.success('Location added successfully')
     newLocationName.value = ''
     await loadLocations()

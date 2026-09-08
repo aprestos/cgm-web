@@ -8,6 +8,9 @@ import BaseCard from '@/components/BaseCard.vue'
 import type { DataTableColumn } from '@/components/DataTable.vue'
 import DataTable from '@/components/DataTable.vue'
 import CBadge from '@/components/CBadge.vue'
+import { useEditionStore } from '@/features/events/edition.store.ts'
+
+const editionStore = useEditionStore()
 
 defineProps<{
   loading: boolean
@@ -121,7 +124,9 @@ function formatDate(iso: string): string {
         </template>
 
         <template #cell-total="{ item }">
-          <span class="tabular-nums">{{ formatPrice(item.total) }}</span>
+          <span class="tabular-nums">{{
+            formatPrice(item.total, editionStore.currency)
+          }}</span>
         </template>
 
         <template #cell-created_at="{ item }">

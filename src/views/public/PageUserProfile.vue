@@ -12,8 +12,10 @@ import WithdrawUserHistory from './WithdrawUserHistory.vue'
 import { RouteNames } from '@/router/routeNames.ts'
 import CButton from '@/components/CButton.vue'
 import { useEditionStore } from '@/features/events/edition.store'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const editionStore = useEditionStore()
+const tenantStore = useTenantStore()
 
 const route = useRoute()
 const userId = route.params.id as string
@@ -38,11 +40,14 @@ async function loadUserData(): Promise<void> {
 }
 
 async function loadWithdraws(): Promise<void> {
+  const tenantId = tenantStore.tenant?.id
+  if (!tenantId) return
+
   isLoadingWithdraws.value = true
   try {
     withdraws.value.set(
       editionStore.edition?.id as number,
-      await libraryWithdrawService.getByUserId(userId),
+      await libraryWithdrawService.getByUserId(tenantId, userId),
     )
   } catch (error) {
     console.error('Failed to load withdraws:', error)

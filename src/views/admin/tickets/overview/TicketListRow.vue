@@ -5,6 +5,7 @@ import type { Ticket } from '@/features/tickets/ticket.model'
 import { formatPrice } from '@/utils/price'
 import { getTicketTitle } from '@/utils/ticket'
 import CBadge from '@/components/CBadge.vue'
+import { useEditionStore } from '@/features/events/edition.store'
 
 interface Props {
   ticket: Ticket
@@ -14,6 +15,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const { t, locale } = useI18n()
+const editionStore = useEditionStore()
 
 const title = computed(() =>
   getTicketTitle(
@@ -73,7 +75,8 @@ const status = computed(() => {
         {{ title.displayDate }}
       </p>
       <p class="mt-1 text-xs font-medium text-slate-500">
-        {{ ticket.accessDays?.length }} days - {{ formatPrice(ticket.price) }}
+        {{ ticket.accessDays?.length }} days -
+        {{ formatPrice(ticket.price, editionStore.currency) }}
       </p>
     </div>
     <div class="flex shrink-0 flex-col items-end gap-1">

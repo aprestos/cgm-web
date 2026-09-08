@@ -1,7 +1,5 @@
 import { supabase } from '@/lib/supabase.ts'
 import type { CreateOrderInput } from '@/features/orders/createOrder.input.model.ts'
-import { useTenantStore } from '@/features/tenant/tenant.store'
-import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger.ts'
 import { toSnakeCaseAs } from '@/utils/caseConverter.ts'
 import type { Order, OrderItem } from '@/features/orders/order.model.ts'
@@ -239,7 +237,11 @@ export const orderService = {
     return (data ?? []) as unknown as OrderSummary[]
   },
 
-  async create(order: CreateOrderInput): Promise<{ orderId: string }> {
+  async create(
+    tenantId: string,
+    editionId: number,
+    order: CreateOrderInput,
+  ): Promise<{ orderId: string }> {
     const body = toSnakeCaseAs<Record<string, unknown>>(
       order as unknown as Record<string, unknown>,
     )
@@ -251,8 +253,8 @@ export const orderService = {
     }>(`orders`, {
       method: 'POST',
       headers: {
-        'Tenant-Id': useTenantStore().tenant?.id as string,
-        'Edition-Id': String(useEditionStore().edition?.id),
+        'Tenant-Id': tenantId,
+        'Edition-Id': String(editionId),
       },
       body,
     })

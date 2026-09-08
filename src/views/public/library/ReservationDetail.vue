@@ -129,6 +129,11 @@ import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import { toast } from 'vue-sonner'
 import libraryService from '@/features/library/games/service.ts'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   reservation: LibraryReservation | null
@@ -160,13 +165,19 @@ const handleCancelReservation = (): void => {
 }
 
 const confirmCancel = async (): Promise<void> => {
-  if (!props.reservation) return
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!props.reservation || !tenantId || !editionId) return
 
   try {
     cancellingReservation.value = true
     showCancelConfirmation.value = false
 
-    await libraryReservationService.delete(props.reservation.id)
+    await libraryReservationService.delete(
+      tenantId,
+      editionId,
+      props.reservation.id,
+    )
     await libraryService.updateGame(
       props.reservation.library_game.id as number,
       {

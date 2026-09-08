@@ -44,7 +44,7 @@ export const useTenantStore = defineStore('tenant', () => {
     const current = tenant.value
 
     if (!current || !current.email) {
-      return 'info@congrem.io'
+      return undefined
     }
 
     return current.email

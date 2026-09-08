@@ -15,11 +15,13 @@ import { RouteNames } from '@/router/routeNames'
 import { useCart } from '@/features/cart/cart.store'
 import { formatPrice } from '@/utils/price'
 import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 import { LogoType } from '@/features/tenant/tenant.model.ts'
 import { authService } from '@/features/auth/service'
 import type { User } from '@/features/auth/user.model'
 
 const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   sections?: string[]
@@ -62,7 +64,9 @@ const canAccessDashboard = computed<boolean>(
 const displayName = computed<string>(
   () => user.value?.name || t('landing.header.accountFallbackName'),
 )
-const formattedTotal = computed(() => formatPrice(totalPrice.value))
+const formattedTotal = computed(() =>
+  formatPrice(totalPrice.value, editionStore.currency),
+)
 const desktopSections = computed(() => props.sections.slice(0, 5))
 const headerProgress = computed<number>(() => {
   const progress = scrollY.value / heroFadeDistance.value
@@ -147,7 +151,8 @@ function handleScroll(): void {
 }
 
 async function loadUser(): Promise<void> {
-  user.value = await authService.getUser()
+  const tenantId = tenantStore.tenant?.id
+  user.value = tenantId ? await authService.getUser(tenantId) : null
 }
 
 function getHeroFadeDistance(): number {

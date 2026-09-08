@@ -6,6 +6,7 @@ import CInput from '@/components/CInput.vue'
 import type { Ticket } from '@/features/tickets/ticket.model'
 import { formatPrice } from '@/utils/price'
 import { getTicketTitle } from '@/utils/ticket.ts'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const props = defineProps<{
   tickets: Ticket[]
@@ -20,6 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { t, locale } = useI18n()
+const editionStore = useEditionStore()
 
 const emailTouched = ref(false)
 
@@ -150,7 +152,7 @@ const ticketRows = computed(() =>
               </span>
             </div>
             <p class="mt-0.5 text-xs text-gray-400 dark:text-gray-500">
-              {{ formatPrice(ticket.price) }}
+              {{ formatPrice(ticket.price, editionStore.currency) }}
               &nbsp;·&nbsp;
               {{ ticket.quantity }}
               {{ t('admin.orders.create.available') }}
@@ -195,7 +197,7 @@ const ticketRows = computed(() =>
       <span
         class="font-display text-lg font-bold tabular-nums text-gray-900 dark:text-white"
       >
-        {{ formatPrice(total) }}
+        {{ formatPrice(total, editionStore.currency) }}
       </span>
     </div>
   </div>

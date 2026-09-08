@@ -204,9 +204,9 @@ const loadPermissions = async (): Promise<void> => {
   // NOTE: keep `isLoading` scoped to role loading to avoid races with `loadUserRoles()`
   try {
     const [create, update, remove] = await Promise.allSettled([
-      authService.hasPermission('roles', 'create'),
-      authService.hasPermission('roles', 'update'),
-      authService.hasPermission('roles', 'delete'),
+      authService.hasPermission(tenantId, 'roles', 'create'),
+      authService.hasPermission(tenantId, 'roles', 'update'),
+      authService.hasPermission(tenantId, 'roles', 'delete'),
     ])
 
     const resolvePermission = (

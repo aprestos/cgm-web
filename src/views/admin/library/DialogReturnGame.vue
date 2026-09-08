@@ -10,8 +10,12 @@ import { userService } from '@/features/users/service.ts'
 import { useTimeAgo } from '@vueuse/core'
 import { IconHourglassHigh } from '@tabler/icons-vue'
 import { toast } from 'vue-sonner'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 interface Props {
   open: boolean
@@ -38,13 +42,17 @@ const withdrawDate = computed(() => {
 watch(
   () => [props.open, props.selectedGame],
   async () => {
-    if (props.open && props.selectedGame) {
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (props.open && props.selectedGame && tenantId && editionId) {
       isLoadingWithdraw.value = true
       activeWithdraw.value = null
       withdrawUser.value = null
 
       try {
         const withdraw = await libraryWithdrawService.getActiveByLibraryGameId(
+          tenantId,
+          editionId,
           props.selectedGame.id,
         )
         if (withdraw) {
@@ -73,10 +81,16 @@ async function handleConfirm(): Promise<void> {
 }
 
 const returnGame = async (): Promise<void> => {
-  if (!props.selectedGame?.id) return
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!props.selectedGame?.id || !tenantId || !editionId) return
 
   try {
-    await libraryWithdrawService.returnGame(props.selectedGame?.id)
+    await libraryWithdrawService.returnGame(
+      tenantId,
+      editionId,
+      props.selectedGame.id,
+    )
     toast.success(
       t('admin.library.returnSuccess', { name: props.selectedGame.game.name }),
     )

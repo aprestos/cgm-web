@@ -179,7 +179,8 @@ async function loadTournaments(): Promise<void> {
 }
 
 onMounted(async () => {
-  currentUser.value = await authService.getUser()
+  const tenantId = tenantStore.tenant?.id
+  currentUser.value = tenantId ? await authService.getUser(tenantId) : null
   await loadTournaments()
 })
 </script>

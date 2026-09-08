@@ -287,8 +287,12 @@ import DialogEditGame from '@/views/admin/library/DialogEditGame.vue'
 import libraryService from '@/features/library/games/service.ts'
 import PageHeader from '@/components/PageHeader.vue'
 import BaseCard from '@/components/BaseCard.vue'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
 
 enum Dialog {
   add,
@@ -429,11 +433,17 @@ const closeDialog = (): void => {
 // Reservation lookup (debounced)
 const handleReservationChange = useDebounceFn(
   async (reservationNumber: string): Promise<void> => {
-    if (!reservationNumber.trim()) return
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (!reservationNumber.trim() || !tenantId || !editionId) return
     loadingReservation.value = true
     try {
       selectedReservation.value =
-        await libraryReservationService.getByDisplayId(reservationNumber)
+        await libraryReservationService.getByDisplayId(
+          tenantId,
+          editionId,
+          reservationNumber,
+        )
       shownDialog.value = Dialog.reservation
     } catch {
       toast.error(t('admin.library.reservationNotFound'))
@@ -451,11 +461,22 @@ watch(reservationInput, (newVal) => {
 
 // Lifecycle
 onMounted(() => {
-  // subscribe to service updates
-  unsubscribe = libraryService.subscribeToUpdates((updatedGames) => {
-    allGames.value = updatedGames || []
+  const tenantId = tenantStore.tenant?.id
+  const editionId = editionStore.edition?.id
+  if (!tenantId || !editionId) {
     loading.value = false
-  })
+    return
+  }
+
+  // subscribe to service updates
+  unsubscribe = libraryService.subscribeToUpdates(
+    tenantId,
+    editionId,
+    (updatedGames) => {
+      allGames.value = updatedGames || []
+      loading.value = false
+    },
+  )
 })
 
 onUnmounted(() => {

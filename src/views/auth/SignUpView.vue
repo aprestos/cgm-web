@@ -78,8 +78,10 @@ import CButton from '@/components/CButton.vue'
 import CInput from '@/components/CInput.vue'
 import { authService } from '@/features/auth/service'
 import { RouteNames } from '@/router/routeNames'
+import { useTenantStore } from '@/features/tenant/tenant.store'
 
 const { t } = useI18n()
+const tenantStore = useTenantStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -117,7 +119,11 @@ const handleSubmit = async (): Promise<void> => {
   isLoading.value = true
 
   try {
-    await authService.signUpWithEmail(form.name.trim(), form.email)
+    await authService.signUpWithEmail(
+      tenantStore.tenant?.name ?? '',
+      form.name.trim(),
+      form.email,
+    )
     // `flow` is what sends "use a different address" back here rather than to
     // sign-in, so a mistyped address does not cost the name as well.
     await router.push({

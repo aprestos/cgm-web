@@ -1,8 +1,6 @@
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import { LibraryGameStatus } from '@/features/library/games/game.model.ts'
 import { supabase } from '@/lib/supabase.ts'
-import { useEditionStore } from '@/features/events/edition.store'
-import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs } from '@/utils/caseConverter.ts'
 
@@ -29,15 +27,15 @@ export const libraryService = {
     return result.count || 0
   },
 
-  async get(): Promise<Array<LibraryGame>> {
+  async get(tenantId: string, editionId: number): Promise<Array<LibraryGame>> {
     try {
       const { data } = await supabase
         .from('library_games')
         .select(
           'id,owner,notes,game:games(*),location:locations(id,name),edition_id,status,reserved_until',
         )
-        .eq('tenant_id', useTenantStore().tenant?.id)
-        .eq('edition_id', useEditionStore().edition?.id)
+        .eq('tenant_id', tenantId)
+        .eq('edition_id', editionId)
       return data ? toCamelCaseAs<LibraryGame>(data) : []
     } catch (error) {
       logger.error('Error on libraryService.get()', { error })
@@ -60,6 +58,8 @@ export const libraryService = {
   },
 
   async post(
+    tenantId: string,
+    editionId: number,
     gameId: number,
     locationId: number,
     owner: string,
@@ -67,8 +67,8 @@ export const libraryService = {
     notes?: string,
   ): Promise<void> {
     const { error } = await supabase.from('library_games').insert({
-      tenant_id: useTenantStore().tenant?.id,
-      edition_id: useEditionStore().edition?.id,
+      tenant_id: tenantId,
+      edition_id: editionId,
       game_id: gameId,
       location_id: locationId,
       status,
@@ -81,10 +81,14 @@ export const libraryService = {
     }
   },
 
-  subscribeToUpdates(onUpdate: GameUpdateCallback): () => void {
+  subscribeToUpdates(
+    tenantId: string,
+    editionId: number,
+    onUpdate: GameUpdateCallback,
+  ): () => void {
     // Initial load using async/await
     const initializeData = async (): Promise<void> => {
-      const games = await this.get()
+      const games = await this.get(tenantId, editionId)
       onUpdate(games)
     }
 
@@ -93,7 +97,7 @@ export const libraryService = {
 
     const handleDatabaseChange = (): void => {
       // Fetch fresh data and update if changed
-      void this.get().then((freshGames) => {
+      void this.get(tenantId, editionId).then((freshGames) => {
         onUpdate(freshGames)
       })
     }
@@ -218,12 +222,16 @@ export const libraryService = {
     return filtered
   },
 
-  async search(query: string): Promise<Array<LibraryGame>> {
+  async search(
+    tenantId: string,
+    editionId: number,
+    query: string,
+  ): Promise<Array<LibraryGame>> {
     const { data, error } = await supabase
       .from('library_games')
       .select('*')
-      .eq('tenant_id', useTenantStore().tenant?.id)
-      .eq('edition_id', useEditionStore().edition?.id)
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
       .or(
         `game_name.ilike.%${query}%,owner.ilike.%${query}%,notes.ilike.%${query}%`,
       )
@@ -243,10 +251,11 @@ export const libraryService = {
     await supabase.from('library_games').update(update).eq('id', id)
   },
 
-  async deleteGame(libraryGameId: number): Promise<void> {
+  async deleteGame(tenantId: string, libraryGameId: number): Promise<void> {
     const { error } = await supabase
       .from('library_games')
       .delete()
+      .eq('tenant_id', tenantId)
       .eq('id', libraryGameId)
 
     if (error) {

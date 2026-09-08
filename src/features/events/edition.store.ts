@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import type { Edition } from '@/features/events/edition.model.ts'
 
 /**
@@ -11,5 +11,14 @@ import type { Edition } from '@/features/events/edition.model.ts'
 export const useEditionStore = defineStore('edition', () => {
   const edition = ref<Edition | null>(null)
 
-  return { edition }
+  /**
+   * The currency prices are shown in, defaulting until an edition is loaded.
+   *
+   * Formatting a price needs a currency, and an edition can be absent or
+   * saved without one, so the fallback lives here rather than at every
+   * call site that formats a price.
+   */
+  const currency = computed(() => edition.value?.currency ?? 'EUR')
+
+  return { edition, currency }
 })
