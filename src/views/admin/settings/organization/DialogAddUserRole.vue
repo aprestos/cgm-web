@@ -43,7 +43,7 @@
           size="lg"
           class="order-1 w-full sm:order-2 sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('common.actions.submitting')"
+          :loading-text="t('common.actions.saving')"
         >
           {{ t('admin.settings.roles.add.submit') }}
         </CButton>

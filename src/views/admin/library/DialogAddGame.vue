@@ -72,10 +72,10 @@
           size="lg"
           class="order-1 sm:order-2 w-full sm:w-auto"
           :loading="isSubmitting"
-          :loading-text="t('common.actions.submitting')"
+          :loading-text="t('common.actions.saving')"
           @click="submit"
         >
-          {{ t('common.actions.submit') }}
+          {{ t('common.actions.save') }}
         </CButton>
       </div>
     </form>
