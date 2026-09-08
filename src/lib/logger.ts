@@ -31,25 +31,47 @@ const parseLogLevel = (level: string): number => {
  * Logging must never be the thing that throws, and it is reachable from
  * module scope and from failure paths that run before the app is installed,
  * so no active Pinia simply means the line carries no tenant.
+ *
+ * Never on a server: `getActivePinia()` is a module global, and between two
+ * concurrent renders it points at whichever request suspended last. A log line
+ * stamped with the wrong tenant is worse than one stamped with none.
  */
 const tenantId = (): string | undefined =>
-  getActivePinia() ? useTenantStore().tenant?.id : undefined
+  typeof window !== 'undefined' && getActivePinia()
+    ? useTenantStore().tenant?.id
+    : undefined
 
 const currentLogLevel = parseLogLevel(logLevel)
 
-let logtail: Logtail | undefined = undefined
+/**
+ * The Better Stack sink, when there is one worth building.
+ *
+ * Nothing is built on a server: `@logtail/browser` batches and flushes on
+ * browser lifecycle events a render does not have, so server-side lines go to
+ * the console and Nitro's own logging picks them up from there. Shipping them
+ * to Better Stack needs `@logtail/node`, which is a separate change.
+ */
+function createLogtail(): Logtail | undefined {
+  if (typeof window === 'undefined') return undefined
 
-if (isDevelopment) {
-  console.log('Development environment detected, using console for logging.')
-} else if (!token || !endpoint) {
-  console.log(
-    'Logtail token or endpoint not provided, using console for logging.',
-  )
-} else {
-  logtail = new Logtail(token, {
+  if (isDevelopment) {
+    console.log('Development environment detected, using console for logging.')
+    return undefined
+  }
+
+  if (!token || !endpoint) {
+    console.log(
+      'Logtail token or endpoint not provided, using console for logging.',
+    )
+    return undefined
+  }
+
+  return new Logtail(token, {
     endpoint: `https://${endpoint}`,
   })
 }
+
+const logtail = createLogtail()
 
 class Logger {
   info(message: string, content?: Record<string, unknown>): void {

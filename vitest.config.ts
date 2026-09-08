@@ -1,9 +1,19 @@
-import { fileURLToPath } from 'node:url'
-import { defineConfig, configDefaults } from 'vitest/config'
-import viteConfig from './vite.config'
+import { fileURLToPath, URL } from 'node:url'
+import vue from '@vitejs/plugin-vue'
+import { configDefaults, defineConfig } from 'vitest/config'
 
+/**
+ * Standalone since Nuxt took over the build: there is no `vite.config.ts` left
+ * to spread in. The unit tests mount components directly, so they need the Vue
+ * plugin and the `@` alias and nothing else Nuxt adds.
+ */
 export default defineConfig({
-  ...viteConfig,
+  plugins: [vue()],
+  resolve: {
+    alias: {
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
+  },
   test: {
     environment: 'jsdom',
     exclude: [...configDefaults.exclude, 'e2e/**'],

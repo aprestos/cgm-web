@@ -11,13 +11,22 @@ export const editionService = {
     if (error) throw error
     return data
   },
+  /**
+   * The edition the tenant is currently showing, or null when it has none.
+   *
+   * `maybeSingle` rather than `single`: a tenant that has been created but
+   * has not set up an edition yet is a normal state, not an error. Under the
+   * SPA the thrown error left that tenant's site a blank page, because startup
+   * never reached `mount()`; on a server it was a 500. Every caller already
+   * takes null — the return type has always said so.
+   */
   async getCurrentEdition(tenantId: string): Promise<Edition | null> {
     const { data, error } = await supabase
       .from('editions')
       .select('*')
       .eq('tenant_id', tenantId)
       .eq('current', true)
-      .single<Edition>()
+      .maybeSingle<Edition>()
     if (error) throw error
     return data
   },
