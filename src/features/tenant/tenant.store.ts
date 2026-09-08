@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 import { LogoType, type Tenant } from '@/features/tenant/tenant.model'
+import type { DomainStatus } from '@/features/domains/domain.model'
 
 const logoFallbackOrder: Record<LogoType, LogoType[]> = {
   [LogoType.favicon]: [LogoType.favicon, LogoType.square],
@@ -22,6 +23,19 @@ const logoFallbackOrder: Record<LogoType, LogoType[]> = {
  */
 export const useTenantStore = defineStore('tenant', () => {
   const tenant = ref<Tenant | null>(null)
+
+  /**
+   * Set instead of `tenant` when the request's host belongs to nobody.
+   *
+   * The app renders `DomainNotConfigured` off this rather than off a bare
+   * `tenant === null`, so the page can say which of the two things happened —
+   * a host nobody has claimed, or one still waiting on DNS — and so a tenant
+   * that simply has not loaded yet is not mistaken for one that does not exist.
+   */
+  const unconfiguredDomain = ref<{
+    hostname: string
+    status: DomainStatus | null
+  } | null>(null)
 
   function getLogo(logoType: LogoType): string | undefined {
     const current = tenant.value
@@ -50,5 +64,5 @@ export const useTenantStore = defineStore('tenant', () => {
     return current.email
   }
 
-  return { tenant, getLogo, getEmail }
+  return { tenant, unconfiguredDomain, getLogo, getEmail }
 })

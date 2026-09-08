@@ -1,4 +1,4 @@
-import type { NavigationGuardReturn, RouteLocationNormalized } from 'vue-router'
+import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 import { authService } from '@/features/auth/service.ts'
 import { RouteNames } from '@/router/routeNames'
 import { useTenantStore } from '@/features/tenant/tenant.store'
@@ -39,10 +39,21 @@ export const hasAnyOfRoles = async (roles: string[]): Promise<boolean> => {
   }
 }
 
-// Main navigation guard handler (Vue 2 style)
+/**
+ * Where a navigation should go instead, or undefined to let it through.
+ *
+ * Installed as Nuxt global middleware (`src/middleware/auth.global.ts`)
+ * rather than `router.beforeEach`, because Nuxt owns the router instance now.
+ * The logic is unchanged.
+ *
+ * This also runs on the server, where there is no session to read, so a
+ * guarded route would redirect to sign-in rather than render. That is the safe
+ * direction, and it does not come up today: every guarded route is under
+ * `/admin` or `/auth`, which `routeRules` keeps client-rendered.
+ */
 export const navigationGuard = async (
   to: RouteLocationNormalized,
-): Promise<NavigationGuardReturn> => {
+): Promise<RouteLocationRaw | undefined> => {
   try {
     // Routes with a custom guard or requiresAuth need a logged-in user first
     if (to.meta.guard || to.meta.requiresAuth) {

@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Nuxt
+.nuxt
+.output
+.nitro
+.data
+
 # Package manager lock files (using pnpm only)
 package-lock.json
 yarn.lock

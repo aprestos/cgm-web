@@ -21,6 +21,8 @@ export default defineConfigWithVueTs(
       '**/coverage/**',
       '**/eslint.config.ts',
       '**/*.config.ts',
+      '**/.nuxt/**',
+      '**/.output/**',
     ],
   },
 
@@ -34,9 +36,12 @@ export default defineConfigWithVueTs(
       parser: vueParser,
       parserOptions: {
         parser: tsparser,
+        // Nuxt generates the app and server projects into `.nuxt/`; run
+        // `pnpm run dev` or `nuxt prepare` before linting a clean checkout.
         project: [
-          './tsconfig.app.json',
-          './tsconfig.node.json',
+          './.nuxt/tsconfig.app.json',
+          './.nuxt/tsconfig.server.json',
+          './.nuxt/tsconfig.node.json',
           './tsconfig.vitest.json',
           './e2e/tsconfig.json',
         ],
