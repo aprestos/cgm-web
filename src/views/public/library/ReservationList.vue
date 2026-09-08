@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import libraryReservationService, {
   type LibraryReservation,
 } from '@/features/library/reservations/service.ts'
@@ -80,11 +80,6 @@ const now = ref(Date.now())
 
 let timer: number | undefined
 
-onMounted(() => {
-  timer = window.setInterval(() => {
-    now.value = Date.now()
-  }, 1000) // update once per second
-})
 onUnmounted(() => {
   if (timer !== undefined) {
     clearInterval(timer)
@@ -108,7 +103,10 @@ const closeReservationDetail = () => {
 onMounted(async () => {
   const tenantId = tenantStore.tenant?.id
   const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) return
+  if (!tenantId || !editionId) {
+    loading.value = false
+    return
+  }
 
   const user = await authService.getUser(tenantId)
   if (user) {
@@ -122,6 +120,9 @@ onMounted(async () => {
       },
     )
   }
+  timer = window.setInterval(() => {
+    now.value = Date.now()
+  }, 1000) // update once per second
 })
 
 onUnmounted(() => {
