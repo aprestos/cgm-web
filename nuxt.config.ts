@@ -54,6 +54,13 @@ export default defineNuxtConfig({
     // These stay the SPA they have always been.
     '/admin/**': { ssr: false },
     '/auth/**': { ssr: false },
+
+    // Checkout is the cart, and the cart lives in the visitor's browser: the
+    // store restores it from localStorage during setup, so a server render is
+    // always the empty-cart page and a returning visitor's first client render
+    // disagrees with all of it. Nothing here is worth crawling either — it
+    // says `noindex`. Step 5c of `docs/ssr-migration.md`.
+    '/checkout': { ssr: false },
   },
 
   devServer: {
@@ -72,8 +79,8 @@ export default defineNuxtConfig({
       charset: 'utf-8',
       viewport: 'width=device-width, initial-scale=1.0, viewport-fit=cover',
       title: 'congrem.io',
-      // Still static. `<html lang>` following the active locale is step 5d.
-      htmlAttrs: { lang: 'en' },
+      // `<html lang>` is set in `src/app.vue`, from the language the request
+      // resolved to — it is not knowable here.
       link: [{ rel: 'icon', href: '/favicon.ico' }],
       meta: [
         // iOS Safari specific

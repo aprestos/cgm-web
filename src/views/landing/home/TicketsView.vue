@@ -314,32 +314,38 @@ const getTitle = (ticket: Ticket): { weekday: string; displayDate: string } =>
         v-if="!props.showComingSoon"
         class="mt-12 flex h-14 items-center justify-center"
       >
-        <Transition
-          enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-          enter-from-class="opacity-0 scale-75 blur-sm"
-          enter-to-class="opacity-100 scale-100 blur-0"
-          leave-active-class="transition-all duration-300 ease-in"
-          leave-from-class="opacity-100 scale-100"
-          leave-to-class="opacity-0 scale-75"
-        >
-          <RouterLink
-            v-if="hasItems"
-            :to="{ name: RouteNames.landing.checkout }"
+        <!-- Client-only, like the badge in the header and for the same
+             reason: `hasItems` reads a cart the server has no way to know
+             about, so a returning visitor's first client render disagrees with
+             the HTML. The reserved height above keeps the layout still. -->
+        <ClientOnly>
+          <Transition
+            enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            enter-from-class="opacity-0 scale-75 blur-sm"
+            enter-to-class="opacity-100 scale-100 blur-0"
+            leave-active-class="transition-all duration-300 ease-in"
+            leave-from-class="opacity-100 scale-100"
+            leave-to-class="opacity-0 scale-75"
           >
-            <button
-              type="button"
-              class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-primary-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition-all duration-300 hover:scale-105 hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/40 dark:shadow-primary-700/30"
+            <RouterLink
+              v-if="hasItems"
+              :to="{ name: RouteNames.landing.checkout }"
             >
-              <IconShoppingBag class="h-5 w-5" />
-              <span>
-                {{ t('landing.tickets.checkout') }} · {{ formattedTotal }}
-              </span>
-              <IconArrowRight
-                class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-              />
-            </button>
-          </RouterLink>
-        </Transition>
+              <button
+                type="button"
+                class="group flex cursor-pointer items-center gap-3 rounded-2xl bg-primary-600 px-8 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary-500/30 transition-all duration-300 hover:scale-105 hover:bg-primary-500 hover:shadow-xl hover:shadow-primary-500/40 dark:shadow-primary-700/30"
+              >
+                <IconShoppingBag class="h-5 w-5" />
+                <span>
+                  {{ t('landing.tickets.checkout') }} · {{ formattedTotal }}
+                </span>
+                <IconArrowRight
+                  class="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                />
+              </button>
+            </RouterLink>
+          </Transition>
+        </ClientOnly>
       </div>
     </div>
   </section>

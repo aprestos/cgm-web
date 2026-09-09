@@ -2,8 +2,8 @@
 
 Tracks the move from a client-rendered SPA to server-rendered public pages.
 
-Steps 1–4, 5b and items 1–3 of step 7 are done. 5c–5e are next, then 5a; step 6
-is optional and may never be worth doing. Step 7 was added after 5b, which
+Steps 1–5 (except 5a) and items 1–3 of step 7 are done. 5a is next; step 6 is
+optional and may never be worth doing. Step 7 was added after 5b, which
 showed that rendering the content on a server is only half of what the SEO
 reason for this migration needed. Everything below step 7 is a debt this
 migration created or uncovered, recorded so it does not get lost.
@@ -58,6 +58,7 @@ The target is the ~48 landing and public views.
 | 4. Nuxt + `Host` header  | —   | The app is server-rendered. The tenant is resolved from the request's own `Host` header during render instead of from three round trips before first paint.                                          |
 | 5b. Fetch during render  | —   | The public pages had been server-rendered since step 4 and still arrived empty, because every one of them fetched its content in `onMounted`. They now fetch during the render.                      |
 | 7.1–7.3. Metadata        | —   | One title for the whole app, no description, canonical or `og:` tag anywhere, no `robots.txt` or `sitemap.xml`, and every unknown URL answering 200. All four fixed.                                 |
+| 5c–5e. Hydration, locale | —   | Every public route now hydrates with zero console errors. i18n is one instance per app, the language is resolved per request, and `<html lang>` follows it.                                          |
 
 Steps 1–3 were behaviour-preserving in the SPA and were worth shipping on their
 own merits.
@@ -166,9 +167,17 @@ host in the cache key (`cache: { varies: ['host'] }`, or a key function) and
 rules on — driving one hostname and then another at a cold server proves
 nothing, since the bug needs the first response to have been cached.
 
-The other precondition is that these renders stay anonymous, which is why 5b
+The cache key also has to include **the language**. Since 5e a render comes out
+in the language the request asked for, so `/library` cached for a Portuguese
+visitor is `/library` served to an English one. `Vary: accept-language` is not
+enough on its own, because the `app-locale` cookie outranks the header — the
+key has to be built from the same resolution `plugins/i18n.ts` does.
+
+The third precondition is that these renders stay anonymous, which is why 5b
 left the personal parts of each page in the browser: a page rendered with a
 visitor's session is a page that must never be shared with the next visitor.
+`/checkout` is `ssr: false` for the stronger version of the same reason (5c),
+so it is not a candidate for caching at all.
 
 ### 5b. Data fetching (done)
 
@@ -232,67 +241,109 @@ Two smaller consequences worth knowing about:
   scroll, which a crawler does not do, so the other ~200 are still invisible to
   one. That is a step 7 problem, not a rendering one.
 
-### 5c. Hydration mismatches
+### 5c. Hydration mismatches (done)
 
-Now observable rather than predicted. A headless pass over the public routes
-against the dev server reports these, and nothing else — the counts below are
-after 5b, which added no new ones of its own:
+Every public route — `/`, `/library`, `/tournaments`, `/flea-market`,
+`/checkout` — now hydrates with **zero console errors or warnings**, for a
+fresh browser and for a returning one carrying a cart and a checkout draft.
 
-- **`LanguageSwitcher`'s headless-ui `Listbox`** — on every public page. The
-  server and the client generate different ids and the popover markup differs,
-  so it mismatches on both children and nodes. The most common cause of this is
-  a component that has to be `<ClientOnly>`.
-- **`FilterSidebar`** on `/library` — server renders a fragment where the
-  client expects an `<aside>`; it teleports.
-- ~~**A date range in `HeroView`**~~ — **fixed, and it was not what this said.**
-  The two strings differ by their separator, not their date: `Intl.DateTimeFormat.formatRange`
-  pads the en dash with whatever the runtime's ICU decides, and Node 26 picks
-  U+2009 THIN SPACE where Chrome picks a plain U+0020. Not a timezone at all —
-  the same instant, formatted by two different ICU builds. `formatDateRange` in
-  `src/utils/date.ts` no longer calls the native `formatRange`; it goes through
-  the Luxon path that was previously only a fallback, with a separator we own.
-  That also removed a zone bug nobody had noticed: the native path read its ends
-  through `new Date`, which parses a date-only ISO string as UTC midnight and
-  then prints it locally, so `2026-12-28` was already December 27th for anyone
-  west of Greenwich.
+What each one turned out to be:
 
-  Worth keeping in mind for the rest of 5c: this one only became visible on the
-  landing page, and 5b then reproduced it in `TicketsView` the moment tickets
-  started rendering on the server. **A mismatch you cannot see is a mismatch in
-  content that was not being rendered yet.** Fixing it took `/` to zero console
-  errors and warnings.
+- **`LanguageSwitcher`'s headless-ui `Listbox`** — on every public page.
+  Different ids and different popover markup on the two sides. `<ClientOnly>`,
+  with a fallback that draws the same trigger button so the header does not
+  shift when the real one takes over. The fallback can name the current
+  language honestly, because after 5e the server knows which one it is.
+- **`FilterSidebar`** on `/library` and `/tournaments` — `useMinWidth` answers
+  false with no browser, so the server rendered the slide-over and a desktop
+  browser replaced it with the pinned `<aside>`. `<ClientOnly>` inside the
+  component, deliberately with no fallback: guessing a viewport server-side
+  only trades a mismatch for a flash of the wrong layout.
+- ~~**A date range in `HeroView`**~~ — fixed in the 5b/step 7 pass, and it was
+  not what this file said it was. The two strings differ by their separator,
+  not their date: `Intl.DateTimeFormat.formatRange` pads the en dash with
+  whatever the runtime's ICU decides, and Node 26 picks U+2009 THIN SPACE where
+  Chrome picks a plain U+0020. The same instant, formatted by two different ICU
+  builds. `formatDateRange` in `src/utils/date.ts` no longer calls the native
+  `formatRange`; it goes through the Luxon path that used to be only a
+  fallback, with a separator we own. That also removed a zone bug nobody had
+  noticed: the native path read its ends through `new Date`, which parses a
+  date-only ISO string as UTC midnight and then prints it locally, so
+  `2026-12-28` was already December 27th for anyone west of Greenwich.
 
-Predicted and _not_ yet seen, because a fresh browser has neither: the cart
-badge and drawer (`src/features/cart/cart.store.ts` hydrates from
-localStorage), and the checkout draft restore
-(`src/views/landing/checkout/checkout.draft.ts`). Both still need
-`<ClientOnly>`.
+And the two that were predicted here, of which **only one was real**:
 
-Anything branching on `useBreakpoint` / `useMediaQuery` is the same shape:
-both correctly answer `false` with no browser, so the server renders the mobile
-branch and the client may swap it. It only matters where the two layouts must
-not coexist, which is exactly what those composables are for.
+- **The cart was real.** `useCart()` calls `initialize()` during setup, which
+  reads localStorage synchronously, so a returning visitor's _first_ client
+  render already had a cart the server's HTML did not. It showed up twice on
+  `/`: the badge in `HeaderComponent` and the checkout bar in `TicketsView`.
+  Both are `<ClientOnly>` now. Neither is content — they are controls that mean
+  nothing to a visitor without a cart.
+- **The checkout draft was not.** `restoreDraft()` is called from `onMounted`,
+  which runs _after_ the first client render, so the browser's first render
+  agrees with the server's and the restore lands as an ordinary reactive
+  update. Nothing to fix. The distinction is the whole lesson: **restoring
+  browser state during setup mismatches, restoring it in `onMounted` does
+  not.**
 
-Most of the codebase is already fine: only 28 of ~265 source files touch
+`/checkout` is `ssr: false` now rather than patched with `<ClientOnly>`.
+Checkout _is_ the cart, and the cart lives in the browser: a server render is
+always the empty-cart page, so nearly every element on it disagreed with the
+browser's first render. It is `noindex` anyway. That is the same one-line
+answer `/admin` and `/auth` already had.
+
+Anything branching on `useBreakpoint` / `useMediaQuery` is the `FilterSidebar`
+shape: both correctly answer `false` with no browser, so the server renders the
+mobile branch and the client may swap it. It only matters where the two layouts
+must not coexist, which is exactly what those composables are for.
+
+Most of the codebase was already fine: only 28 of ~265 source files touch
 browser globals, and the scroll handlers in `PageLanding.vue`,
 `BaseLandingPage.vue` and `HeaderComponent.vue` are all inside
 `onMounted`/`onUnmounted`, which never run on a server.
 
-### 5d. `<html lang>`
+### 5d. `<html lang>` (done)
 
-Still a static `en`, now in `app.head.htmlAttrs` in `nuxt.config.ts`; it does
-not follow the active locale. Invisible in a SPA, wrong on a server-rendered
-page, and easy to fix once the server knows the locale — the cookie from #83 is
-already readable per request. Blocked on 5e: setting the locale per request
-against a shared `createI18n` instance is what makes that singleton dangerous.
+`src/app.vue` sets it from the language the request resolved to, reactively, so
+switching language in the page updates it too. It was a static `en` in
+`nuxt.config.ts`, which in a SPA nobody could see — the shell had no text in
+it. On a server-rendered page it is a claim about content that is right there
+in the response, and it was wrong for every Portuguese visitor.
 
-### 5e. i18n is still a module-level singleton
+**No `hreflang`, on purpose.** `hreflang` annotates _alternate URLs_ for the
+same content in other languages, and this app has none: the language is a
+cookie and a header, and `/library` is one URL that answers in whichever
+language the visitor asked for. Adding `hreflang` would mean per-locale URLs
+(`/pt/library`), which is a routing decision, not a metadata one. What the
+current shape does want is `Vary: accept-language` on the cached responses —
+see the warning in 5a.
 
-`createI18n()` runs at module scope in `src/i18n/index.ts`, so the instance is
-shared across concurrent requests — the same class of bug PR #81 fixed for the
-stores. It has not bitten yet because locale is currently only ever read.
-`@nuxtjs/i18n` handles this per request; if we do not adopt it, `createI18n`
-has to move into a per-app factory.
+### 5e. i18n per request (done)
+
+`createI18n()` no longer runs at module scope. `src/i18n/index.ts` exports
+`createAppI18n(locale)` and `plugins/i18n.ts` calls it once per app, which on a
+server is once per request.
+
+The language for a request is resolved in that plugin, in this order: the
+`app-locale` cookie, then a legacy localStorage preference (browser only, the
+shim from #83), then what the visitor's browser asks for — `Accept-Language` on
+a server, `navigator` in a browser, which are the same preference reported
+through two different channels. The answer is kept in `useState`, so the
+server's decision rides to the browser in the payload and hydration starts from
+the language the server actually rendered rather than working it out again and
+possibly disagreeing.
+
+**The consequence is bigger than `<html lang>`.** Until this, every server
+render came out in English regardless of who asked, and the visitor's language
+was applied on hydration — a mismatch on every translated string on the page,
+and English HTML for a crawler no matter which language the page is really in.
+A Portuguese request now gets `<title>Ludoteca · …</title>` from the server.
+
+One module had to change with it. `getStatusLabel` in
+`features/library/games/game.model.ts` read `i18n.global` off the shared
+instance; there is no shared instance to read now, and had there been one it
+would have answered in whichever request's language happened to be current. It
+takes `t` as a parameter — the same fix the services got in 4c.
 
 ## Step 6 — File-based routing (optional)
 
@@ -428,8 +479,6 @@ both are blocked on the i18n singleton.
 | ------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
 | Remove the legacy session shim              | `migrateLegacySession()` in `src/lib/supabase.ts`, installed by `plugins/legacy-session.client.ts` | Once sessions in the wild have turned over                              |
 | Remove the legacy locale shim               | `migrateLegacyLocale()` in `src/i18n/localePreference.ts`                                          | Same                                                                    |
-| `createI18n` per request                    | `src/i18n/index.ts`                                                                                | Step 5e — blocks anything server-side setting a locale                  |
-| `<html lang>` follows locale                | `app.head.htmlAttrs` in `nuxt.config.ts`                                                           | Step 5d                                                                 |
 | `sitemap.xml` repeats three service queries | `server/routes/sitemap.xml.ts`                                                                     | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
 | Per-request Supabase client                 | `src/lib/supabase.ts`                                                                              | With checkout, not 5b — see 5b for why the public pages do not want one |
 | `noUncheckedIndexedAccess`                  | `nuxt.config.ts`                                                                                   | Whenever; ~20 sites                                                     |
@@ -472,9 +521,9 @@ indexes happily. It was invisible in a SPA.
 3. ~~**5b** `useAsyncData` in the public views~~ — done, and it did not need the
    per-request Supabase client after all.
 4. ~~**7 items 1–3** metadata, `robots.txt`/`sitemap.xml`, a real 404~~ — done.
-5. **5c/5d/5e** hydration, `lang`, i18n per request. What is left of 5c is two
-   components that both want `<ClientOnly>`.
-6. **5a** ISR windows — last, and only with the host in the cache key.
+5. ~~**5c/5d/5e** hydration, `lang`, i18n per request~~ — done.
+6. **5a** ISR windows — next, and only with the host **and the language** in the
+   cache key.
 7. **7 items 4–7**, then **6** only if we want it.
 
 5b moved ahead of 5a: caching a render that still fetches its content in the
@@ -482,7 +531,9 @@ browser caches an empty page. Step 7 then moved ahead of the rest of 5, for the
 same reason one step further out — a page nothing links to and nothing
 describes is a page that having rendered correctly does not help. Both moves
 paid: 7.1 is also what turned up the temporal-dead-zone bug in `HomeView`,
-which nothing else was going to find.
+which nothing else was going to find, and 5e turned out to matter more for SEO
+than 5d did — every server render had been coming out in English regardless of
+who asked.
 
 ## How to verify
 
@@ -513,7 +564,30 @@ and the whole run looks like a broken tenant lookup. Use `node:http` or curl.
 console errors across the landing, library, tournaments, checkout, flea-market,
 auth and admin routes. Keep running it after anything that touches the head:
 7.1's dead-zone bug reached the browser as a rejected setup promise and showed
-up only there, while the page still server-rendered perfectly. Keep that habit, and extend it to assert on
+up only there, while the page still server-rendered perfectly.
+
+Run it **twice** — once with a fresh browser and once with a returning one.
+5c's real mismatches were only visible to a browser that already had a cart in
+localStorage; a fresh one agreed with the server perfectly and reported
+nothing. Seeding `congremio:cart:v1` before the second pass is what found them:
+
+```js
+localStorage.setItem(
+  'congremio:cart:v1',
+  JSON.stringify({
+    cartId: null,
+    items: [
+      {
+        ticket: { id: 1, name: 'x', price: 1000, status: 'active' },
+        quantity: 2,
+      },
+    ],
+  }),
+)
+```
+
+Worth a pass with `Accept-Language: pt` and with an `app-locale=pt` cookie too,
+now that the language changes what the server renders. Keep that habit, and extend it to assert on
 server-rendered HTML (content present before hydration) and to fail on
 hydration-mismatch warnings, which Vue logs to the console. Run it against
 `nuxt dev` rather than the built server: a production build reports only

@@ -200,7 +200,7 @@ const isConventionHappening = computed(() => {
           />
 
           <p class="relative text-lg text-shadow-lg font-semibold text-gray-50">
-            {{ getStatusLabel(game) }}
+            {{ getStatusLabel(game, t) }}
           </p>
         </div>
       </div>

@@ -24,67 +24,86 @@ const handleLocaleChange = (localeCode: string): void => {
 </script>
 
 <template>
-  <Listbox
-    :model-value="currentLocale?.code"
-    @update:model-value="handleLocaleChange"
-  >
-    <div class="relative">
-      <ListboxButton
-        class="relative flex flex-row items-center w-full cursor-default text-base sm:text-sm/6 text-gray-900 dark:text-white focus:ring-0 bg-transparent outline-none"
-      >
-        <CButton variant="transparent">
-          <IconLanguage class="size-5 mr-1" />
-          <span class="hidden md:block">{{
-            currentLocale?.nativeName
-          }}</span></CButton
+  <!--
+    Client-only: headless-ui's `Listbox` generates its own ids and renders its
+    popover differently on a server than in a browser, so it mismatched on
+    every public page. The fallback is the same trigger without the menu behind
+    it, so the header does not shift when the real one takes over — and it can
+    name the current language honestly, because the server knows which one the
+    request resolved to (step 5e).
+  -->
+  <ClientOnly>
+    <Listbox
+      :model-value="currentLocale?.code"
+      @update:model-value="handleLocaleChange"
+    >
+      <div class="relative">
+        <ListboxButton
+          class="relative flex flex-row items-center w-full cursor-default text-base sm:text-sm/6 text-gray-900 dark:text-white focus:ring-0 bg-transparent outline-none"
         >
-      </ListboxButton>
-
-      <TransitionRoot
-        leave="transition ease-in duration-100"
-        leave-from="opacity-100"
-        leave-to="opacity-0"
-      >
-        <ListboxOptions
-          class="absolute right-0 z-20 max-h-60 w-[min(10rem,calc(100vw-2rem))] overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
-          :class="placement === 'top' ? 'bottom-full mb-1' : 'mt-1'"
-        >
-          <ListboxOption
-            v-for="locale in availableLocales"
-            v-slot="{ active, selected }"
-            :key="locale.code"
-            :value="locale.code"
-            as="template"
+          <CButton variant="transparent">
+            <IconLanguage class="size-5 mr-1" />
+            <span class="hidden md:block">{{
+              currentLocale?.nativeName
+            }}</span></CButton
           >
-            <li
-              class="group flex flex-row relative cursor-default select-none px-3 py-2"
-              :class="
-                active
-                  ? 'bg-primary-600 text-white dark:bg-primary-500'
-                  : 'text-gray-900 dark:text-gray-100'
-              "
+        </ListboxButton>
+
+        <TransitionRoot
+          leave="transition ease-in duration-100"
+          leave-from="opacity-100"
+          leave-to="opacity-0"
+        >
+          <ListboxOptions
+            class="absolute right-0 z-20 max-h-60 w-[min(10rem,calc(100vw-2rem))] overflow-auto rounded-md bg-white dark:bg-gray-800 py-1 text-base shadow-lg ring-1 ring-gray-200 dark:ring-white/10 focus:outline-none sm:text-sm"
+            :class="placement === 'top' ? 'bottom-full mb-1' : 'mt-1'"
+          >
+            <ListboxOption
+              v-for="locale in availableLocales"
+              v-slot="{ active, selected }"
+              :key="locale.code"
+              :value="locale.code"
+              as="template"
             >
-              <span
-                class="block truncate"
-                :class="selected ? 'font-medium' : 'font-normal'"
-              >
-                {{ locale.nativeName }}
-              </span>
-              <span
-                v-if="selected"
-                class="absolute inset-y-0 right-0 flex items-center pr-3"
+              <li
+                class="group flex flex-row relative cursor-default select-none px-3 py-2"
                 :class="
                   active
-                    ? 'text-white'
-                    : 'text-primary-600 dark:text-primary-500'
+                    ? 'bg-primary-600 text-white dark:bg-primary-500'
+                    : 'text-gray-900 dark:text-gray-100'
                 "
               >
-                <IconCheck class="h-5 w-5" aria-hidden="true" />
-              </span>
-            </li>
-          </ListboxOption>
-        </ListboxOptions>
-      </TransitionRoot>
-    </div>
-  </Listbox>
+                <span
+                  class="block truncate"
+                  :class="selected ? 'font-medium' : 'font-normal'"
+                >
+                  {{ locale.nativeName }}
+                </span>
+                <span
+                  v-if="selected"
+                  class="absolute inset-y-0 right-0 flex items-center pr-3"
+                  :class="
+                    active
+                      ? 'text-white'
+                      : 'text-primary-600 dark:text-primary-500'
+                  "
+                >
+                  <IconCheck class="h-5 w-5" aria-hidden="true" />
+                </span>
+              </li>
+            </ListboxOption>
+          </ListboxOptions>
+        </TransitionRoot>
+      </div>
+    </Listbox>
+
+    <template #fallback>
+      <div class="relative flex flex-row items-center">
+        <CButton variant="transparent">
+          <IconLanguage class="size-5 mr-1" />
+          <span class="hidden md:block">{{ currentLocale?.nativeName }}</span>
+        </CButton>
+      </div>
+    </template>
+  </ClientOnly>
 </template>

@@ -3,6 +3,7 @@ import { Toaster } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
 import { useFavicon } from '@vueuse/core'
+import { useI18n } from 'vue-i18n'
 
 import DomainNotConfigured from '@/views/DomainNotConfigured.vue'
 import { useTenantStore } from '@/features/tenant/tenant.store'
@@ -32,6 +33,20 @@ useSeo({
   canonical: false,
   noindex: () => !!tenantStore.unconfiguredDomain,
 })
+
+/**
+ * The document's language, following the one the page is actually in.
+ *
+ * It was a static `en` in `nuxt.config.ts`, which in a SPA nobody could see:
+ * the shell had no text in it. On a server-rendered page it is a claim about
+ * content that is right there in the response, and it was wrong for every
+ * Portuguese visitor. `plugins/i18n.ts` resolves the language per request now
+ * (step 5e), which is what makes this possible at all.
+ *
+ * Reactive, so switching language in the page updates it too.
+ */
+const { locale } = useI18n()
+useHead({ htmlAttrs: { lang: locale } })
 </script>
 
 <template>
