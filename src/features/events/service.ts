@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase'
-import { findCurrentEdition } from '#shared/tenant-lookups'
 import type { Edition } from '@/features/events/edition.model.ts'
 
 export const editionService = {
@@ -22,9 +21,14 @@ export const editionService = {
    * takes null — the return type has always said so.
    */
   async getCurrentEdition(tenantId: string): Promise<Edition | null> {
-    // The query is in `#shared/tenant-lookups`; `sitemap.xml` needs the same
-    // one and cannot import this file.
-    return (await findCurrentEdition(supabase, tenantId)) as Edition | null
+    const { data, error } = await supabase
+      .from('editions')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .eq('current', true)
+      .maybeSingle<Edition>()
+    if (error) throw error
+    return data
   },
   async save(
     tenantId: string | undefined,

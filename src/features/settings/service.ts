@@ -1,5 +1,4 @@
 import { supabase } from '@/lib/supabase.ts'
-import { findEnabledSettings } from '#shared/tenant-lookups'
 import type { Setting, Settings } from './setting.model'
 import type { SettingType } from '@/features/settings/type.enum.ts'
 import logger from '@/lib/logger.ts'
@@ -17,15 +16,19 @@ const mapToSettings = (rows: Array<SettingRow> | null): Settings => {
 
 export const settingsService = {
   async get(tenantId: string, editionId: number): Promise<Settings | null> {
-    // The query is in `#shared/tenant-lookups`; `sitemap.xml` needs the same
-    // one and cannot import this file.
-    try {
-      const rows = await findEnabledSettings(supabase, tenantId, editionId)
-      return mapToSettings(rows as Array<SettingRow>)
-    } catch (error) {
+    const { data, error } = await supabase
+      .from('settings')
+      .select()
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .eq('enabled', true)
+
+    if (error) {
       logger.error('Unable to fetch settings', { tenantId, editionId, error })
       throw new Error('Unable to load configurations. Try again later')
     }
+
+    return mapToSettings(data)
   },
   async updateEnabled(
     tenantId: string,

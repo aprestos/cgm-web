@@ -712,18 +712,18 @@ disagreed with itself after hydration.
 
 ## Debts to clear
 
-All of them are cleared. Kept here because each one records a decision, and
-the last of them was closed by deciding it was not needed rather than by
-building it.
+None are outstanding. Kept here because each one records a decision, and two of
+them were closed by deciding rather than by building: one was not needed, and
+one is a duplication we would rather have than the thing that removes it.
 
-| Item                                              | Where                                                 | Outcome                                                |
-| ------------------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------ |
-| ~~`/not-found` answers 200~~                      | `src/router/index.ts`                                 | Fixed in 7.3                                           |
-| ~~Legacy session and locale shims~~               | `src/lib/supabase.ts`, `src/i18n/localePreference.ts` | Removed                                                |
-| ~~`server/` repeats things `src/` already knows~~ | `shared/tenant-lookups.ts`, `shared/locales.ts`       | Moved to `shared/`, which both bundlers read           |
-| ~~`noUncheckedIndexedAccess`~~                    | `nuxt.config.ts`                                      | On; 22 sites fixed                                     |
-| ~~Better Stack gets no server-side logs~~         | `src/lib/logger.ts`                                   | Server lines POST to the ingest endpoint               |
-| ~~Per-request Supabase client~~                   | `src/lib/supabase.ts`                                 | Not needed — nothing renders personal data on a server |
+| Item                                       | Where                                                     | Outcome                                                |
+| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
+| ~~`/not-found` answers 200~~               | `src/router/index.ts`                                     | Fixed in 7.3                                           |
+| ~~Legacy session and locale shims~~        | `src/lib/supabase.ts`, `src/i18n/localePreference.ts`     | Removed                                                |
+| `server/` repeats three queries and a list | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts` | Kept on purpose — see below                            |
+| ~~`noUncheckedIndexedAccess`~~             | `nuxt.config.ts`                                          | On; 22 sites fixed                                     |
+| ~~Better Stack gets no server-side logs~~  | `src/lib/logger.ts`                                       | Server lines POST to the ingest endpoint               |
+| ~~Per-request Supabase client~~            | `src/lib/supabase.ts`                                     | Not needed — nothing renders personal data on a server |
 
 **The two shims are gone.** `migrateLegacySession` carried a pre-cookie session
 out of localStorage (#82) and `migrateLegacyLocale` did the same for a language
@@ -734,24 +734,26 @@ nobody with a session old enough for either to find, and signing in again is
 the whole cost of being wrong. `plugins/legacy-session.client.ts` went with
 them, along with the three tests that covered the locale one.
 
-**`shared/` is where the two halves of the app now keep what they both know.**
-`server/` is bundled by Nitro and `src/` by Vite, so a server route cannot
-import `src/lib/supabase.ts` — it reads `import.meta.env` and checks `typeof
-window`, neither of which exists there. That had left `sitemap.xml` writing out
-its own copies of three queries and its own list of languages, where a column
-rename would have had to find two places.
+**`server/` still repeats three queries and a list of two languages, and that
+is the decision rather than a gap.** `server/` is bundled by Nitro and `src/`
+by Vite, so a server route cannot import `src/lib/supabase.ts` — it reads
+`import.meta.env` and checks `typeof window`, neither of which exists there.
+`sitemap.xml` therefore writes out its own version of the tenant, edition and
+settings lookups, and `server/utils/locales.ts` its own list of the languages
+we have catalogs for.
 
-`shared/` is the one directory both bundlers read, aliased as `#shared`.
-`shared/tenant-lookups.ts` holds the three reads that turn a hostname into a
-tenant's configuration, and `shared/locales.ts` holds the languages we have
-catalogs for. Only the queries are shared; what each side does with a row —
-mapping it to a model, falling back to a dev tenant, deciding whether to log —
-stays with the caller, because those answers genuinely differ.
+Removing that was tried, with the queries in a `shared/` module both bundlers
+read. It worked and it was worse: three services had to take a Supabase client
+as a parameter and hand back untyped rows, and the alias needed teaching to
+eslint and to vitest, all so that one server route would not write four lines
+of `.from().select().eq()`. The indirection cost more than the duplication it
+removed, and it put the queries somewhere nobody reading a service would look.
 
-Two things had to be told about the alias: `eslint.config.ts` needed
-`.nuxt/tsconfig.shared.json` in its project list, because type-aware rules skip
-a file no project includes, and `vitest.config.ts` needed the alias spelled out,
-because it has stood on its own since Nuxt took over the build.
+So the duplication stays, and what it needs is not removal but a way to notice
+drift. The languages have one: `src/i18n/__tests__/locales.spec.ts` fails if
+the two lists stop matching. The three queries do not, because you cannot test
+the shape of a query without a database — if a column is renamed, both copies
+have to be found, and the comment in each one says where the other is.
 
 **`noUncheckedIndexedAccess` is on**, and the twenty-two places it found are
 fixed rather than asserted away. Most were an index straight after a length

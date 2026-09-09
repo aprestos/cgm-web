@@ -41,7 +41,6 @@ export default defineConfigWithVueTs(
         project: [
           './.nuxt/tsconfig.app.json',
           './.nuxt/tsconfig.server.json',
-          './.nuxt/tsconfig.shared.json',
           './.nuxt/tsconfig.node.json',
           './tsconfig.vitest.json',
           './e2e/tsconfig.json',

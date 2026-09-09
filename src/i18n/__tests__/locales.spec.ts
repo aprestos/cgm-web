@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import en from '@/i18n/locales/en'
 import pt from '@/i18n/locales/pt'
 import { AVAILABLE_LOCALE_CODES, createAppI18n } from '@/i18n'
-import { LOCALES } from '../../../shared/locales'
+import { CACHEABLE_LOCALES } from '../../../server/utils/locales'
 
 type Messages = Record<string, unknown>
 
@@ -55,13 +55,15 @@ describe('locale catalogs', () => {
     })
   })
 
-  // `#shared/locales` is what the server middleware keys its cache by and what
-  // the app validates against, so it has to agree with the catalogs actually
-  // on disk: a directory added under `locales/` without a line there would
-  // silently never be served, and a line there without a directory would key a
-  // cache by a language nothing can render.
-  it('the shared list matches the catalogs on disk', () => {
-    expect([...LOCALES].sort()).toEqual([...AVAILABLE_LOCALE_CODES].sort())
+  // `server/` is bundled by Nitro and cannot import the catalogs, which are
+  // discovered with `import.meta.glob`. So the language list is written out
+  // twice, and this is what stops the copies drifting: a locale added here and
+  // not there would silently stop being cacheable, and one removed here and
+  // not there would keep a dead cache key alive.
+  it('the server middleware knows the same languages as the app', () => {
+    expect([...CACHEABLE_LOCALES].sort()).toEqual(
+      [...AVAILABLE_LOCALE_CODES].sort(),
+    )
   })
 
   it('en top-level namespaces follow the agreed structure', () => {

@@ -1,5 +1,4 @@
 import type { Tenant } from '@/features/tenant/tenant.model.ts'
-import { findTenantDomain } from '#shared/tenant-lookups'
 import { supabase } from '@/lib/supabase.ts'
 import logger from '@/lib/logger.ts'
 import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
@@ -8,6 +7,9 @@ import { toCamelCaseAs, toSnakeCase } from '@/utils/caseConverter.ts'
 // rejected before it costs a round trip.
 const HOSTNAME =
   /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)*$/
+
+/** A tenant_domains row with the tenant it resolves to embedded. */
+type ResolvedDomain = { tenants: Record<string, unknown> | null }
 
 export const tenantService = {
   async getByDomain(domain: string): Promise<Tenant> {
@@ -19,21 +21,17 @@ export const tenantService = {
       }
 
       // One round trip: find the hostname, embed the tenant it belongs to.
-      // The query itself is in `#shared/tenant-lookups`, because `sitemap.xml`
-      // resolves a tenant the same way and cannot import this file.
-      //
-      // A failed lookup answers null rather than throwing, so that the dev
-      // fallback below still gets its turn — the same thing the old code did
-      // by ignoring the error, said out loud.
-      const resolved = await findTenantDomain(supabase, hostname).catch(
-        (error: unknown) => {
-          logger.warn('Tenant lookup failed', { hostname, error })
-          return null
-        },
-      )
+      // Only active hostnames resolve, so a domain still being verified cannot
+      // serve a tenant before its ownership has been confirmed.
+      const { data } = await supabase
+        .from('tenant_domains')
+        .select('tenants(*)')
+        .eq('hostname', hostname)
+        .eq('status', 'active')
+        .maybeSingle<ResolvedDomain>()
 
-      if (resolved?.tenants) {
-        return toCamelCaseAs<Tenant>(resolved.tenants)
+      if (data?.tenants) {
+        return toCamelCaseAs<Tenant>(data.tenants)
       }
 
       // Development only. In production an unrecognised host is a domain we do
