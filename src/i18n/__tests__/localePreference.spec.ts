@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   LOCALE_COOKIE,
-  migrateLegacyLocale,
   readStoredLocale,
   storeLocale,
 } from '../localePreference'
@@ -62,28 +61,6 @@ describe('localePreference', () => {
       storeLocale('en')
       expect(readStoredLocale()).toBe('en')
       document.cookie = 'unrelated=; Path=/; Max-Age=0'
-    })
-  })
-
-  describe('migrateLegacyLocale', () => {
-    it('answers null when there is no pre-cookie preference', () => {
-      expect(migrateLegacyLocale()).toBeNull()
-    })
-
-    it('moves a localStorage preference into the cookie and clears it', () => {
-      localStorage.setItem(LOCALE_COOKIE, 'pt')
-
-      expect(migrateLegacyLocale()).toBe('pt')
-      expect(readStoredLocale()).toBe('pt')
-      expect(localStorage.getItem(LOCALE_COOKIE)).toBeNull()
-    })
-
-    it('has nothing left to do on a second run', () => {
-      localStorage.setItem(LOCALE_COOKIE, 'pt')
-      migrateLegacyLocale()
-
-      expect(migrateLegacyLocale()).toBeNull()
-      expect(readStoredLocale()).toBe('pt')
     })
   })
 })

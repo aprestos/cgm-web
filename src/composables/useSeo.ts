@@ -12,7 +12,7 @@ export interface SeoInput {
    */
   tagline?: MaybeRefOrGetter<string | undefined>
   description?: MaybeRefOrGetter<string | undefined>
-  /** Absolute URL. Falls back to a tenant photo, then the edition poster. */
+  /** Absolute URL. Falls back to the edition poster, then the tenant's logo. */
   image?: MaybeRefOrGetter<string | undefined>
   /**
    * Whether this call owns the page's canonical. Only `app.vue` sets it false:
@@ -89,36 +89,32 @@ export function useSeo(input: SeoInput = {}): void {
   const description = computed(() => toValue(input.description))
 
   /**
-   * A photo of the convention before the edition's poster.
+   * The edition's poster, and nothing standing in for it.
    *
-   * A link preview card is a wide letterbox and a poster is portrait, so a
-   * poster in one is cropped to a band across its middle. `tenant.images` is
-   * the gallery on the landing page — photographs, and the only thing we have
-   * that is likely to be landscape. Neither is measured; we cannot know the
-   * proportions of a URL, so this is an assumption about what each field is
-   * for, and `card` below hedges it.
+   * A poster is the picture of an edition — the thing a tenant chose to
+   * represent it — so a preview shows that or it shows the tenant's mark. It
+   * deliberately does not fall back to a photograph from the landing page's
+   * gallery: a picture of the room is not a picture of the event, and a
+   * preview card is a claim about what a link leads to.
    */
   const image = computed(
     () =>
       toValue(input.image) ??
-      tenantStore.tenant?.images?.[0] ??
       editionStore.edition?.poster_url ??
       tenantStore.tenant?.logos?.square ??
       tenantStore.tenant?.logo,
   )
 
   /**
-   * `summary_large_image` only when the picture is one we expect to be wide.
+   * The small card, always.
    *
-   * Falling back to the small square card is not a worse preview than a
-   * portrait poster stretched across a banner — it is a better one, because
-   * the whole image survives.
+   * `summary_large_image` is a wide letterbox, and both of the things that can
+   * end up above are the wrong shape for it — a poster is portrait and a logo
+   * is square, so either would be cropped to a band across its middle. The
+   * small card shows the whole image instead, which for a poster and a logo is
+   * the entire point of showing one.
    */
-  const card = computed(() =>
-    (toValue(input.image) ?? tenantStore.tenant?.images?.[0])
-      ? 'summary_large_image'
-      : 'summary',
-  )
+  const card = 'summary'
 
   // No canonical on a page we are asking not to be indexed: it would name the
   // very URL the `robots` tag is telling a crawler to leave alone, and on the
