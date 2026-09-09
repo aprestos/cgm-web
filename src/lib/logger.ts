@@ -110,6 +110,8 @@ function shipFromServer(
       source: 'server',
       content,
     }),
+  }).then((response) => {
+    if (!response.ok) console.error(message, content)
   }).catch(() => {
     console.error(message, content)
   })
