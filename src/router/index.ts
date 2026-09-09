@@ -261,12 +261,16 @@ export const routes: RouteRecordRaw[] = [
       import('../views/public/PageUserProfile.vue'),
   },
   {
-    path: '/not-found',
+    // A URL nobody claims renders here, at the address that was asked for, and
+    // answers 404 while doing it (`NotFoundView` sets the status).
+    //
+    // It used to redirect to a `/not-found` route that answered 200. In a SPA
+    // that was invisible; on a server it is a soft 404 — an unbounded supply
+    // of pages a crawler will happily index, once per tenant domain. Nothing
+    // linked to `/not-found` by name, so the two routes are one now and any
+    // link to the old path lands here like every other unknown URL.
+    path: '/:pathMatch(.*)*',
     name: RouteNames.error.notFound,
     component: (): Promise<unknown> => import('../views/NotFoundView.vue'),
-  },
-  {
-    path: '/:pathMatch(.*)*',
-    redirect: '/not-found',
   },
 ]

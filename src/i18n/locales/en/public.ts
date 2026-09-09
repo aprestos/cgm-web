@@ -42,6 +42,10 @@ export default {
     },
   },
   library: {
+    // Crawlers and link previews only — see `useSeo`.
+    seo: {
+      description: 'The board game library at {name}.',
+    },
     title: 'Library',
     games: 'Games',
     search: 'Search games...',
@@ -72,6 +76,12 @@ export default {
     },
   },
   tournaments: {
+    seo: {
+      withCount:
+        '{count} tournaments at {name}. Browse them and grab your spot before it is gone.',
+      description:
+        'Every tournament of {name}. Browse them and grab your spot before it is gone.',
+    },
     title: 'Tournaments',
     description:
       'Browse every tournament of the convention and grab your spot before it is gone.',
