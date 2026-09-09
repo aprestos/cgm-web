@@ -1,4 +1,5 @@
-import { CACHEABLE_LOCALES, LOCALE_HEADER } from '../utils/locales'
+import { isKnownLocale, DEFAULT_LOCALE } from '#shared/locales'
+import { LOCALE_HEADER } from '../utils/locales'
 
 /**
  * Decides, once per request, which language this response is in, and puts the
@@ -23,13 +24,13 @@ export default defineEventHandler((event) => {
     // the same reason the language list is: Nitro does not bundle `src/`.
     known(getCookie(event, 'app-locale')) ??
     known(preferredLanguage(getRequestHeader(event, 'accept-language'))) ??
-    'en'
+    DEFAULT_LOCALE
 })
 
 /** The code, if we have a catalog for it — so a crafted cookie or header
  *  cannot invent cache keys. */
 function known(code: string | undefined | null): string | undefined {
-  return code && CACHEABLE_LOCALES.includes(code) ? code : undefined
+  return isKnownLocale(code) ? code : undefined
 }
 
 /**

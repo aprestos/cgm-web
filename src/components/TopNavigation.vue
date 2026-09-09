@@ -89,7 +89,7 @@
                         <div
                           class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-600 text-white text-sm font-semibold"
                         >
-                          {{ user?.name ? user.name[0].toUpperCase() : 'U' }}
+                          {{ user?.name?.[0]?.toUpperCase() ?? 'U' }}
                         </div>
                         <div class="min-w-0">
                           <p

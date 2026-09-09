@@ -42,12 +42,14 @@ export function getTicketTitle(
     .filter((date) => date.isValid)
     .sort((a, b) => a.toMillis() - b.toMillis())
 
-  if (dates.length === 0) {
-    return { weekday: '-', displayDate: '-' }
-  }
-
   const first = dates[0]
   const last = dates[dates.length - 1]
+
+  // Answers the same question `dates.length === 0` used to, in the form the
+  // compiler can follow now that indexing admits it might find nothing.
+  if (!first || !last) {
+    return { weekday: '-', displayDate: '-' }
+  }
 
   const isWeekend =
     dates.length === 2 &&

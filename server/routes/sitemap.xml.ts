@@ -1,3 +1,8 @@
+import {
+  findCurrentEdition,
+  findEnabledSettings,
+  findTenantDomain,
+} from '#shared/tenant-lookups'
 import { requestOrigin } from '../utils/request-origin'
 import { serverSupabase } from '../utils/supabase'
 
@@ -30,38 +35,23 @@ export default defineEventHandler(async (event) => {
 
   const supabase = serverSupabase()
 
-  // Only an active hostname resolves, so a domain still being verified cannot
-  // publish a sitemap for a tenant whose ownership is unconfirmed.
-  const { data: domain } = await supabase
-    .from('tenant_domains')
-    .select('tenants(id)')
-    .eq('hostname', hostname)
-    .eq('status', 'active')
-    .maybeSingle<{ tenants: { id: string } | null }>()
-
+  const domain = await findTenantDomain(supabase, hostname)
   const tenantId = domain?.tenants?.id
-  if (!tenantId) {
+  if (typeof tenantId !== 'string') {
     setResponseStatus(event, 404)
     return urlset([])
   }
 
-  const { data: edition } = await supabase
-    .from('editions')
-    .select('id')
-    .eq('tenant_id', tenantId)
-    .eq('current', true)
-    .maybeSingle<{ id: number }>()
+  const edition = await findCurrentEdition(supabase, tenantId)
+  const editionId = edition?.id
 
   const enabled = new Set<string>()
-  if (edition) {
-    const { data: settings } = await supabase
-      .from('settings')
-      .select('type')
-      .eq('tenant_id', tenantId)
-      .eq('edition_id', edition.id)
-      .eq('enabled', true)
-
-    for (const row of (settings ?? []) as Array<{ type: string }>) {
+  if (typeof editionId === 'number') {
+    for (const row of await findEnabledSettings(
+      supabase,
+      tenantId,
+      editionId,
+    )) {
       enabled.add(row.type)
     }
   }

@@ -110,6 +110,13 @@ export default defineNuxtConfig({
     // says `noindex`. Step 5c of `docs/ssr-migration.md`.
     '/checkout': { ssr: false },
 
+    // One person's profile and their withdrawal history, which `robots.txt`
+    // already tells crawlers to leave alone. Everything on it loads in
+    // `onMounted`, so a server render was only ever an empty shell — and it
+    // was the last page that would have wanted a Supabase client built from
+    // the visitor's own cookies. See the debts below.
+    '/users/**': { ssr: false },
+
     // The crawlable pages, cached. `/flea-market` is not here: it renders an
     // empty div, so there is nothing to save.
     '/': publicPage,
@@ -190,15 +197,5 @@ export default defineNuxtConfig({
     // `pnpm run type-check` runs vue-tsc over the generated config; running it
     // again inside the dev server would only make it slower.
     typeCheck: false,
-    tsConfig: {
-      compilerOptions: {
-        // Nuxt turns this on and the SPA's tsconfig did not, so adopting the
-        // generated config wholesale would fail the build on ~20 pre-existing
-        // unchecked array and record accesses. Tightening those is worth doing
-        // and has nothing to do with rendering on a server, so it is not done
-        // in the same change.
-        noUncheckedIndexedAccess: false,
-      },
-    },
   },
 })

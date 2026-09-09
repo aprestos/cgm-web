@@ -51,7 +51,7 @@ describe('CSelect', () => {
       'Armazém (piso -1)',
     ])
 
-    await options[0].trigger('click')
+    await wrapper.get('li').trigger('click')
     await nextTick()
 
     expect(wrapper.emitted('update:modelValue')?.slice(-1)[0]).toEqual([1])
@@ -63,9 +63,8 @@ describe('CSelect', () => {
     await wrapper.find('button').trigger('click')
     await nextTick()
 
-    const options = wrapper.findAll('li')
-    expect(options[0].find('svg').exists()).toBe(false)
-    expect(options[1].find('svg').exists()).toBe(true)
+    expect(wrapper.get('li').find('svg').exists()).toBe(false)
+    expect(wrapper.get('li:nth-of-type(2)').find('svg').exists()).toBe(true)
   })
 
   it('clears back to null only when clearable', async () => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import type { Ticket } from '@/features/tickets/ticket.model'
+import { type Ticket, TicketStatus } from '@/features/tickets/ticket.model'
 import { formatPrice } from '@/utils/price'
 import { getTicketTitle } from '@/utils/ticket'
 import CBadge from '@/components/CBadge.vue'
@@ -37,10 +37,10 @@ const status = computed(() => {
     | 'pink'
     | undefined
   switch (props.ticket.status) {
-    case 'active':
+    case TicketStatus.ACTIVE:
       color = 'green'
       break
-    case 'inactive':
+    case TicketStatus.INACTIVE:
       color = 'yellow'
       break
     default:

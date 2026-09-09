@@ -1,5 +1,9 @@
 import { createI18n } from 'vue-i18n'
 import type { TranslationSchema } from './locales/en'
+import {
+  DEFAULT_LOCALE as SHARED_DEFAULT,
+  isKnownLocale,
+} from '#shared/locales'
 
 // Auto-import all locale directories using Vite's glob import
 // Each locale is a directory named with the locale code (e.g., en/, pt/, es/)
@@ -41,8 +45,15 @@ for (const [path, module] of Object.entries(localeModules)) {
 
 // Export available locales for use in language switchers
 export const AVAILABLE_LOCALE_CODES = availableLocaleCodes
-export const DEFAULT_LOCALE = 'en'
-export const FALLBACK_LOCALE = 'en'
+
+/**
+ * Re-exported from `#shared/locales`, which is where the list of languages
+ * lives: `server/middleware/locale.ts` needs the same one and cannot import
+ * this module, because the catalogs above are discovered with
+ * `import.meta.glob`.
+ */
+export const DEFAULT_LOCALE = SHARED_DEFAULT
+export const FALLBACK_LOCALE = SHARED_DEFAULT
 
 // Locale display names - keep in sync with available translation files in ./locales
 const LOCALE_NAMES: Record<string, { name: string; nativeName: string }> = {
@@ -67,9 +78,7 @@ export const AVAILABLE_LOCALES: LocaleInfo[] = availableLocaleCodes.map(
 )
 
 /** Whether we actually have a catalog for this language. */
-export function isValidLocale(code: string | null | undefined): code is string {
-  return !!code && availableLocaleCodes.includes(code)
-}
+export const isValidLocale = isKnownLocale
 
 /**
  * The instance itself, with its type left to be inferred.

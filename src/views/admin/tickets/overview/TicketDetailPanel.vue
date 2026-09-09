@@ -7,7 +7,7 @@ import {
   IconTicket,
   IconTrash,
 } from '@tabler/icons-vue'
-import type { Ticket } from '@/features/tickets/ticket.model'
+import { type Ticket, TicketStatus } from '@/features/tickets/ticket.model'
 import CBadge from '@/components/CBadge.vue'
 import CInfoPopover from '@/components/CInfoPopover.vue'
 import { formatPrice } from '@/utils/price'
@@ -44,10 +44,10 @@ const status = computed(() => {
 
   let color: 'green' | 'yellow' | 'gray'
   switch (ticket.status) {
-    case 'active':
+    case TicketStatus.ACTIVE:
       color = 'green'
       break
-    case 'inactive':
+    case TicketStatus.INACTIVE:
       color = 'yellow'
       break
     default:
