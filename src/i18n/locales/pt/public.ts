@@ -43,7 +43,12 @@ export default {
   },
   library: {
     seo: {
+      withCount: 'Explora os {count} jogos de tabuleiro da ludoteca — {name}.',
       description: 'A ludoteca de jogos de tabuleiro — {name}.',
+      page: 'página {page}',
+    },
+    pagination: {
+      label: 'Páginas da ludoteca',
     },
     title: 'Ludoteca',
     games: 'Jogos',

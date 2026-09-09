@@ -121,6 +121,9 @@ import {
 } from '@/features/library/games/service.ts'
 import { FunnelIcon, SparklesIcon } from '@heroicons/vue/20/solid'
 import { useSeo } from '@/composables/useSeo'
+import { useJsonLd } from '@/composables/useJsonLd'
+import { useLibraryGames } from '@/features/library/games/useLibraryGames'
+import { useRoute } from 'vue-router'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useEditionStore } from '@/features/events/edition.store'
 
@@ -128,15 +131,75 @@ const { t } = useI18n()
 
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
+const route = useRoute()
 
-// No game count in the description: the list lives in `GameList`, and lifting
-// it up here to say "213 games" would be a refactor for one sentence.
+// Awaited before anything below reads it, head computeds included — see
+// `useLibraryGames`.
+const games = await useLibraryGames()
+
+const siteName = computed(
+  () => editionStore.edition?.name ?? tenantStore.tenant?.name ?? '',
+)
+
+// Which twenty this URL is. `GameList` decides the window; this only needs the
+// number, for the title and the canonical.
+const page = computed(() => {
+  const raw = route.query.page
+  const asked = Number(Array.isArray(raw) ? raw[0] : raw)
+  return Number.isInteger(asked) && asked > 1 ? asked : 1
+})
+
 useSeo({
-  title: () => t('public.library.title'),
+  // A page number in the title, so the pages of the library are not a run of
+  // identical entries in a results list.
+  title: () =>
+    page.value > 1
+      ? `${t('public.library.title')} · ${t('public.library.seo.page', { page: page.value })}`
+      : t('public.library.title'),
   description: () =>
-    t('public.library.seo.description', {
-      name: editionStore.edition?.name ?? tenantStore.tenant?.name ?? '',
-    }),
+    games.value.length > 0
+      ? t('public.library.seo.withCount', {
+          count: games.value.length,
+          name: siteName.value,
+        })
+      : t('public.library.seo.description', { name: siteName.value }),
+  // `?page` is the one parameter that says which page this is; every other one
+  // would fork the library into copies of itself.
+  canonicalQuery: ['page'],
+})
+
+/**
+ * The games, as a list a search engine can read.
+ *
+ * Only the ones this URL shows, with `position` counted from the start of the
+ * whole library rather than the page — the numbering is what tells a search
+ * engine these pages are one list in a sequence. Step 7 item 4 of
+ * `docs/ssr-migration.md`.
+ *
+ * No `url` per game: opening one is a dialog, not a page, so there is nowhere
+ * to point.
+ */
+const GAMES_PER_PAGE = 20
+
+useJsonLd(() => {
+  const from = (page.value - 1) * GAMES_PER_PAGE
+  const shown = games.value.slice(from, from + GAMES_PER_PAGE)
+  if (shown.length === 0) return null
+
+  return {
+    '@type': 'ItemList',
+    name: t('public.library.title'),
+    numberOfItems: games.value.length,
+    itemListElement: shown.map((entry, index) => ({
+      '@type': 'ListItem',
+      position: from + index + 1,
+      item: {
+        '@type': 'Game',
+        name: entry.game?.name,
+        ...(entry.game?.image ? { image: entry.game.image } : {}),
+      },
+    })),
+  }
 })
 
 const searchQuery = ref('')
