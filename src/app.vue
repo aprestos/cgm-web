@@ -8,6 +8,7 @@ import { useI18n } from 'vue-i18n'
 import DomainNotConfigured from '@/views/DomainNotConfigured.vue'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useSeo } from '@/composables/useSeo'
+import { LogoType } from '~/features/tenant/tenant.model.ts'
 
 const tenantStore = useTenantStore()
 
@@ -15,8 +16,9 @@ const tenantStore = useTenantStore()
 // has — Congrem's, from `nuxt.config.ts` — which on a server there is no point
 // in doing. The tenant's own icon is a post-hydration nicety, not something a
 // crawler reads, and a tenant that uploaded none keeps the platform's.
-if (import.meta.client && tenantStore.tenant?.logo) {
-  useFavicon().value = tenantStore.tenant.logo
+const logo = tenantStore.getLogo(LogoType.square)
+if (import.meta.client && logo) {
+  useFavicon().value = logo
 }
 
 /**
