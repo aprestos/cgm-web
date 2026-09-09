@@ -47,6 +47,7 @@ import SettingsSection from '@/components/SettingsSection.vue'
 import tenantService from '@/features/tenant/service.ts'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger.ts'
+import type { Tenant } from '~/features/tenant/tenant.model.ts'
 
 const tenantStore = useTenantStore()
 
@@ -83,7 +84,7 @@ const { r$ } = useRegle(formData, {
   },
   shortDescription: {
     string,
-    minLength: minLength(10),
+    minLength: minLength(6),
     maxLength: maxLength(200),
   },
 })
@@ -135,23 +136,15 @@ const saveTenant = async (): Promise<void> => {
 
     isSaving.value = true
 
+    const { name, email, shortDescription } = formData.value
+
     // Prepare updates
-    const updates: {
-      name?: string
-      email?: string
-      short_description?: string
-    } = {}
-
-    if (formData.value.name.trim()) {
-      updates.name = formData.value.name.trim()
-    }
-
-    if (formData.value.email.trim()) {
-      updates.email = formData.value.email.trim()
-    }
-
-    if (formData.value.shortDescription.trim()) {
-      updates.short_description = formData.value.shortDescription.trim()
+    const updates: Partial<
+      Pick<Tenant, 'name' | 'email' | 'shortDescription'>
+    > = {
+      ...(name && { name }),
+      ...(email && { email }),
+      ...(shortDescription && { shortDescription }),
     }
 
     // Save to database

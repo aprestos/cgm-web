@@ -14,9 +14,9 @@ export default {
     joinCommunity: 'Juntar-me à Comunidade',
   },
   seo: {
-    withDates:
-      '{name}, {dates}. Bilhetes, a ludoteca e todos os torneios do evento.',
-    description: '{name}. Bilhetes, a ludoteca e todos os torneios do evento.',
+    whenAndWhere: '{location}, {dates}.',
+    when: '{dates}.',
+    where: '{location}.',
   },
   poster: {
     viewPoster: 'Ver cartaz do evento',
