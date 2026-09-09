@@ -66,7 +66,9 @@ const fetchWithdrawDetails = async (): Promise<void> => {
       class="cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 rounded-full"
     >
       <CBadge v-show="status === 'available'" type="green"
-        ><span class="hidden md:inline">{{ getStatusLabel(props.data) }}</span
+        ><span class="hidden md:inline">{{
+          getStatusLabel(props.data, t)
+        }}</span
         ><span class="md:hidden"><IconCheck /></span
       ></CBadge>
       <CBadge
@@ -74,7 +76,9 @@ const fetchWithdrawDetails = async (): Promise<void> => {
         text=""
         type="yellow"
         @click="fetchWithdrawDetails"
-        ><span class="hidden md:inline">{{ getStatusLabel(props.data) }}</span
+        ><span class="hidden md:inline">{{
+          getStatusLabel(props.data, t)
+        }}</span
         ><span class="md:hidden"><IconExclamationMark /></span
       ></CBadge>
       <CBadge
@@ -82,11 +86,11 @@ const fetchWithdrawDetails = async (): Promise<void> => {
         text="Not available"
         type="red"
       >
-        <span class="hidden md:inline">{{ getStatusLabel(props.data) }}</span
+        <span class="hidden md:inline">{{ getStatusLabel(props.data, t) }}</span
         ><span class="md:hidden"><IconX /></span>
       </CBadge>
       <CBadge v-show="status === 'reserved'" text="Reserved" type="blue">
-        <span class="hidden md:inline">{{ getStatusLabel(props.data) }}</span
+        <span class="hidden md:inline">{{ getStatusLabel(props.data, t) }}</span
         ><span class="md:hidden"><IconX /></span>
       </CBadge>
     </PopoverButton>

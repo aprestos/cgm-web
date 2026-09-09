@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import en from '@/i18n/locales/en'
 import pt from '@/i18n/locales/pt'
-import { AVAILABLE_LOCALE_CODES, i18n } from '@/i18n'
+import { AVAILABLE_LOCALE_CODES, createAppI18n } from '@/i18n'
 
 type Messages = Record<string, unknown>
 
@@ -43,6 +43,9 @@ describe('locale catalogs', () => {
   it('loader discovers all locale directories and resolves messages', () => {
     expect(AVAILABLE_LOCALE_CODES).toContain('en')
     expect(AVAILABLE_LOCALE_CODES).toContain('pt')
+    // Built here rather than imported: there is no shared instance any more,
+    // one is created per app (step 5e of docs/ssr-migration.md).
+    const i18n = createAppI18n('en')
     expect(i18n.global.getLocaleMessage('en')).toMatchObject({
       common: { actions: { cancel: 'Cancel' } },
     })

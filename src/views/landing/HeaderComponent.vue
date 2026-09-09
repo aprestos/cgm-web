@@ -256,38 +256,44 @@ onUnmounted(() => {
       </nav>
 
       <div class="relative col-start-3 flex items-center justify-end gap-2">
-        <Transition
-          enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
-          enter-from-class="translate-x-8 scale-50 opacity-0 blur-sm"
-          enter-to-class="translate-x-0 scale-100 opacity-100 blur-0"
-          leave-active-class="transition-all duration-300 ease-in"
-          leave-from-class="translate-x-0 scale-100 opacity-100"
-          leave-to-class="translate-x-8 scale-50 opacity-0"
-        >
-          <button
-            v-if="hasItems"
-            type="button"
-            class="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 hover:scale-105"
-            @click="handleCartClick"
+        <!-- Client-only: the cart is restored from localStorage during setup,
+             so the server renders no badge and the browser's first render has
+             one. Nothing here is content — it is a control that only means
+             anything to a visitor who already has a cart. -->
+        <ClientOnly>
+          <Transition
+            enter-active-class="transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+            enter-from-class="translate-x-8 scale-50 opacity-0 blur-sm"
+            enter-to-class="translate-x-0 scale-100 opacity-100 blur-0"
+            leave-active-class="transition-all duration-300 ease-in"
+            leave-from-class="translate-x-0 scale-100 opacity-100"
+            leave-to-class="translate-x-8 scale-50 opacity-0"
           >
-            <span class="relative flex items-center">
-              <IconShoppingCart
-                class="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110"
-                :stroke-width="2"
-              />
-              <span
-                class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white"
-              >
-                {{ totalItems }}
-              </span>
-            </span>
-            <span
-              class="hidden text-sm font-semibold text-gray-800 transition-colors duration-300 group-hover:text-primary sm:inline dark:text-gray-100 dark:group-hover:text-primary-300"
+            <button
+              v-if="hasItems"
+              type="button"
+              class="group flex cursor-pointer items-center gap-3 rounded-xl px-3 py-2 transition-all duration-300 hover:scale-105"
+              @click="handleCartClick"
             >
-              {{ formattedTotal }}
-            </span>
-          </button>
-        </Transition>
+              <span class="relative flex items-center">
+                <IconShoppingCart
+                  class="h-5 w-5 text-primary transition-transform duration-300 group-hover:scale-110"
+                  :stroke-width="2"
+                />
+                <span
+                  class="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white"
+                >
+                  {{ totalItems }}
+                </span>
+              </span>
+              <span
+                class="hidden text-sm font-semibold text-gray-800 transition-colors duration-300 group-hover:text-primary sm:inline dark:text-gray-100 dark:group-hover:text-primary-300"
+              >
+                {{ formattedTotal }}
+              </span>
+            </button>
+          </Transition>
+        </ClientOnly>
 
         <div class="relative">
           <button

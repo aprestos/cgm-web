@@ -1,10 +1,5 @@
 import { createI18n } from 'vue-i18n'
 import type { TranslationSchema } from './locales/en'
-import {
-  migrateLegacyLocale,
-  readBrowserLocale,
-  readStoredLocale,
-} from './localePreference'
 
 // Auto-import all locale directories using Vite's glob import
 // Each locale is a directory named with the locale code (e.g., en/, pt/, es/)
@@ -71,41 +66,49 @@ export const AVAILABLE_LOCALES: LocaleInfo[] = availableLocaleCodes.map(
   }),
 )
 
-// Check if a locale code is valid (has a translation file)
-function isValidLocale(code: string): boolean {
-  return availableLocaleCodes.includes(code)
+/** Whether we actually have a catalog for this language. */
+export function isValidLocale(code: string | null | undefined): code is string {
+  return !!code && availableLocaleCodes.includes(code)
 }
 
 /**
- * The language to start in: what the visitor chose, else what their browser
- * asks for, else English.
+ * The instance itself, with its type left to be inferred.
  *
- * Runs while this module is evaluated, so it must hold up with no browser
- * around. Every source answers null on a server and the default wins; the
- * request's own language is applied by the server once it renders.
+ * `createI18n` is overloaded and its generics do not reproduce by hand what it
+ * actually returns — every spelling of the return type either picks the wrong
+ * overload or produces something the real instance is not assignable to. So it
+ * is inferred here once, and `AppI18n` below is that inferred type.
  */
-function getInitialLocale(): string {
-  const stored = readStoredLocale() ?? migrateLegacyLocale()
-  if (stored && isValidLocale(stored)) {
-    return stored
-  }
-
-  const browser = readBrowserLocale()
-  if (browser && isValidLocale(browser)) {
-    return browser
-  }
-
-  return DEFAULT_LOCALE
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function buildI18n(locale: string) {
+  return createI18n<[MessageSchema], string>({
+    legacy: false, // Use Composition API mode
+    locale,
+    fallbackLocale: FALLBACK_LOCALE,
+    messages,
+    globalInjection: true,
+    missingWarn: import.meta.env.DEV,
+    fallbackWarn: import.meta.env.DEV,
+  })
 }
 
-export const i18n = createI18n<[MessageSchema], string>({
-  legacy: false, // Use Composition API mode
-  locale: getInitialLocale(),
-  fallbackLocale: FALLBACK_LOCALE,
-  messages,
-  globalInjection: true,
-  missingWarn: import.meta.env.DEV,
-  fallbackWarn: import.meta.env.DEV,
-})
+/** One app's i18n instance, as `createAppI18n` builds it. */
+export type AppI18n = ReturnType<typeof buildI18n>
 
-export default i18n
+/**
+ * Builds an i18n instance for one app.
+ *
+ * A factory rather than a `createI18n()` at module scope, because a server
+ * evaluates this module once and creates an app per request. A shared instance
+ * makes one visitor's language every concurrent visitor's language — the same
+ * class of bug PR #81 fixed for the stores.
+ *
+ * It had not bitten yet only because nothing ever *set* the locale outside the
+ * browser: every server render came out in the default language and the
+ * visitor's own choice was applied on hydration, which is a mismatch on every
+ * translated string. Resolving the language per request is what step 5d needs
+ * to put it in `<html lang>`, and it is why this had to come first.
+ */
+export function createAppI18n(locale: string): AppI18n {
+  return buildI18n(isValidLocale(locale) ? locale : DEFAULT_LOCALE)
+}
