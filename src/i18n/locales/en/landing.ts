@@ -10,6 +10,14 @@ export default {
     exploreLibrary: 'Explore the Library',
     joinCommunity: 'Join the Community',
   },
+  // Read by crawlers and link previews, never rendered on the page. Used only
+  // when the edition has no description of its own — see `useSeo`.
+  seo: {
+    withDates:
+      '{name}, {dates}. Tickets, the game library and every tournament of the convention.',
+    description:
+      '{name}. Tickets, the game library and every tournament of the convention.',
+  },
   poster: {
     viewPoster: 'View event poster',
     eventPoster: 'Event poster',

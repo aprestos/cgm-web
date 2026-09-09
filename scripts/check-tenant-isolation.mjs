@@ -83,6 +83,43 @@ for (let round = 0; round < ROUNDS; round++) {
   }
 }
 
+/**
+ * `sitemap.xml` resolves the tenant a second time, in a Nitro route that
+ * cannot import the app's services and so repeats their queries (step 7). It
+ * is the one other place a host is turned into tenant data, which makes it the
+ * one other place this can go wrong — and every URL it prints is a public
+ * statement about which pages belong to which domain.
+ */
+for (let round = 0; round < ROUNDS; round++) {
+  const sitemaps = await Promise.all(
+    hosts.map(async (host) => ({
+      host,
+      ...(await get(host, '/sitemap.xml')),
+    })),
+  )
+
+  for (const { host, status, html } of sitemaps) {
+    if (status !== 200) failures.push(`${host} sitemap: status ${status}`)
+    if (!html.includes(`<loc>http://${host}/</loc>`))
+      failures.push(`${host} sitemap: does not list its own origin`)
+
+    for (const other of hosts) {
+      if (other !== host && html.includes(other))
+        failures.push(`${host} sitemap: leaked ${other}`)
+    }
+  }
+}
+
+const strangerSitemap = await get(UNCONFIGURED_HOST, '/sitemap.xml')
+if (strangerSitemap.status !== 404)
+  failures.push(
+    `${UNCONFIGURED_HOST} sitemap: status ${strangerSitemap.status}, expected 404`,
+  )
+for (const host of hosts) {
+  if (strangerSitemap.html.includes(host))
+    failures.push(`${UNCONFIGURED_HOST} sitemap: leaked ${host}`)
+}
+
 const stranger = await get(UNCONFIGURED_HOST)
 if (stranger.status !== 404)
   failures.push(`${UNCONFIGURED_HOST}: status ${stranger.status}, expected 404`)
@@ -90,7 +127,7 @@ if (!stranger.html.includes('This domain is not connected'))
   failures.push(`${UNCONFIGURED_HOST}: did not render DomainNotConfigured`)
 
 console.log(
-  `${ROUNDS} rounds x ${hosts.length} concurrent hosts = ${ROUNDS * hosts.length} requests`,
+  `${ROUNDS} rounds x ${hosts.length} concurrent hosts x 2 paths = ${ROUNDS * hosts.length * 2} requests`,
 )
 
 if (failures.length) {
@@ -98,4 +135,6 @@ if (failures.length) {
   process.exit(1)
 }
 
-console.log('no cross-tenant leakage; every title and status correct')
+console.log(
+  'no cross-tenant leakage in pages or sitemaps; every title and status correct',
+)

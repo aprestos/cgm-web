@@ -13,6 +13,11 @@ export default {
     exploreLibrary: 'Explorar a Ludoteca',
     joinCommunity: 'Juntar-me à Comunidade',
   },
+  seo: {
+    withDates:
+      '{name}, {dates}. Bilhetes, a ludoteca e todos os torneios do evento.',
+    description: '{name}. Bilhetes, a ludoteca e todos os torneios do evento.',
+  },
   poster: {
     viewPoster: 'Ver cartaz do evento',
     eventPoster: 'Cartaz do evento',

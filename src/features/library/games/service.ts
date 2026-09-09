@@ -81,10 +81,19 @@ export const libraryService = {
     }
   },
 
+  /**
+   * Streams the library, starting with the list as it is now.
+   *
+   * `loadInitial: false` is for a caller that already has that first list —
+   * the public library fetches it during the server render (step 5b of
+   * `docs/ssr-migration.md`), and repeating it in the browser is exactly the
+   * round trip that step removed.
+   */
   subscribeToUpdates(
     tenantId: string,
     editionId: number,
     onUpdate: GameUpdateCallback,
+    { loadInitial = true }: { loadInitial?: boolean } = {},
   ): () => void {
     // Initial load using async/await
     const initializeData = async (): Promise<void> => {
@@ -93,7 +102,7 @@ export const libraryService = {
     }
 
     // Call the async function
-    void initializeData()
+    if (loadInitial) void initializeData()
 
     const handleDatabaseChange = (): void => {
       // Fetch fresh data and update if changed
