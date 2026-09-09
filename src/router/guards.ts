@@ -1,11 +1,16 @@
-import type { RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 import { authService } from '@/features/auth/service.ts'
-import { RouteNames } from '@/router/routeNames'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
 
-// Guard function type
-export type RouteGuard = () => Promise<boolean>
+/**
+ * The two questions the route middleware in `src/middleware/` asks.
+ *
+ * They used to be wired into the route table as `meta.requiresAuth`, a
+ * `meta.guard` function and a `beforeEnter`, read by a `navigationGuard` this
+ * file exported. File-based routing has no route table to hang a function on —
+ * `definePageMeta` is extracted at build time — so the wiring is named
+ * middleware now and these are just the checks.
+ */
 
 // Authentication check guard
 export const requiresAuth = async (): Promise<boolean> => {
@@ -36,54 +41,5 @@ export const hasAnyOfRoles = async (roles: string[]): Promise<boolean> => {
   } catch (error) {
     logger.error('Error checking staff permissions:', { error })
     return false
-  }
-}
-
-/**
- * Where a navigation should go instead, or undefined to let it through.
- *
- * Installed as Nuxt global middleware (`src/middleware/auth.global.ts`)
- * rather than `router.beforeEach`, because Nuxt owns the router instance now.
- * The logic is unchanged.
- *
- * This also runs on the server, where there is no session to read, so a
- * guarded route would redirect to sign-in rather than render. That is the safe
- * direction, and it does not come up today: every guarded route is under
- * `/admin` or `/auth`, which `routeRules` keeps client-rendered.
- */
-export const navigationGuard = async (
-  to: RouteLocationNormalized,
-): Promise<RouteLocationRaw | undefined> => {
-  try {
-    // Routes with a custom guard or requiresAuth need a logged-in user first
-    if (to.meta.guard || to.meta.requiresAuth) {
-      const isAuthenticated = await requiresAuth()
-
-      if (!isAuthenticated) {
-        return {
-          name: RouteNames.auth.signIn,
-          query: { redirect: to.fullPath },
-        }
-      }
-    }
-
-    // Check custom guard function
-    if (to.meta.guard) {
-      logger.debug('calling guard', to.meta)
-      const hasPermission = await to.meta.guard()
-      logger.debug('hasPermission', { hasPermission })
-
-      if (hasPermission) {
-        return
-      } else {
-        return { name: RouteNames.error.notFound }
-      }
-    }
-
-    // No guards required, proceed
-    return
-  } catch (error) {
-    console.error('Navigation guard error:', error)
-    return { name: RouteNames.error.notFound }
   }
 }

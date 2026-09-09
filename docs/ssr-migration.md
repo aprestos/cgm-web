@@ -2,11 +2,10 @@
 
 Tracks the move from a client-rendered SPA to server-rendered public pages.
 
-All of step 5 and all of step 7 are done. What is left is step 6, which is
-optional and may never be worth doing. Step 7 was added after 5b, which showed
-that rendering the content on a server is only half of what the SEO reason for
-this migration needed. Everything below step 7 is a debt this
-migration created or uncovered, recorded so it does not get lost.
+Every step is done. Step 7 was added along the way, after 5b showed that
+rendering the content on a server is only half of what the SEO reason for this
+migration needed. Everything below step 7 is a debt this migration created or
+uncovered, recorded so it does not get lost.
 
 ## Why we are doing this
 
@@ -61,6 +60,7 @@ The target is the ~48 landing and public views.
 | 5c–5e. Hydration, locale | —   | Every public route now hydrates with zero console errors. i18n is one instance per app, the language is resolved per request, and `<html lang>` follows it.                                          |
 | 5a. Caching              | —   | The public pages are cached per tenant and per language, 359ms down to 2ms. Not with `isr`, which cannot key by host and would have served one tenant's pages to another.                            |
 | 7.4–7.7. The rest of SEO | —   | Structured data on the three public pages, a URL per twenty games, a home title that says what the site is, and a link preview that is not a cropped poster.                                         |
+| 6. File-based routing    | —   | The hand-written route table is gone; 35 route components live in `pages/` and `layouts/` and Nuxt scans them. Same URLs, same names, same guards.                                                   |
 
 Steps 1–3 were behaviour-preserving in the SPA and were worth shipping on their
 own merits.
@@ -417,13 +417,90 @@ instance; there is no shared instance to read now, and had there been one it
 would have answered in whichever request's language happened to be current. It
 takes `t` as a parameter — the same fix the services got in 4c.
 
-## Step 6 — File-based routing (optional)
+## Step 6 — File-based routing (done)
 
-Only worth doing if we want Nuxt's conventions throughout. The app works
-without it via `router.options.ts` (4a). Route names are already centralised in
-`src/router/routeNames.ts`, and `meta.guard` / `meta.requiresAuth` map onto
-Nuxt middleware. Defer until step 5 is settled, and treat it as optional rather
-than pending.
+The hand-written table in `src/router/index.ts` is gone. Thirty-five route
+components moved into `src/pages/` and `src/layouts/`, and Nuxt scans them.
+Nothing about the app's behaviour changed: the same URLs, the same route names,
+the same guards.
+
+The ~140 components those pages are built from stayed in `src/views/`. Only the
+files that were _routes_ moved, which is what makes this a diff somebody can
+read rather than a wholesale rename.
+
+### The one shape a scanned tree cannot express
+
+The old table had **two sibling parents both matching `path: ''`** —
+`BaseLandingPage` holding `/` and `/checkout`, `BasePublicPage` holding
+`/library`, `/tournaments` and `/flea-market`. A directory cannot be two
+things, so those two became **layouts**, named per page with
+`definePageMeta({ layout })`. `app.vue` wraps `<NuxtPage>` in `<NuxtLayout>` for
+that to mean anything, and there is deliberately no `layouts/default.vue`: the
+admin, auth and 404 pages render bare, exactly as they did.
+
+`/auth` and `/admin` did _not_ become layouts. Their chrome was a parent route
+component with children under it, and `pages/auth.vue` + `pages/auth/*.vue` is
+the same shape — which matters for `/admin`, because a parent route is
+something meta can be attached to and a layout is not.
+
+`/checkout` had been declared twice, once under each of those parents, with two
+names. Only `landing.checkout` was ever navigated to; `public.checkout` is
+deleted.
+
+### Route names survived, which is why nothing else had to change
+
+Every `router.push({ name })` in the app depends on the names in
+`routeNames.ts`. `definePageMeta({ name: RouteNames.public.library })` keeps
+them — the macro is extracted at build time but it resolves imported constants,
+which was the first thing checked and the one answer that would have made this
+step not worth doing. Verified afterwards by walking every route in a browser
+and reading `$router.currentRoute.name` back.
+
+### Guards became middleware, because a macro cannot hold a function
+
+`/admin` carried `meta.requiresAuth` and `meta.guard: () => hasAnyOfRoles([...])`,
+and `/admin/settings` a `beforeEnter`. `definePageMeta` is extracted at build
+time and cannot carry a function, so both became named middleware —
+`src/middleware/admin.ts` and `admin-settings.ts` — declared on the parent
+pages. **Nuxt collects middleware from every matched record**, so declaring
+`admin` on `pages/admin.vue` covers everything under it, and `/admin/settings`
+runs both.
+
+That retired `middleware/auth.global.ts` and the `navigationGuard` in
+`router/guards.ts`, which existed to read `meta.guard` off the table. What is
+left in that file is the two questions themselves, `requiresAuth` and
+`hasAnyOfRoles`.
+
+### A bug this turned up
+
+The old guard sent an unauthorised visitor to `{ name: RouteNames.error.notFound }`.
+That was fine until 7.3 made the not-found route the **catch-all** — after
+which resolving that name with no `pathMatch` param produces `/`, so somebody
+without the role was quietly sent to the landing page instead of a 404. It had
+never shown, because every guarded route is behind a login and client-rendered.
+
+The middleware throws a 404 now, and `src/error.vue` renders it with the same
+not-found page an unknown URL gets — the markup moved to
+`components/NotFoundContent.vue` so both use one copy. Adding `error.vue` also
+means a thrown error stops falling through to Nuxt's own error screen, which is
+a different design and a different language from the rest of the app.
+
+### Also
+
+- `vue/multi-word-component-names` is off for `pages/`, `layouts/`, `app.vue`
+  and `error.vue`. Those filenames _are_ the route, the layout or the framework
+  hook; components still have to obey the rule.
+- `router.options.ts` keeps `scrollBehavior` and nothing else.
+- `admin.dashboard` is still in `routeNames.ts` and still names no route. It is
+  referenced by one nav entry that is permanently `enabled: false`.
+
+### Was it worth it?
+
+The plan said "only if we want Nuxt's conventions throughout", and that is
+still the honest answer. Nothing here fixed a user-visible problem; the routing
+worked. What it bought is that a route is now a file where you would look for
+it, guards are middleware rather than functions smuggled through route meta,
+and there is no second place where routes have to be registered.
 
 ---
 
@@ -676,7 +753,7 @@ indexes happily. It was invisible in a SPA.
 4. ~~**7 items 1–3** metadata, `robots.txt`/`sitemap.xml`, a real 404~~ — done.
 5. ~~**5c/5d/5e** hydration, `lang`, i18n per request~~ — done.
 6. ~~**5a** caching~~ — done, and not with `isr`; see the step for why.
-7. ~~**7 items 4–7**~~ — done. **6** remains, only if we want it.
+7. ~~**7 items 4–7**~~ — done. ~~**6**~~ — done too.
 
 5b moved ahead of 5a: caching a render that still fetches its content in the
 browser caches an empty page. Step 7 then moved ahead of the rest of 5, for the
