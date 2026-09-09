@@ -39,6 +39,17 @@
   --color-primary-950: var(--color-indigo-950);
   --color-primary: var(--color-indigo-500);
 
+  /* Congrem green — the *platform's* colour, and the one ramp in here that a
+     tenant retheme must never touch. It identifies Congrem: it belongs on
+     platform surfaces (a host with no tenant, admin, billing, sign-in) and
+     nowhere a convention's own branding is in play, where the Congrem mark
+     goes monochrome instead and inherits the text colour. Two steps because
+     two are used: the base fails AA against ink, so a dark ground takes -300.
+     The full ramp is in the brand guidelines if more are ever needed. */
+  --color-congrem-300: #7bbba4;
+  --color-congrem-500: #1f7a5c;
+  --color-congrem: var(--color-congrem-500);
+
   /* Surface + highlight point at the runtime variables below, which invert in
      dark mode - @theme itself cannot express a media-conditional value. */
   --color-surface-0: rgb(var(--surface-0));

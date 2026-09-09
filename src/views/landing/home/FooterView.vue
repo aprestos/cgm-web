@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
 import { useTenantStore } from '@/features/tenant/tenant.store'
-import { LogoType } from '@/features/tenant/tenant.model.ts'
+import CongremLogo from '@/components/CongremLogo.vue'
 
 const tenantStore = useTenantStore()
 
@@ -12,14 +12,18 @@ const { t } = useI18n()
   <footer class="border-t border-gray-200 py-12 dark:border-white/10">
     <div class="mx-auto max-w-7xl px-4">
       <div class="flex flex-col items-center justify-between gap-6 sm:flex-row">
-        <div class="flex items-center gap-3">
-          <img
-            v-if="tenantStore.getLogo(LogoType.long)"
-            :src="tenantStore.getLogo(LogoType.long)"
-            :alt="tenantStore.tenant?.name"
-            class="h-8 w-auto"
-          />
-          <span class="text-sm text-gray-500">
+        <!--
+          The platform's mark, not the tenant's: the convention's own logo is
+          already in the header, and the footer is where the page says what it
+          runs on. It is monochrome here — `currentColor` takes the grey of the
+          copyright beside it — because the Congrem green identifies Congrem
+          and never a tenant, and the mark is never recoloured to a tenant's
+          brand colour either. `h-9` rather than `h-8`: the lockup's minimum is
+          130px wide, which 32px of height falls just short of.
+        -->
+        <div class="flex items-center gap-3 text-gray-500">
+          <CongremLogo class="h-9 w-auto" />
+          <span class="text-sm">
             {{
               t('landing.footer.copyright', {
                 year: new Date().getFullYear(),
