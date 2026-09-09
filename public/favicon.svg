@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120"
+     role="img" aria-label="Congrem">
+  <title>Congrem</title>
+  <rect width="120" height="120" rx="27" fill="#1F7A5C"/>
+  <g fill="#FFFFFF">
+    <circle cx="32.86" cy="27.37" r="5.43"/>
+    <path d="M23.42 43.77a9.44 9.44 0 0 1 18.88 0Z"/>
+    <circle cx="87.14" cy="27.37" r="5.43"/>
+    <path d="M77.70 43.77a9.44 9.44 0 0 1 18.88 0Z"/>
+    <circle cx="60" cy="54.51" r="5.43"/>
+    <path d="M50.56 70.91a9.44 9.44 0 0 1 18.88 0Z"/>
+    <circle cx="32.86" cy="81.65" r="5.43"/>
+    <path d="M23.42 98.06a9.44 9.44 0 0 1 18.88 0Z"/>
+    <circle cx="87.14" cy="81.65" r="5.43"/>
+    <path d="M77.70 98.06a9.44 9.44 0 0 1 18.88 0Z"/>
+  </g>
+</svg>

@@ -3,6 +3,16 @@
     class="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-6 py-12"
   >
     <div class="max-w-md text-center">
+      <!--
+        No tenant resolved from this host, so nothing here is themed by a
+        convention — this is a platform surface, and it is Congrem answering.
+        Hence the mark in Congrem green rather than the monochrome cut the
+        tenant-facing pages use, and -300 in dark mode because the base green
+        does not hold its contrast against ink.
+      -->
+      <CongremLogo
+        class="mx-auto mb-10 h-9 w-auto text-congrem dark:text-congrem-300"
+      />
       <component
         :is="isPending ? IconClock : IconWorldOff"
         class="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500"
@@ -31,6 +41,7 @@
 import { computed } from 'vue'
 import { IconClock, IconWorldOff } from '@tabler/icons-vue'
 import type { DomainStatus } from '@/features/domains/domain.model'
+import CongremLogo from '@/components/CongremLogo.vue'
 
 interface Props {
   hostname: string

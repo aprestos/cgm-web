@@ -142,7 +142,19 @@ export default defineNuxtConfig({
       title: 'congrem.io',
       // `<html lang>` is set in `src/app.vue`, from the language the request
       // resolved to — it is not knowable here.
-      link: [{ rel: 'icon', href: '/favicon.ico' }],
+      // Congrem's own icons — the platform's mark, in the platform's green,
+      // baked into the files because a browser tab has no CSS for
+      // `currentColor` to inherit. A tenant that uploaded an icon of its own
+      // gets that one instead, swapped in after hydration by `src/app.vue`;
+      // these are what a crawler and every other visitor see. None of them
+      // declares a `type`, deliberately: that swap rewrites the `href` of
+      // every icon link and leaves the rest of the attributes alone, so a
+      // `type="image/svg+xml"` here would end up describing a tenant's PNG.
+      link: [
+        { rel: 'icon', href: '/favicon.ico' },
+        { rel: 'icon', href: '/favicon.svg', sizes: 'any' },
+        { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      ],
       meta: [
         // iOS Safari specific
         { name: 'apple-mobile-web-app-capable', content: 'yes' },

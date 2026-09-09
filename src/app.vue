@@ -11,9 +11,10 @@ import { useSeo } from '@/composables/useSeo'
 
 const tenantStore = useTenantStore()
 
-// Browser-only: it rewrites the <link rel="icon"> the document already has,
-// which on a server there is no point in doing — the tenant's own icon is a
-// post-hydration nicety, not something a crawler reads.
+// Browser-only: it rewrites the href of every icon link the document already
+// has — Congrem's, from `nuxt.config.ts` — which on a server there is no point
+// in doing. The tenant's own icon is a post-hydration nicety, not something a
+// crawler reads, and a tenant that uploaded none keeps the platform's.
 if (import.meta.client && tenantStore.tenant?.logo) {
   useFavicon().value = tenantStore.tenant.logo
 }
