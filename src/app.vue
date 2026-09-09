@@ -64,7 +64,18 @@ useHead({ htmlAttrs: { lang: locale } })
 
   <template v-else>
     <Toaster rich-colors theme="system" position="top-center" />
-    <NuxtPage />
+
+    <!--
+      `NuxtLayout` is what makes `definePageMeta({ layout })` mean anything.
+      The landing and public pages each sit in their own chrome, which used to
+      be two sibling route records both matching `''` — a shape a scanned
+      `pages/` tree cannot express, and layouts are what Nuxt offers instead.
+      Pages that name no layout (admin, auth, the 404) render bare, because
+      there is no `layouts/default.vue` for them to fall into.
+    -->
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
   </template>
 </template>
 

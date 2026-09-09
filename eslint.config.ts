@@ -113,6 +113,22 @@ export default defineConfigWithVueTs(
     },
   },
 
+  // Nuxt's own directories name files after the route, the layout or the
+  // framework hook they are, so `pages/index.vue` and `layouts/public.vue` are
+  // correct names rather than lazy ones. `multi-word-component-names` is aimed
+  // at components, which still have to obey it.
+  {
+    files: [
+      'src/pages/**/*.vue',
+      'src/layouts/*.vue',
+      'src/app.vue',
+      'src/error.vue',
+    ],
+    rules: {
+      'vue/multi-word-component-names': 'off',
+    },
+  },
+
   // Vitest config
   {
     ...pluginVitest.configs.recommended,

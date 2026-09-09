@@ -41,7 +41,6 @@ const Public = {
   prototypes: 'public.prototypes',
   fleaMarket: 'public.flea-market',
   user: 'public.user',
-  checkout: 'public.checkout',
 } as const
 
 const Landing = {
