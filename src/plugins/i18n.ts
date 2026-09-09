@@ -1,9 +1,5 @@
 import { createAppI18n, DEFAULT_LOCALE, isValidLocale } from '@/i18n'
-import {
-  LOCALE_COOKIE,
-  migrateLegacyLocale,
-  readBrowserLocale,
-} from '@/i18n/localePreference'
+import { LOCALE_COOKIE, readBrowserLocale } from '@/i18n/localePreference'
 
 /** Kept in step with `server/utils/locales.ts`, which cannot be imported here:
  *  that file is bundled by Nitro and this one by Vite. */
@@ -41,8 +37,7 @@ export default defineNuxtPlugin({
  * also what keeps a cached page and a fresh one in the same language.
  *
  * **In the browser** the sources are still there to read: the language the
- * visitor chose, then the pre-cookie preference the #83 shim carries over,
- * then what the browser itself asks for.
+ * visitor chose, then what the browser itself asks for.
  */
 function resolveLocale(): string {
   if (import.meta.server) {
@@ -52,9 +47,6 @@ function resolveLocale(): string {
 
   const chosen = useCookie(LOCALE_COOKIE).value
   if (isValidLocale(chosen)) return chosen
-
-  const legacy = migrateLegacyLocale()
-  if (isValidLocale(legacy)) return legacy
 
   const asked = readBrowserLocale()
   if (isValidLocale(asked)) return asked

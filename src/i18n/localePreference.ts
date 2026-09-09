@@ -57,26 +57,3 @@ export function readBrowserLocale(): string | null {
     return null
   }
 }
-
-/**
- * Moves a language chosen before the switch to cookies out of localStorage.
- *
- * Without this the change silently resets everyone's language to the default.
- * Runs once per visitor: the localStorage copy is dropped as soon as it has
- * been written as a cookie.
- */
-export function migrateLegacyLocale(): string | null {
-  if (typeof window === 'undefined') return null
-
-  try {
-    const saved = localStorage.getItem(LOCALE_COOKIE)
-    if (!saved) return null
-
-    storeLocale(saved)
-    localStorage.removeItem(LOCALE_COOKIE)
-    return saved
-  } catch {
-    // A blocked or unavailable localStorage just means no preference to carry.
-    return null
-  }
-}

@@ -666,17 +666,24 @@ Still second best. A field on the tenant would let each of them say what they
 actually are, and the ones that are not board game conventions would stop being
 described as one.
 
-### 7.7 A link preview that is not a cropped poster — done
+### 7.7 The picture on a link preview — done
 
-`og:image` prefers a photo from `tenant.images` — the gallery on the landing
-page — over the edition poster, and `twitter:card` drops to `summary` when the
-poster is all there is. A preview card is a wide letterbox and a poster is
-portrait, so a poster in one is cropped to a band across its middle; the small
-square card is not a worse preview than that, it is a better one, because the
-whole image survives.
+`og:image` is the edition's poster, and the tenant's logo when there is no
+poster. Nothing else — in particular not a photograph from the landing page's
+gallery, which an earlier pass had preferred on the theory that a wide photo
+suits a wide card better. It does, and it is still the wrong picture: a poster
+is what a tenant chose to represent an edition, and a picture of the room is
+not a picture of the event. A preview card is a claim about what a link leads
+to.
 
-Neither image is measured. We cannot know the proportions of a URL, so this is
-an assumption about what each field is _for_, and the card type hedges it.
+`twitter:card` is `summary` rather than `summary_large_image`, for both. The
+large card is a wide letterbox and both of the things that can go in it are the
+wrong shape — a poster is portrait, a logo is square — so either would be
+cropped to a band across its middle. The small card shows the whole image,
+which for a poster and a logo is the entire point of showing one.
+
+Checked across the real tenants: the two with a poster send the poster, the one
+with a logo and no poster sends the logo.
 
 ### What 7.4–7.7 found in 5a
 
@@ -705,18 +712,23 @@ disagreed with itself after hydration.
 
 ## Debts to clear
 
-| Item                                          | Where                                                                                              | When                                                                    |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Remove the legacy session shim                | `migrateLegacySession()` in `src/lib/supabase.ts`, installed by `plugins/legacy-session.client.ts` | Once sessions in the wild have turned over                              |
-| Remove the legacy locale shim                 | `migrateLegacyLocale()` in `src/i18n/localePreference.ts`                                          | Same                                                                    |
-| `server/` repeats things `src/` already knows | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts`, `server/middleware/locale.ts`           | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
-| Per-request Supabase client                   | `src/lib/supabase.ts`                                                                              | With checkout, not 5b — see 5b for why the public pages do not want one |
-| `noUncheckedIndexedAccess`                    | `nuxt.config.ts`                                                                                   | Whenever; ~20 sites                                                     |
-| Better Stack gets no server-side logs         | `src/lib/logger.ts`                                                                                | When server logs matter                                                 |
-| ~~`/not-found` answers 200~~ — done           | `src/router/index.ts`                                                                              | Done — 7.3                                                              |
+| Item                                          | Where                                                                                    | When                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `server/` repeats things `src/` already knows | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts`, `server/middleware/locale.ts` | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
+| Per-request Supabase client                   | `src/lib/supabase.ts`                                                                    | With checkout, not 5b — see 5b for why the public pages do not want one |
+| `noUncheckedIndexedAccess`                    | `nuxt.config.ts`                                                                         | Whenever; ~20 sites                                                     |
+| Better Stack gets no server-side logs         | `src/lib/logger.ts`                                                                      | When server logs matter                                                 |
+| ~~`/not-found` answers 200~~ — done           | `src/router/index.ts`                                                                    | Done — 7.3                                                              |
+| ~~Legacy session and locale shims~~ — removed | `src/lib/supabase.ts`, `src/i18n/localePreference.ts`                                    | Done — see below                                                        |
 
-Both shims are cheap to keep and destructive to remove early — leaving them a
-release or two longer costs nothing.
+**The two shims are gone.** `migrateLegacySession` carried a pre-cookie session
+out of localStorage (#82) and `migrateLegacyLocale` did the same for a language
+(#83); both existed so that the switch to cookies would not sign everyone out
+or reset their language. Removing them early would have done exactly that,
+which is why they were written down here rather than deleted — but there is
+nobody with a session old enough for either to find, and signing in again is
+the whole cost of being wrong. `plugins/legacy-session.client.ts` went with
+them, along with the three tests that covered the locale one.
 
 The **per-request Supabase client** was expected to land with 5b and did not.
 The client in `src/lib/supabase.ts` is a module singleton, which on a server
