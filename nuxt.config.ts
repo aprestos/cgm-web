@@ -1,6 +1,54 @@
 import tailwindcss from '@tailwindcss/vite'
 
 /**
+ * How a rendered public page is cached, and what makes one page different from
+ * another.
+ *
+ * **Not `isr`.** That rule is Vercel's, and Vercel keys its ISR cache by path
+ * (plus `allowQuery`) with no way to add a header — so on an app that serves
+ * the same four paths on a domain per tenant, `isr: 60` on `/library` means
+ * one tenant's library served to every other tenant. `cache` is Nitro's own,
+ * it works on every preset, and its key is ours to define.
+ *
+ * **`varies` is load-bearing, in both directions.** It decides the cache key,
+ * and it is also the whole set of headers the render gets to see: a rule with
+ * no `varies` answered 404 for every tenant, because the handler could not
+ * read its own `Host`. Anything a render depends on has to be in this list.
+ *
+ * Three things, and no more:
+ *
+ * - `host` and `x-forwarded-host` — which tenant this is. Behind a proxy only
+ *   the forwarded one is the visitor's.
+ * - `x-app-locale` — which language, resolved to one of two values by
+ *   `server/middleware/locale.ts`. The cookie and `accept-language` that
+ *   decide it are deliberately *not* varied on: one carries a session token
+ *   and the other is free-form, and either would grow the key without bound.
+ *
+ * A session cookie is therefore invisible to a cached render, which is the
+ * property that makes sharing the result between visitors safe rather than
+ * merely lucky.
+ *
+ * 60s is a starting guess. `/library` is the one to watch: game availability
+ * changes during a convention, though the browser's realtime subscription
+ * corrects a stale list right after hydration.
+ */
+const publicPage = {
+  cache: {
+    maxAge: 60,
+    varies: ['host', 'x-forwarded-host', 'x-app-locale'],
+  },
+
+  // For anything caching *in front* of us. Nitro answers `max-age=60`, and a
+  // shared cache that took that at face value would have no idea the body
+  // depends on the visitor's language — `x-app-locale` is ours, invented after
+  // the request arrived, and no CDN has ever seen it. These are the two
+  // headers a CDN does see that decide the answer. Naming `cookie` also means
+  // most shared caches will decline to store the response at all, which is the
+  // outcome we want: the only cache that knows the right key is this one.
+  headers: { vary: 'accept-language, cookie' },
+}
+
+/**
  * Nuxt replaces the hand-rolled Vite SPA so the public pages can be rendered
  * on a server. See `docs/ssr-migration.md` for why.
  *
@@ -61,6 +109,12 @@ export default defineNuxtConfig({
     // disagrees with all of it. Nothing here is worth crawling either — it
     // says `noindex`. Step 5c of `docs/ssr-migration.md`.
     '/checkout': { ssr: false },
+
+    // The crawlable pages, cached. `/flea-market` is not here: it renders an
+    // empty div, so there is nothing to save.
+    '/': publicPage,
+    '/library': publicPage,
+    '/tournaments': publicPage,
   },
 
   devServer: {

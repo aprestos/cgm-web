@@ -40,10 +40,15 @@ const UNCONFIGURED_HOST = process.env.UNCONFIGURED_HOST ?? 'nope.example.com'
  * which drops it silently — and every request then resolves to 127.0.0.1,
  * which looks exactly like a broken tenant lookup.
  */
-function get(host, path = '/') {
+function get(host, path = '/', headers = {}) {
   return new Promise((resolve, reject) => {
     const request = http.request(
-      { host: '127.0.0.1', port: PORT, path, headers: { Host: host } },
+      {
+        host: '127.0.0.1',
+        port: PORT,
+        path,
+        headers: { Host: host, ...headers },
+      },
       (response) => {
         let body = ''
         response.setEncoding('utf8')
@@ -79,6 +84,52 @@ for (let round = 0; round < ROUNDS; round++) {
     for (const other of hosts) {
       if (other !== host && html.includes(HOSTS[other]))
         failures.push(`${host}: leaked "${HOSTS[other]}"`)
+    }
+  }
+}
+
+/**
+ * The cached public pages, driven in every (host, language) combination at
+ * once.
+ *
+ * Step 5a put those two things in the cache key and nothing else. A key
+ * missing the host serves one tenant's page to another; a key missing the
+ * language serves a Portuguese page to an English visitor. Both only appear
+ * on the *second* request for a key, so a single pass over each combination
+ * would find neither — the rounds are the point.
+ */
+const CACHED_PATHS = ['/', '/library', '/tournaments']
+const LANGUAGES = ['en', 'pt']
+
+for (let round = 0; round < ROUNDS; round++) {
+  const combinations = hosts.flatMap((host) =>
+    CACHED_PATHS.flatMap((path) =>
+      LANGUAGES.map((language) => ({ host, path, language })),
+    ),
+  )
+
+  const responses = await Promise.all(
+    combinations.map(async (combination) => ({
+      ...combination,
+      ...(await get(combination.host, combination.path, {
+        'Accept-Language': combination.language,
+      })),
+    })),
+  )
+
+  for (const { host, path, language, status, html } of responses) {
+    const where = `${host}${path} [${language}]`
+    if (status !== 200) failures.push(`${where}: status ${status}`)
+
+    const lang = html.match(/<html[^>]*lang="([a-z]+)"/)?.[1]
+    if (lang !== language) failures.push(`${where}: served lang "${lang}"`)
+
+    if (!html.includes(HOSTS[host]))
+      failures.push(`${where}: does not name its own tenant`)
+
+    for (const other of hosts) {
+      if (other !== host && html.includes(HOSTS[other]))
+        failures.push(`${where}: leaked "${HOSTS[other]}"`)
     }
   }
 }
@@ -126,8 +177,10 @@ if (stranger.status !== 404)
 if (!stranger.html.includes('This domain is not connected'))
   failures.push(`${UNCONFIGURED_HOST}: did not render DomainNotConfigured`)
 
+const cachedRequests =
+  ROUNDS * hosts.length * CACHED_PATHS.length * LANGUAGES.length
 console.log(
-  `${ROUNDS} rounds x ${hosts.length} concurrent hosts x 2 paths = ${ROUNDS * hosts.length * 2} requests`,
+  `${ROUNDS} rounds: ${ROUNDS * hosts.length * 2} uncached + ${cachedRequests} cached requests`,
 )
 
 if (failures.length) {
@@ -136,5 +189,5 @@ if (failures.length) {
 }
 
 console.log(
-  'no cross-tenant leakage in pages or sitemaps; every title and status correct',
+  'no cross-tenant or cross-language leakage in pages, cached pages or sitemaps',
 )

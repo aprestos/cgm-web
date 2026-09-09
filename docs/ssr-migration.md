@@ -2,8 +2,8 @@
 
 Tracks the move from a client-rendered SPA to server-rendered public pages.
 
-Steps 1–5 (except 5a) and items 1–3 of step 7 are done. 5a is next; step 6 is
-optional and may never be worth doing. Step 7 was added after 5b, which
+All of step 5 and items 1–3 of step 7 are done. What is left is step 7 items
+4–7, and step 6, which is optional and may never be worth doing. Step 7 was added after 5b, which
 showed that rendering the content on a server is only half of what the SEO
 reason for this migration needed. Everything below step 7 is a debt this
 migration created or uncovered, recorded so it does not get lost.
@@ -59,6 +59,7 @@ The target is the ~48 landing and public views.
 | 5b. Fetch during render  | —   | The public pages had been server-rendered since step 4 and still arrived empty, because every one of them fetched its content in `onMounted`. They now fetch during the render.                      |
 | 7.1–7.3. Metadata        | —   | One title for the whole app, no description, canonical or `og:` tag anywhere, no `robots.txt` or `sitemap.xml`, and every unknown URL answering 200. All four fixed.                                 |
 | 5c–5e. Hydration, locale | —   | Every public route now hydrates with zero console errors. i18n is one instance per app, the language is resolved per request, and `<html lang>` follows it.                                          |
+| 5a. Caching              | —   | The public pages are cached per tenant and per language, 359ms down to 2ms. Not with `isr`, which cannot key by host and would have served one tenant's pages to another.                            |
 
 Steps 1–3 were behaviour-preserving in the SPA and were worth shipping on their
 own merits.
@@ -139,45 +140,115 @@ come back rather than forget this URL.
 
 ## Step 5 — Rendering strategy, data fetching, hydration
 
-### 5a. Route rules
+### 5a. Route rules and caching (done)
+
+The plan here was `isr: 60` on the four public paths. **That would have served
+one tenant's pages to every other tenant**, and the shape of the fix is not the
+shape the plan assumed.
+
+#### Why not `isr`
+
+`isr` is not a Nitro feature; it is a Vercel one. Nitro's Vercel preset turns
+`isr: 60` into a `.prerender-config.json` next to the function, and the only
+key Vercel's ISR cache has is the **path**, plus whatever `allowQuery` lists.
+There is no way to add a header to it. The function still receives the real
+`Host` — it renders the right tenant perfectly — and then the result is filed
+under `/library` and handed to the next domain that asks. Silent, correct on
+the first request, wrong from the second.
+
+For an app that serves the same four paths on a domain per tenant, `isr` is
+therefore unusable, and no window length makes it safe.
+
+#### What is there instead
+
+`cache`, which is Nitro's own, works on every preset, and whose key is ours:
 
 ```ts
-routeRules: {
-  '/admin/**': { ssr: false },   // behind auth, no SEO value
-  '/auth/**':  { ssr: false },
-  '/':         { isr: 60 },
-  '/library':  { isr: 60 },
-  '/tournaments': { isr: 60 },
-  '/flea-market': { isr: 60 },
+const publicPage = {
+  cache: { maxAge: 60, varies: ['host', 'x-forwarded-host', 'x-app-locale'] },
+  headers: { vary: 'accept-language, cookie' },
 }
 ```
 
-The two `ssr: false` rules are already in `nuxt.config.ts` — step 4 could not
-land without them. The ISR windows are what is left, and they are a starting
-guess: tune them against how often editions, tickets and tournaments actually
-change.
+applied to `/`, `/library` and `/tournaments`. Not `/flea-market`: it renders
+an empty div, so there is nothing to save.
 
-**Do not turn ISR on before reading this.** Nitro keys its route cache on the
-path. Every tenant shares these four paths, so `/library` rendered for one
-tenant is `/library` served to the next — the same class of bug as step 1 and
-step 4b, this time in the cache rather than in a module global, and the worst
-one yet because it survives the request. Whatever we do here has to put the
-host in the cache key (`cache: { varies: ['host'] }`, or a key function) and
-`scripts/check-tenant-isolation.mjs` has to be run against a build with the
-rules on — driving one hostname and then another at a cold server proves
-nothing, since the bug needs the first response to have been cached.
+**`varies` does two jobs, and the second one is the surprise.** It decides the
+cache key, and it is also the complete set of request headers the render is
+allowed to see — `defineCachedEventHandler` rebuilds the request with only
+those. A rule without it does not leak; it **breaks**. Measured, with
+`cache: { maxAge: 60 }` and nothing else on `/library`: every tenant got
 
-The cache key also has to include **the language**. Since 5e a render comes out
-in the language the request asked for, so `/library` cached for a Portuguese
-visitor is `/library` served to an English one. `Vary: accept-language` is not
-enough on its own, because the `app-locale` cookie outranks the header — the
-key has to be built from the same resolution `plugins/i18n.ts` does.
+```
+404  This domain is not connected
+```
 
-The third precondition is that these renders stay anonymous, which is why 5b
-left the personal parts of each page in the browser: a page rendered with a
-visitor's session is a page that must never be shared with the next visitor.
-`/checkout` is `ssr: false` for the stronger version of the same reason (5c),
-so it is not a candidate for caching at all.
+because the render could not read its own `Host`. That is a genuinely useful
+property — with `cache`, forgetting something from the key fails loudly on the
+first request instead of leaking on the second, which is exactly backwards from
+how `isr` fails.
+
+#### The language, and why a middleware
+
+The key needs the language too, since 5e made a render come out in the language
+that was asked for. Neither of the two headers that decide it can be keyed on:
+
+- **`cookie`** carries the visitor's session, so every signed-in visitor would
+  get a private copy of the same anonymous page, and the key would grow without
+  bound.
+- **`accept-language`** is a free-form ranked list — `en-US,en;q=0.9,pt;q=0.8`
+  — with a different spelling in every browser, so it is nearly as unbounded.
+
+`server/middleware/locale.ts` resolves both down to one of the two languages we
+have and puts the answer in `x-app-locale` before anything else runs. The key
+becomes (path, host, language): bounded, and unforgeable, since only known
+language codes pass through. `plugins/i18n.ts` reads that header on the server
+instead of the cookie.
+
+The side effect is the useful part: **a cached render cannot see a session
+cookie at all.** The precondition that these renders stay anonymous — 5b's
+reason for leaving the personal parts of each page in the browser — is now
+structural rather than a promise. (`/checkout` is `ssr: false` for the stronger
+version of the same reason, so it is not a candidate for caching either.)
+
+`headers: { vary: 'accept-language, cookie' }` is for anything caching in front
+of us. Nitro answers `cache-control: max-age=60`, and a shared cache taking
+that at face value would have no idea the body depends on the language —
+`x-app-locale` is ours, invented after the request arrived, and no CDN has seen
+it. Naming `cookie` there also means most shared caches decline to store the
+response at all, which is the outcome we want: the only cache that knows the
+right key is this one.
+
+#### What it bought
+
+Measured against a build, warm process, per (host, language) key:
+
+| Route          | Cold   | Warm  |
+| -------------- | ------ | ----- |
+| `/`            | 359ms  | 2.3ms |
+| `/tournaments` | 321ms  | 1.6ms |
+| `/library`     | ~400ms | 1.1ms |
+
+The cold figures are the three-round-trip bootstrap plus the render; they are
+what every request used to cost.
+
+60s is still a starting guess. `/library` is the one to watch — game
+availability changes during a convention — but a stale list corrects itself
+right after hydration, because the browser subscribes to the same data in
+realtime.
+
+#### How this is checked
+
+`scripts/check-tenant-isolation.mjs` now drives every (host × path × language)
+combination concurrently, for 15 rounds, and asserts each response names its
+own tenant, is in the language that was asked for, and contains no other
+tenant's name. **The rounds are the point**: a bad key is correct on the first
+request for it and wrong on every one after, so a single pass over each
+combination finds nothing.
+
+It was checked against a deliberately wrong key — `varies` with the host
+removed — and failed on every combination, which is the only evidence that it
+would catch a real one.
 
 ### 5b. Data fetching (done)
 
@@ -475,15 +546,15 @@ both are blocked on the i18n singleton.
 
 ## Debts to clear
 
-| Item                                        | Where                                                                                              | When                                                                    |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| Remove the legacy session shim              | `migrateLegacySession()` in `src/lib/supabase.ts`, installed by `plugins/legacy-session.client.ts` | Once sessions in the wild have turned over                              |
-| Remove the legacy locale shim               | `migrateLegacyLocale()` in `src/i18n/localePreference.ts`                                          | Same                                                                    |
-| `sitemap.xml` repeats three service queries | `server/routes/sitemap.xml.ts`                                                                     | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
-| Per-request Supabase client                 | `src/lib/supabase.ts`                                                                              | With checkout, not 5b — see 5b for why the public pages do not want one |
-| `noUncheckedIndexedAccess`                  | `nuxt.config.ts`                                                                                   | Whenever; ~20 sites                                                     |
-| Better Stack gets no server-side logs       | `src/lib/logger.ts`                                                                                | When server logs matter                                                 |
-| ~~`/not-found` answers 200~~ — done         | `src/router/index.ts`                                                                              | Done — 7.3                                                              |
+| Item                                          | Where                                                                                              | When                                                                    |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| Remove the legacy session shim                | `migrateLegacySession()` in `src/lib/supabase.ts`, installed by `plugins/legacy-session.client.ts` | Once sessions in the wild have turned over                              |
+| Remove the legacy locale shim                 | `migrateLegacyLocale()` in `src/i18n/localePreference.ts`                                          | Same                                                                    |
+| `server/` repeats things `src/` already knows | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts`, `server/middleware/locale.ts`           | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
+| Per-request Supabase client                   | `src/lib/supabase.ts`                                                                              | With checkout, not 5b — see 5b for why the public pages do not want one |
+| `noUncheckedIndexedAccess`                    | `nuxt.config.ts`                                                                                   | Whenever; ~20 sites                                                     |
+| Better Stack gets no server-side logs         | `src/lib/logger.ts`                                                                                | When server logs matter                                                 |
+| ~~`/not-found` answers 200~~ — done           | `src/router/index.ts`                                                                              | Done — 7.3                                                              |
 
 Both shims are cheap to keep and destructive to remove early — leaving them a
 release or two longer costs nothing.
@@ -522,9 +593,9 @@ indexes happily. It was invisible in a SPA.
    per-request Supabase client after all.
 4. ~~**7 items 1–3** metadata, `robots.txt`/`sitemap.xml`, a real 404~~ — done.
 5. ~~**5c/5d/5e** hydration, `lang`, i18n per request~~ — done.
-6. **5a** ISR windows — next, and only with the host **and the language** in the
-   cache key.
-7. **7 items 4–7**, then **6** only if we want it.
+6. ~~**5a** caching~~ — done, and not with `isr`; see the step for why.
+7. **7 items 4–7** — JSON-LD, `/library`'s paginated games, a home title that
+   says what the site is, `og:image` shape. Then **6**, only if we want it.
 
 5b moved ahead of 5a: caching a render that still fetches its content in the
 browser caches an empty page. Step 7 then moved ahead of the rest of 5, for the
@@ -547,7 +618,9 @@ another tenant's data, plus that an unknown host still answers 404 with
 `DomainNotConfigured`. It found the bug described under step 4, and it is the
 only check that could have. Since 7.2 it drives `/sitemap.xml` for the same
 hosts in the same rounds — that route resolves a tenant by itself, and what it
-publishes is a list of URLs. Not a CI test — it needs real hostnames and a real
+publishes is a list of URLs. Since 5a it also drives every (host × path ×
+language) combination against the cached routes, because a cache key is a
+second, quieter way to hand one visitor another's page. Not a CI test — it needs real hostnames and a real
 database:
 
 ```sh
