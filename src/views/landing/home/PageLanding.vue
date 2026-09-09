@@ -27,6 +27,7 @@ import tournamentService from '@/features/tournaments/events/service.ts'
 import logger from '@/lib/logger.ts'
 import { formatDateRange } from '@/utils/date'
 import { useSeo } from '@/composables/useSeo'
+import { useJsonLd } from '@/composables/useJsonLd'
 
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
@@ -136,6 +137,11 @@ const hasTournaments = computed(
  * this edition over anything we can assemble for them.
  */
 useSeo({
+  // The edition's name alone only helps somebody who already knows the event.
+  // `hero.defaultTitle` is what this app is for, and it is already the phrase
+  // shown to a visitor when a tenant has written nothing of their own. A field
+  // on the tenant would be better — see step 7 of `docs/ssr-migration.md`.
+  tagline: () => t('landing.hero.defaultTitle'),
   description: () => {
     const name = edition.value?.name ?? tenant.value?.name ?? ''
     const start = edition.value?.start_date
@@ -152,6 +158,68 @@ useSeo({
         : t('landing.seo.description', { name }))
     )
   },
+})
+
+/**
+ * The edition, described for a search engine.
+ *
+ * An `Event` is one of the few things a result page will render specially —
+ * the dates, the venue and the ticket prices can appear in the result itself.
+ * All of it is already in the stores by the time this renders.
+ *
+ * Nothing is emitted without a start date: a convention with no date is not an
+ * event a search engine can do anything useful with, and a card with holes in
+ * it is worse than no card.
+ */
+const origin = useRequestURL({ xForwardedHost: true }).origin
+
+useJsonLd(() => {
+  const current = edition.value
+  if (!current?.start_date) return null
+
+  const place = current.location?.title
+  const offers = availableTickets.value.map((ticket) => ({
+    '@type': 'Offer',
+    name: ticket.name,
+    // Prices are stored in minor units — see `formatPrice`.
+    price: (ticket.price / 100).toFixed(2),
+    priceCurrency: editionStore.currency,
+    url: `${origin}/checkout`,
+    availability: 'https://schema.org/InStock',
+  }))
+
+  return {
+    '@type': 'Event',
+    name: current.name,
+    url: `${origin}/`,
+    startDate: current.start_date,
+    ...(current.end_date ? { endDate: current.end_date } : {}),
+    eventStatus: 'https://schema.org/EventScheduled',
+    eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+    ...(current.description ? { description: current.description } : {}),
+    ...(current.poster_url ? { image: [current.poster_url] } : {}),
+    // A `Place` with a name and a map link, because a name is all the edition
+    // stores — there is no structured address to give.
+    ...(place
+      ? {
+          location: {
+            '@type': 'Place',
+            name: place,
+            ...(current.location?.url ? { url: current.location.url } : {}),
+          },
+        }
+      : {}),
+    ...(tenant.value?.name
+      ? {
+          organizer: {
+            '@type': 'Organization',
+            name: tenant.value.name,
+            url: origin,
+          },
+        }
+      : {}),
+    ...(offers.length > 0 ? { offers } : {}),
+  }
 })
 
 // Convention status

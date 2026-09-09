@@ -32,6 +32,7 @@ import tournamentParticipantsService from '@/features/tournaments/participants/s
 import tournamentService from '@/features/tournaments/events/service.ts'
 import logger from '@/lib/logger.ts'
 import { useSeo } from '@/composables/useSeo'
+import { useJsonLd } from '@/composables/useJsonLd'
 
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
@@ -147,6 +148,57 @@ const availableTournaments = computed<Tournament[]>(() =>
 )
 
 const statusCounts = computed(() => countByStatus(availableTournaments.value))
+
+/**
+ * The tournaments, as a list a search engine can read.
+ *
+ * An `ItemList` of `Event`s rather than one `Event` per tournament, because
+ * this page is the list — none of them has a URL of its own to be the subject
+ * of a result. Step 7 item 4 of `docs/ssr-migration.md`.
+ */
+const origin = useRequestURL({ xForwardedHost: true }).origin
+
+useJsonLd(() => {
+  const listed = availableTournaments.value.filter(
+    (tournament) => tournament.status !== TournamentStatus.finished,
+  )
+  if (listed.length === 0) return null
+
+  return {
+    '@type': 'ItemList',
+    name: t('public.tournaments.title'),
+    numberOfItems: listed.length,
+    itemListElement: listed.map((tournament, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      item: {
+        '@type': 'Event',
+        name: tournament.title,
+        url: `${origin}/tournaments`,
+        startDate: tournament.startsAt,
+        eventStatus:
+          tournament.status === TournamentStatus.cancelled
+            ? 'https://schema.org/EventCancelled'
+            : 'https://schema.org/EventScheduled',
+        eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+        ...(tournament.description
+          ? { description: tournament.description }
+          : {}),
+        ...(tournament.place
+          ? { location: { '@type': 'Place', name: tournament.place } }
+          : {}),
+        ...(tournament.organizer
+          ? {
+              organizer: {
+                '@type': 'Organization',
+                name: tournament.organizer,
+              },
+            }
+          : {}),
+      },
+    })),
+  }
+})
 
 useSeo({
   title: () => t('public.tournaments.title'),

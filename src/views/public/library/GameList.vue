@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import {
   getStatus,
@@ -10,6 +10,7 @@ import {
   type FilterOptions,
   libraryService,
 } from '@/features/library/games/service.ts'
+import { useLibraryGames } from '@/features/library/games/useLibraryGames'
 import GameItem from './GameItem.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import libraryReservationService from '@/features/library/reservations/service.ts'
@@ -21,13 +22,14 @@ import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+const route = useRoute()
 const router = useRouter()
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
 
 const selectedGameId = ref<string>('')
 const isDetailModalOpen = ref(false)
-const currentPage = ref(1)
+const loadedPages = ref(1)
 const itemsPerPage = ref(20)
 let unsubscribe: (() => void) | null = null
 let observer: IntersectionObserver | null = null
@@ -50,30 +52,11 @@ const props: Props = withDefaults(defineProps<Props>(), {
   filters: undefined,
 })
 
-/**
- * The library, as it stands when the page is rendered.
- *
- * This is the page's whole content, and it used to arrive only after the
- * browser had mounted, subscribed and fetched — so a crawler got four skeleton
- * cards and nothing else. Step 5b of `docs/ssr-migration.md`.
- *
- * `libraryService.get` handles its own errors and answers `[]`, so there is
- * nothing here that can turn a slow database into a 500.
- */
-const { data: renderedGames } = await useAsyncData(
-  'library-games',
-  async (): Promise<LibraryGame[]> => {
-    const tenantId = tenantStore.tenant?.id
-    const editionId = editionStore.edition?.id
-    if (!tenantId || !editionId) return []
-
-    return await libraryService.get(tenantId, editionId)
-  },
-  { default: (): LibraryGame[] => [] },
-)
-
-// Seeded from the render; the realtime subscription replaces it from there.
-const allGames = ref<LibraryGame[]>(renderedGames.value ?? [])
+// The same fetch `PageLibraryHome` reads; `useAsyncData`'s shared key makes the
+// two calls one request. Seeded into a ref here because the realtime
+// subscription replaces the list from mount onwards.
+const renderedGames = await useLibraryGames()
+const allGames = ref<LibraryGame[]>(renderedGames.value)
 
 // Watch for filter changes and reset pagination
 watch(
@@ -84,27 +67,59 @@ watch(
   { deep: true },
 )
 
-// Paginated games for display (infinite scroll)
-const games = computed(() => {
-  const endIndex = currentPage.value * itemsPerPage.value
-  return filteredGames.value.slice(0, endIndex)
+/**
+ * Which page of the library this URL is.
+ *
+ * Infinite scroll shows a crawler the first twenty games and nothing else —
+ * it does not scroll. `?page=N` gives every twenty a URL of its own that the
+ * server renders, and the links at the bottom of the list are how a crawler
+ * gets to them. Step 7 item 5 of `docs/ssr-migration.md`.
+ *
+ * For a person nothing changes: the page they land on is the start of the
+ * list, and scrolling still appends the next twenty to it.
+ */
+const startPage = computed(() => {
+  const raw = route.query.page
+  const asked = Number(Array.isArray(raw) ? raw[0] : raw)
+  return Number.isInteger(asked) && asked > 1 ? asked : 1
 })
 
+const startIndex = computed(() => (startPage.value - 1) * itemsPerPage.value)
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredGames.value.length / itemsPerPage.value)),
+)
+
+// What is on screen: the window this URL names, plus whatever scrolling has
+// appended to it since.
+const games = computed(() =>
+  filteredGames.value.slice(
+    startIndex.value,
+    startIndex.value + loadedPages.value * itemsPerPage.value,
+  ),
+)
+
 // Check if there are more games to load
-const hasMoreGames = computed(() => {
-  return games.value.length < filteredGames.value.length
-})
+const hasMoreGames = computed(
+  () => startIndex.value + games.value.length < filteredGames.value.length,
+)
 
 const loadMoreGames = (): void => {
   if (hasMoreGames.value) {
-    currentPage.value++
+    loadedPages.value++
   }
 }
 
 const resetPagination = (): void => {
-  currentPage.value = 1
+  loadedPages.value = 1
   setupIntersectionObserver()
 }
+
+// Moving between pages starts a fresh window rather than keeping the previous
+// page's appended games on screen.
+watch(startPage, () => {
+  resetPagination()
+})
 
 const setupIntersectionObserver = (): void => {
   if (observer) {
@@ -285,6 +300,32 @@ onUnmounted(() => {
         <span class="text-sm">{{ t('public.library.loadingMoreGames') }}</span>
       </div>
     </div>
+
+    <!--
+      Real links, one per page of the library, so a crawler can reach the games
+      that scrolling would otherwise be the only way to see. Quiet on purpose:
+      a visitor scrolls, and this is below where they will ever have to.
+    -->
+    <nav
+      v-if="totalPages > 1"
+      :aria-label="t('public.library.pagination.label')"
+      class="mt-12 flex flex-wrap items-center justify-center gap-2"
+    >
+      <RouterLink
+        v-for="page in totalPages"
+        :key="page"
+        :to="page === 1 ? { query: {} } : { query: { page } }"
+        class="rounded-md px-3 py-1.5 text-sm text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-100"
+        :class="
+          page === startPage
+            ? 'bg-gray-100 font-medium text-gray-900 dark:bg-gray-700 dark:text-gray-100'
+            : ''
+        "
+        :aria-current="page === startPage ? 'page' : undefined"
+      >
+        {{ page }}
+      </RouterLink>
+    </nav>
 
     <!-- Empty state -->
     <div v-if="filteredGames.length === 0" class="text-center py-12">

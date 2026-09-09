@@ -44,7 +44,12 @@ export default {
   library: {
     // Crawlers and link previews only — see `useSeo`.
     seo: {
+      withCount: 'Browse the {count} board games in the library at {name}.',
       description: 'The board game library at {name}.',
+      page: 'page {page}',
+    },
+    pagination: {
+      label: 'Library pages',
     },
     title: 'Library',
     games: 'Games',

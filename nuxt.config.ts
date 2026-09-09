@@ -162,6 +162,30 @@ export default defineNuxtConfig({
     },
   },
 
+  experimental: {
+    /**
+     * Keep the payload in the page rather than in a file beside it.
+     *
+     * Nuxt extracts the payload to `/_payload.json` for any route it considers
+     * cacheable, which the rules above made all three public pages. The client
+     * then fetches it — from a **separate render**, which is not the one the
+     * cached HTML came from and is not cached itself.
+     *
+     * Two problems, and the first is the one that showed. The landing page
+     * picks thirteen games at random, so the HTML said one set and the payload
+     * said another, and hydration replaced every card. Anything whose render
+     * is not a pure function of the cache key would have done the same. The
+     * second is quieter: every hydration of a cached page was triggering a
+     * full server render to fetch the payload, which is most of the work the
+     * cache exists to avoid.
+     *
+     * Inline, the payload is part of the response the cache stored, so it
+     * describes exactly the HTML it arrived with. Step 5a of
+     * `docs/ssr-migration.md`.
+     */
+    payloadExtraction: false,
+  },
+
   typescript: {
     // `pnpm run type-check` runs vue-tsc over the generated config; running it
     // again inside the dev server would only make it slower.

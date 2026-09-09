@@ -2,10 +2,10 @@
 
 Tracks the move from a client-rendered SPA to server-rendered public pages.
 
-All of step 5 and items 1–3 of step 7 are done. What is left is step 7 items
-4–7, and step 6, which is optional and may never be worth doing. Step 7 was added after 5b, which
-showed that rendering the content on a server is only half of what the SEO
-reason for this migration needed. Everything below step 7 is a debt this
+All of step 5 and all of step 7 are done. What is left is step 6, which is
+optional and may never be worth doing. Step 7 was added after 5b, which showed
+that rendering the content on a server is only half of what the SEO reason for
+this migration needed. Everything below step 7 is a debt this
 migration created or uncovered, recorded so it does not get lost.
 
 ## Why we are doing this
@@ -60,6 +60,7 @@ The target is the ~48 landing and public views.
 | 7.1–7.3. Metadata        | —   | One title for the whole app, no description, canonical or `og:` tag anywhere, no `robots.txt` or `sitemap.xml`, and every unknown URL answering 200. All four fixed.                                 |
 | 5c–5e. Hydration, locale | —   | Every public route now hydrates with zero console errors. i18n is one instance per app, the language is resolved per request, and `<html lang>` follows it.                                          |
 | 5a. Caching              | —   | The public pages are cached per tenant and per language, 359ms down to 2ms. Not with `isr`, which cannot key by host and would have served one tenant's pages to another.                            |
+| 7.4–7.7. The rest of SEO | —   | Structured data on the three public pages, a URL per twenty games, a home title that says what the site is, and a link preview that is not a cropped poster.                                         |
 
 Steps 1–3 were behaviour-preserving in the SPA and were worth shipping on their
 own merits.
@@ -527,22 +528,103 @@ place that knows a render is happening. Nothing linked to `/not-found` by name,
 so a link to the old path now lands on the catch-all like any other unknown
 URL.
 
-### What is left
+### 7.4 Structured data — done
 
-4. **JSON-LD** — `Event` for the edition, `ItemList` for the library and the
-   tournaments. All of it is already in the stores at render time.
-5. **`/library`'s other ~200 games.** Infinite scroll shows a crawler the first 20. Paginated routes with real links, or render the full list and paginate
-   only the display.
-6. **A home page title that says what the site is.** It is the edition's name
-   and nothing else, which only helps somebody who already knows the event.
-   There is no field for "board game convention in Maia" on the model —
-   `landing.hero.defaultTitle` is the closest thing and it is a UI string, not
-   per tenant.
-7. **`og:image` shape.** It is the edition poster, which is portrait, on a
-   `summary_large_image` card, which wants 1.91:1.
+`src/composables/useJsonLd.ts`, and three callers. The landing page describes
+its edition as an `Event` — dates, venue, organiser, and an `Offer` per ticket
+— which is one of the few things a result page will render specially. The
+library and the tournaments are each an `ItemList`.
 
-5d and 5e sit inside this too: `<html lang>` and `hreflang` are metadata, and
-both are blocked on the i18n singleton.
+Two decisions worth keeping:
+
+- **Nothing is emitted from incomplete data.** No start date, no `Event`; no
+  games, no `ItemList`. A card with holes in it is worse than no card, and the
+  getter answering `null` is how a page says so.
+- **The JSON is escaped before it goes in the page.** A tenant writes their own
+  edition description, and a `</script>` in it would close the block early and
+  spill the rest of the JSON into the document as markup. `<`, `>` and `&`
+  become their `\u` escapes, which are still the same string to a parser.
+
+The `Place` carries a name and a map link, because a name is all an edition
+stores — there is no structured address to give. Library items carry no `url`:
+opening a game is a dialog, not a page.
+
+### 7.5 A URL per twenty games — done
+
+`/library?page=N` renders that window on the server, and a row of real links at
+the bottom of the list is how a crawler reaches them. Infinite scroll still
+works exactly as before for a person: the page they land on is the start of the
+list and scrolling appends to it. Only the starting point changed.
+
+Three things had to go with it:
+
+- **The canonical has to keep `?page`.** Without it every page of the library
+  would name page one as the real version, and a search engine would drop the
+  other four. `useSeo` takes a `canonicalQuery` allow-list — one parameter,
+  because anything else would fork the library into copies of itself.
+- **The title carries the page number**, so the five pages are not five
+  identical entries in a results list.
+- **The `ItemList` counts positions from the start of the library**, not from
+  the top of the page: `?page=3` emits positions 41–60. The numbering is what
+  says these pages are one list in sequence.
+
+The fetch moved into `useLibraryGames`, shared by `PageLibraryHome` and
+`GameList` through one `useAsyncData` key, because both need it now — the page
+counts the games for its title, its structured data and its links, and the list
+draws them. That also let the library's description say how many games there
+are, which 7.1 had left out for want of a count.
+
+The pagination renders one link per page, which is fine at five and would not
+be at fifty. If a tenant's library ever gets that big it wants a window with
+gaps in it.
+
+### 7.6 A home title that says what the site is — done
+
+`Maia Kidult Weekend · Board Game Convention`. The name first, because that is
+what somebody who already knows the event searches for; the tagline second, for
+everybody else. It comes from `landing.hero.defaultTitle`, which is already the
+phrase shown to a visitor when a tenant has written nothing of their own.
+
+Still second best. A field on the tenant would let each of them say what they
+actually are, and the ones that are not board game conventions would stop being
+described as one.
+
+### 7.7 A link preview that is not a cropped poster — done
+
+`og:image` prefers a photo from `tenant.images` — the gallery on the landing
+page — over the edition poster, and `twitter:card` drops to `summary` when the
+poster is all there is. A preview card is a wide letterbox and a poster is
+portrait, so a poster in one is cropped to a band across its middle; the small
+square card is not a worse preview than that, it is a better one, because the
+whole image survives.
+
+Neither image is measured. We cannot know the proportions of a URL, so this is
+an assumption about what each field is _for_, and the card type hedges it.
+
+### What 7.4–7.7 found in 5a
+
+**Nuxt was serving the payload from a different render than the HTML.**
+`payloadExtraction` is on by default and applies to any route Nuxt considers
+cacheable, which the rules from 5a had just made all three public pages. Those
+pages then shipped `data-src="/_payload.json"`, and the browser fetched the
+payload from a separate — and uncached — render.
+
+It showed on the landing page, which picks thirteen games at random: the HTML
+said one set, the payload said another, and hydration replaced every card. Any
+render that is not a pure function of the cache key would have done the same.
+The quieter half is that every hydration of a cached page was triggering a full
+server render to fetch its payload, which is most of the work the cache exists
+to avoid.
+
+`experimental.payloadExtraction: false` puts the payload back in the response
+the cache stored, so it describes exactly the HTML it arrived with. Confirmed
+both ways against a build: on, `/` reports mismatches cold and warm; off, every
+public route reports nothing.
+
+It is worth knowing how this got through 5a. That step was verified with curl
+and `check:tenant-isolation`, both of which only ever read the server's HTML —
+and the server's HTML was right. It took a browser to see that the page
+disagreed with itself after hydration.
 
 ## Debts to clear
 
@@ -594,8 +676,7 @@ indexes happily. It was invisible in a SPA.
 4. ~~**7 items 1–3** metadata, `robots.txt`/`sitemap.xml`, a real 404~~ — done.
 5. ~~**5c/5d/5e** hydration, `lang`, i18n per request~~ — done.
 6. ~~**5a** caching~~ — done, and not with `isr`; see the step for why.
-7. **7 items 4–7** — JSON-LD, `/library`'s paginated games, a home title that
-   says what the site is, `og:image` shape. Then **6**, only if we want it.
+7. ~~**7 items 4–7**~~ — done. **6** remains, only if we want it.
 
 5b moved ahead of 5a: caching a render that still fetches its content in the
 browser caches an empty page. Step 7 then moved ahead of the rest of 5, for the
@@ -638,6 +719,12 @@ console errors across the landing, library, tournaments, checkout, flea-market,
 auth and admin routes. Keep running it after anything that touches the head:
 7.1's dead-zone bug reached the browser as a rejected setup promise and showed
 up only there, while the page still server-rendered perfectly.
+
+**Run it after anything that changes how a page is delivered, not only what it
+contains.** 5a passed curl and `check:tenant-isolation` while serving a payload
+from a different render than the HTML; both of those read only the server's
+HTML, and the server's HTML was right. It took a browser to see the page
+disagree with itself.
 
 Run it **twice** — once with a fresh browser and once with a returning one.
 5c's real mismatches were only visible to a browser that already had a cart in

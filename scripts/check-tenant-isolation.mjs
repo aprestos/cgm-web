@@ -77,9 +77,15 @@ for (let round = 0; round < ROUNDS; round++) {
   for (const { host, status, html } of responses) {
     if (status !== 200) failures.push(`${host}: status ${status}`)
 
+    // `startsWith`, not equality: the landing page's title is the edition's
+    // name followed by a tagline (step 7 item 6). The name still has to come
+    // first, and it is still the whole point of the assertion — another
+    // tenant's name would not be the prefix.
     const title = titleOf(html)
-    if (title !== HOSTS[host])
-      failures.push(`${host}: title "${title}", expected "${HOSTS[host]}"`)
+    if (!title.startsWith(HOSTS[host]))
+      failures.push(
+        `${host}: title "${title}", expected to start "${HOSTS[host]}"`,
+      )
 
     for (const other of hosts) {
       if (other !== host && html.includes(HOSTS[other]))
