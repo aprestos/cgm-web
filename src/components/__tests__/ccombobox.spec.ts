@@ -44,7 +44,7 @@ describe('CCombobox with searchFn', () => {
     const options = wrapper.findAll('li')
     expect(options.length).toBe(2)
 
-    await options[0].trigger('mousedown', { button: 0 })
+    await wrapper.get('li').trigger('mousedown', { button: 0 })
     await wrapper.setProps({ modelValue: 'g1' })
     await flush(50)
 
@@ -127,7 +127,7 @@ describe('CCombobox with static items', () => {
     const options = wrapper.findAll('li')
     expect(options.map((o) => o.text())).toEqual(['Sala 1', 'Armazém'])
 
-    await options[1].trigger('mousedown', { button: 0 })
+    await wrapper.get('li:nth-of-type(2)').trigger('mousedown', { button: 0 })
     await wrapper.setProps({ modelValue: 2 })
     await flush(50)
 

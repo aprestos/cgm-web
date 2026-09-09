@@ -28,6 +28,10 @@ function updateHolder(
 
 function holderSlotLabel(index: number): string {
   const entry = props.holders[index]
+  // Only ever called from a `v-for` over the same array, so this is the
+  // compiler asking rather than a case that happens.
+  if (!entry) return ''
+
   const sameTicketCount = props.holders.filter(
     (h) => h.ticketId === entry.ticketId,
   ).length

@@ -100,8 +100,13 @@ const totalTicketCount = computed(
   () => order.value?.items.reduce((s, i) => s + i.quantity, 0) ?? 0,
 )
 
+/** The first of `GROUP_COLORS`, named so the wheel has somewhere to fall back
+ *  to without asserting that indexing found something. */
+const DEFAULT_COLOR =
+  'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400'
+
 const GROUP_COLORS = [
-  'bg-primary-50 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400',
+  DEFAULT_COLOR,
   'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
   'bg-violet-50 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400',
   'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400',
@@ -120,13 +125,19 @@ const dayColorMap = computed(() => {
     ...new Set((order.value?.issuances ?? []).flatMap((i) => ticketDays(i))),
   ]
   const map = new Map<string, string>()
-  days.forEach((d, i) => map.set(d, GROUP_COLORS[i % GROUP_COLORS.length]))
+  days.forEach((d, i) => map.set(d, colorAt(i)))
   return map
 })
 
+/** A colour from the wheel. The modulo cannot miss, but indexing says it can,
+ *  so the fallback names the first colour rather than asserting. */
+function colorAt(index: number): string {
+  return GROUP_COLORS[index % GROUP_COLORS.length] ?? DEFAULT_COLOR
+}
+
 function dayTagColor(day?: string): string {
-  if (!day) return GROUP_COLORS[0]
-  return dayColorMap.value.get(day) ?? GROUP_COLORS[0]
+  if (!day) return DEFAULT_COLOR
+  return dayColorMap.value.get(day) ?? DEFAULT_COLOR
 }
 
 const buyerInitials = computed<string>(() => {

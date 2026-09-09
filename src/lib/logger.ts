@@ -46,10 +46,9 @@ const currentLogLevel = parseLogLevel(logLevel)
 /**
  * The Better Stack sink, when there is one worth building.
  *
- * Nothing is built on a server: `@logtail/browser` batches and flushes on
- * browser lifecycle events a render does not have, so server-side lines go to
- * the console and Nitro's own logging picks them up from there. Shipping them
- * to Better Stack needs `@logtail/node`, which is a separate change.
+ * Browser only. `@logtail/browser` batches and flushes on browser lifecycle
+ * events a render does not have, so on a server this answers undefined and
+ * `shipFromServer` posts instead.
  */
 function createLogtail(): Logtail | undefined {
   if (typeof window === 'undefined') return undefined
@@ -73,67 +72,101 @@ function createLogtail(): Logtail | undefined {
 
 const logtail = createLogtail()
 
+/** Whether anything anywhere is listening. */
+const shipsSomewhere = !isDevelopment && !!token && !!endpoint
+
+/**
+ * A log line, from a server, to Better Stack's HTTP ingest.
+ *
+ * The SDK is not usable here — it is the browser build, and the node one would
+ * be a dependency for the sake of a POST — so this is the same request it
+ * would have made. Server lines used to go to the console and stop at
+ * whatever was reading stdout.
+ *
+ * Fire and forget, and it swallows its own failures: logging is never allowed
+ * to be the thing that breaks a render, and a line that does not arrive is a
+ * smaller problem than a page that does not.
+ */
+function shipFromServer(
+  level: string,
+  message: string,
+  content?: Record<string, unknown>,
+): void {
+  if (!shipsSomewhere) return
+
+  void fetch(`https://${endpoint}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      dt: new Date().toISOString(),
+      level,
+      message,
+      // No tenant: reading it here means `getActivePinia()`, which between two
+      // concurrent renders points at whichever request suspended last. A line
+      // stamped with the wrong tenant is worse than one stamped with none.
+      source: 'server',
+      content,
+    }),
+  }).then((response) => {
+    if (!response.ok) console.error(message, content)
+  }).catch(() => {
+    console.error(message, content)
+  })
+}
+
 class Logger {
   info(message: string, content?: Record<string, unknown>): void {
-    if (this.shouldLog(LogLevel.INFO)) {
-      void logtail?.info(message, {
-        context: {
-          tenant_id: tenantId(),
-          event_id: tenantId(),
-        },
-        content,
-      })
-      void logtail?.flush()
-    } else {
-      console.info(message, content)
-    }
+    this.send(LogLevel.INFO, 'info', message, content)
   }
 
   warn(message: string, content?: Record<string, unknown>): void {
-    if (this.shouldLog(LogLevel.WARN)) {
-      void logtail?.warn(message, {
-        context: {
-          tenant_id: tenantId(),
-          event_id: tenantId(),
-        },
-        content,
-      })
-      void logtail?.flush()
-    } else {
-      console.warn(message, content)
-    }
+    this.send(LogLevel.WARN, 'warn', message, content)
   }
 
   error(message: string, content?: Record<string, unknown>): void {
-    if (this.shouldLog(LogLevel.ERROR)) {
-      void logtail?.error(message, {
-        context: {
-          tenant_id: tenantId(),
-          event_id: tenantId(),
-        },
-        content,
-      })
-      void logtail?.flush()
-    } else {
-      console.error(message, content)
-    }
+    this.send(LogLevel.ERROR, 'error', message, content)
   }
 
   debug(message: string, content?: Record<string, unknown>): void {
-    if (this.shouldLog(LogLevel.DEBUG)) {
-      void logtail?.debug(message, {
-        context: {
-          tenant_id: tenantId(),
-          event_id: tenantId(),
-        },
-        content,
-      })
-    } else {
-      console.debug(message, content)
-    }
+    this.send(LogLevel.DEBUG, 'debug', message, content)
   }
-  private shouldLog(level: number): boolean {
-    return !!logtail && !isDevelopment && level >= currentLogLevel
+
+  /**
+   * One path for all four levels, and the only place that knows there are two
+   * sinks. Below the configured level, or with nothing configured at all, a
+   * line still goes to the console — which in a browser is the developer's and
+   * on a server is whatever is reading stdout.
+   */
+  private send(
+    level: number,
+    name: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    content?: Record<string, unknown>,
+  ): void {
+    if (level < currentLogLevel || !shipsSomewhere) {
+      console[name](message, content)
+      return
+    }
+
+    if (typeof window === 'undefined') {
+      shipFromServer(name, message, content)
+      return
+    }
+
+    void logtail?.[name](message, {
+      context: {
+        tenant_id: tenantId(),
+        event_id: tenantId(),
+      },
+      content,
+    })
+
+    // `debug` was the one level that never flushed; keeping that, since it is
+    // the noisiest and the least worth a request each.
+    if (name !== 'debug') void logtail?.flush()
   }
 }
 

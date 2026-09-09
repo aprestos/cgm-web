@@ -68,7 +68,7 @@ async function handleContinue(): Promise<void> {
               {{ t('landing.checkout.account.name') }}
             </label>
             <input
-              v-model="attendees[index].holderName"
+              v-model="attendee.holderName"
               type="text"
               class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary-500 dark:border-white/15 dark:bg-gray-900"
               :class="{
@@ -89,7 +89,7 @@ async function handleContinue(): Promise<void> {
               {{ t('landing.checkout.account.email') }}
             </label>
             <input
-              v-model="attendees[index].holderEmail"
+              v-model="attendee.holderEmail"
               type="email"
               class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary-500 dark:border-white/15 dark:bg-gray-900"
               :class="{
