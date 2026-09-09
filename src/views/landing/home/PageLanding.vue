@@ -24,12 +24,15 @@ import ScheduleView from './ScheduleView.vue'
 import TournamentsView from './TournamentsView.vue'
 import type { Schedule } from '@/features/events/edition.model.ts'
 import tournamentService from '@/features/tournaments/events/service.ts'
+import logger from '@/lib/logger.ts'
+import { formatDateRange } from '@/utils/date'
+import { useSeo } from '@/composables/useSeo'
 
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
 const settingsStore = useSettingsStore()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 
 // Stores
 const edition = computed(() => editionStore.edition)
@@ -51,10 +54,6 @@ const scheduleImages = computed<Schedule>(() => edition.value?.schedule ?? {})
 const TRENDING_GAMES_COUNT = 13
 
 // Data
-const trendingGames = ref<LibraryGame[]>([])
-const availableTickets = ref<Ticket[]>([])
-const tournaments = ref<Tournament[]>([])
-const isLoadingGames = ref<boolean>(true)
 const scrollY = ref<number>(0)
 const activeSection = ref<string>('hero')
 
@@ -68,9 +67,92 @@ const isLibraryEnabled = computed(
 const isTournamentsEnabled = computed(
   () => settings.value?.tournaments?.enabled ?? false,
 )
+/**
+ * The page's content, fetched while the page is being rendered.
+ *
+ * This used to be three `onMounted` calls, which meant a crawler — and the
+ * first paint — got the empty state. Step 5b of `docs/ssr-migration.md`.
+ *
+ * One `useAsyncData` for all three rather than three of them, because the
+ * server awaits each in turn and three awaited fetches are the waterfall this
+ * migration exists to remove. `Promise.allSettled` makes it one round trip's
+ * worth of latency, and keeps the old behaviour where a section that fails to
+ * load leaves the rest of the page standing: `ticketService.getAll` and
+ * `tournamentService.getAll` both throw on error, and a throw during render is
+ * a 500 for the whole page rather than a missing section.
+ *
+ * Awaited, because an un-awaited `useAsyncData` resolves after the render it
+ * was supposed to fill: the server would serialise the empty state, which is
+ * the bug this step exists to fix.
+ */
+const { data: content } = await useAsyncData(
+  'landing-content',
+  async () => {
+    const tenantId = tenant.value?.id
+    const editionId = edition.value?.id
+    if (!tenantId || !editionId) return emptyContent()
+
+    const [games, tickets, tournaments] = await Promise.allSettled([
+      isLibraryEnabled.value
+        ? libraryService.get(tenantId, editionId)
+        : Promise.resolve<LibraryGame[]>([]),
+      isTicketsEnabled.value
+        ? ticketService.getAll(tenantId, editionId, TicketStatus.ACTIVE)
+        : Promise.resolve<Ticket[]>([]),
+      isTournamentsEnabled.value
+        ? tournamentService.getAll(tenantId, editionId)
+        : Promise.resolve<Tournament[]>([]),
+    ])
+
+    return {
+      // Shuffled here rather than in a computed so that the server and the
+      // browser agree on the result: it happens once, during the render, and
+      // the chosen thirteen ride to the client in the payload. Shuffling again
+      // on the client would mismatch every card in the mosaic.
+      trendingGames: getRandomItems(
+        settled(games, 'trending games'),
+        TRENDING_GAMES_COUNT,
+      ),
+      tickets: settled(tickets, 'tickets'),
+      tournaments: settled(tournaments, 'tournaments'),
+    }
+  },
+  { default: emptyContent },
+)
+
+const trendingGames = computed(() => content.value?.trendingGames ?? [])
+const availableTickets = computed(() => content.value?.tickets ?? [])
+const tournaments = computed(() => content.value?.tournaments ?? [])
+
 const hasTournaments = computed(
   () => isTournamentsEnabled.value && tournaments.value.length > 0,
 )
+
+/**
+ * What a crawler and a link preview see for this page.
+ *
+ * No title: the landing page is the site, and `useSeo` already titles it with
+ * the edition's name. The description prefers whatever the tenant wrote about
+ * this edition over anything we can assemble for them.
+ */
+useSeo({
+  description: () => {
+    const name = edition.value?.name ?? tenant.value?.name ?? ''
+    const start = edition.value?.start_date
+    const end = edition.value?.end_date
+
+    return (
+      edition.value?.description ??
+      tenant.value?.shortDescription ??
+      (start && end
+        ? t('landing.seo.withDates', {
+            name,
+            dates: formatDateRange(start, end, locale.value),
+          })
+        : t('landing.seo.description', { name }))
+    )
+  },
+})
 
 // Convention status
 const conventionStatus = computed((): 'happening' | 'upcoming' | 'ended' => {
@@ -201,70 +283,37 @@ function scrollToSection(sectionId: string): void {
   }
 }
 
-onMounted(async () => {
+onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-
-  if (isLibraryEnabled.value) {
-    await loadTrendingGames()
-  }
-
-  if (isTicketsEnabled.value) {
-    await loadTickets()
-  }
-
-  if (isTournamentsEnabled.value) {
-    await loadTournaments()
-  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 
-async function loadTrendingGames(): Promise<void> {
-  const tenantId = tenantStore.tenant?.id
-  const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) {
-    isLoadingGames.value = false
-    return
-  }
-
-  try {
-    isLoadingGames.value = true
-    const games = await libraryService.get(tenantId, editionId)
-    trendingGames.value = getRandomItems(games, TRENDING_GAMES_COUNT)
-  } catch {
-    trendingGames.value = []
-  } finally {
-    isLoadingGames.value = false
-  }
+/** The shape `content` has before anything has been fetched, and if a render
+ * finds no tenant or no current edition to fetch for. */
+function emptyContent(): {
+  trendingGames: LibraryGame[]
+  tickets: Ticket[]
+  tournaments: Tournament[]
+} {
+  return { trendingGames: [], tickets: [], tournaments: [] }
 }
 
-async function loadTickets(): Promise<void> {
-  try {
-    if (tenant.value?.id && edition.value?.id) {
-      availableTickets.value = await ticketService.getAll(
-        tenant.value.id,
-        edition.value.id,
-        TicketStatus.ACTIVE,
-      )
-    }
-  } catch {
-    availableTickets.value = []
-  }
-}
-
-async function loadTournaments(): Promise<void> {
-  try {
-    if (tenant.value?.id && edition.value?.id) {
-      tournaments.value = await tournamentService.getAll(
-        tenant.value.id,
-        edition.value.id,
-      )
-    }
-  } catch {
-    tournaments.value = []
-  }
+/**
+ * The value of a settled fetch, or an empty list if it rejected.
+ *
+ * The rejection is logged rather than swallowed: this runs on a server now,
+ * where nobody is watching a console, and a section quietly missing from a
+ * page that renders fine otherwise is exactly the failure that goes unnoticed.
+ */
+function settled<T>(result: PromiseSettledResult<T[]>, what: string): T[] {
+  if (result.status === 'fulfilled') return result.value
+  logger.error(`Unable to load ${what} for the landing page`, {
+    error: result.reason,
+  })
+  return []
 }
 
 function getRandomItems<T>(items: T[], count: number): T[] {

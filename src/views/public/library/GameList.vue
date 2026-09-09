@@ -25,8 +25,6 @@ const router = useRouter()
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
 
-const allGames = ref<LibraryGame[]>([])
-const loading = ref(true)
 const selectedGameId = ref<string>('')
 const isDetailModalOpen = ref(false)
 const currentPage = ref(1)
@@ -51,6 +49,31 @@ interface Props {
 const props: Props = withDefaults(defineProps<Props>(), {
   filters: undefined,
 })
+
+/**
+ * The library, as it stands when the page is rendered.
+ *
+ * This is the page's whole content, and it used to arrive only after the
+ * browser had mounted, subscribed and fetched — so a crawler got four skeleton
+ * cards and nothing else. Step 5b of `docs/ssr-migration.md`.
+ *
+ * `libraryService.get` handles its own errors and answers `[]`, so there is
+ * nothing here that can turn a slow database into a 500.
+ */
+const { data: renderedGames } = await useAsyncData(
+  'library-games',
+  async (): Promise<LibraryGame[]> => {
+    const tenantId = tenantStore.tenant?.id
+    const editionId = editionStore.edition?.id
+    if (!tenantId || !editionId) return []
+
+    return await libraryService.get(tenantId, editionId)
+  },
+  { default: (): LibraryGame[] => [] },
+)
+
+// Seeded from the render; the realtime subscription replaces it from there.
+const allGames = ref<LibraryGame[]>(renderedGames.value ?? [])
 
 // Watch for filter changes and reset pagination
 watch(
@@ -91,12 +114,7 @@ const setupIntersectionObserver = (): void => {
   observer = new IntersectionObserver(
     (entries) => {
       const [entry] = entries
-      if (
-        entry &&
-        entry.isIntersecting &&
-        hasMoreGames.value &&
-        !loading.value
-      ) {
+      if (entry && entry.isIntersecting && hasMoreGames.value) {
         loadMoreGames()
       }
     },
@@ -181,12 +199,14 @@ const closeAuthDialog = (): void => {
 }
 
 onMounted(async () => {
+  // The games are already on the page, so what is left for the browser is the
+  // part a server render cannot have: who the visitor is, the observer that
+  // pages the list, and the subscription that keeps it current.
+  if (allGames.value.length > 0) setupIntersectionObserver()
+
   const tenantId = tenantStore.tenant?.id
   const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) {
-    loading.value = false
-    return
-  }
+  if (!tenantId || !editionId) return
 
   isAuthenticated.value = !!(await authService.getUser(tenantId))
 
@@ -196,7 +216,6 @@ onMounted(async () => {
     editionId,
     (updatedGames) => {
       allGames.value = updatedGames
-      loading.value = false
       // Setup intersection observer after data loads
       if (updatedGames.length > 0) {
         void nextTick(() => {
@@ -204,6 +223,8 @@ onMounted(async () => {
         })
       }
     },
+    // The first list came from the render.
+    { loadInitial: false },
   )
 })
 
@@ -226,12 +247,6 @@ onUnmounted(() => {
     <div
       class="grid grid-cols-2 gap-y-12 gap-x-6 sm:grid-cols-3 sm:gap-x-6 lg:grid-cols-3 xl:grid-cols-4 xl:gap-x-8"
     >
-      <template v-if="loading">
-        <GameItem :loading="true" />
-        <GameItem :loading="true" />
-        <GameItem :loading="true" />
-        <GameItem :loading="true" />
-      </template>
       <GameItem
         v-for="game in games"
         :key="game.id"
@@ -242,14 +257,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Load more trigger element (invisible) -->
-    <div
-      v-if="hasMoreGames && !loading"
-      ref="loadMoreTrigger"
-      class="h-10 w-full"
-    ></div>
+    <div v-if="hasMoreGames" ref="loadMoreTrigger" class="h-10 w-full"></div>
 
     <!-- Loading more indicator -->
-    <div v-if="hasMoreGames && !loading" class="mt-8 flex justify-center">
+    <div v-if="hasMoreGames" class="mt-8 flex justify-center">
       <div class="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
         <svg
           class="animate-spin h-5 w-5"
@@ -276,10 +287,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Empty state -->
-    <div
-      v-if="!loading && filteredGames.length === 0"
-      class="text-center py-12"
-    >
+    <div v-if="filteredGames.length === 0" class="text-center py-12">
       <div class="mx-auto h-12 w-12 text-gray-400">
         <svg
           fill="none"

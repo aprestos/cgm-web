@@ -1,5 +1,17 @@
 import { DateTime } from 'luxon'
 
+/**
+ * What goes between the two ends of a date range.
+ *
+ * Ours rather than `Intl.DateTimeFormat.formatRange`'s, because that separator
+ * is an ICU detail and Node's ICU is not the browser's: Node 26 pads the en
+ * dash with U+2009 THIN SPACE, Chrome pads it with a plain U+0020. The two
+ * strings look identical and are not, so a server-rendered range mismatched
+ * every time the browser hydrated it — see step 5c of `docs/ssr-migration.md`,
+ * which had it recorded as a timezone difference.
+ */
+const RANGE_SEPARATOR = ' – '
+
 export const formatRange = (
   start: string,
   end: string,
@@ -25,7 +37,7 @@ export const formatRange = (
     const endDay = e.toLocaleString({
       day: 'numeric',
     })
-    return `${startStr}–${endDay}`
+    return `${startStr}${RANGE_SEPARATOR}${endDay}`
   }
 
   // same year
@@ -33,7 +45,7 @@ export const formatRange = (
     return `${s.toLocaleString({
       month: 'long',
       day: 'numeric',
-    })}–${e.toLocaleString({
+    })}${RANGE_SEPARATOR}${e.toLocaleString({
       month: 'long',
       day: 'numeric',
     })}`
@@ -44,41 +56,34 @@ export const formatRange = (
     month: 'long',
     day: 'numeric',
     year: 'numeric',
-  })}–${e.toLocaleString({
+  })}${RANGE_SEPARATOR}${e.toLocaleString({
     month: 'long',
     day: 'numeric',
     year: 'numeric',
   })}`
 }
 
+/**
+ * A date range, formatted the same way wherever it runs.
+ *
+ * This used to prefer `Intl.DateTimeFormat.formatRange` and fall back to
+ * `formatRange`. The native one is now unreachable on purpose: it gave the
+ * server and the browser two different strings (see `RANGE_SEPARATOR`), and it
+ * read its ends through `new Date`, which parses a date-only ISO string as UTC
+ * midnight and then prints it in the local zone — so `2026-12-28` was already
+ * December 27th for a visitor west of Greenwich. `formatRange` parses with
+ * Luxon, which takes a date-only string as a local date and leaves it alone.
+ */
 export const formatDateRange = (
   start: string | undefined,
   end: string | undefined,
   locale: string,
 ): string => {
-  const formatter: Intl.DateTimeFormat & {
-    formatRange?: (startDate: Date, endDate: Date) => string
-  } = new Intl.DateTimeFormat(locale, {
-    month: 'long',
-    day: 'numeric',
-  })
-
   if (!start || !end) {
     return '-'
   }
 
-  const startDate = new Date(start)
-  const endDate = new Date(end)
-
-  if (
-    Number.isNaN(startDate.getTime()) ||
-    Number.isNaN(endDate.getTime()) ||
-    typeof formatter.formatRange !== 'function'
-  ) {
-    return formatRange(start, end, locale)
-  }
-
-  return formatter.formatRange(startDate, endDate)
+  return formatRange(start, end, locale)
 }
 
 export const getTicketDays = (

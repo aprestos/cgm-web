@@ -18,6 +18,14 @@ export default defineNuxtConfig({
 
   modules: ['@pinia/nuxt'],
 
+  // Read by the server routes in `server/`, which Nitro bundles rather than
+  // Vite and which therefore cannot see the `VITE_*` variables the app reads
+  // through `import.meta.env`. Same project, same anonymous key.
+  runtimeConfig: {
+    supabaseUrl: process.env.VITE_API_URL,
+    supabaseAnonKey: process.env.VITE_API_ANON_PUBLIC_JWT,
+  },
+
   // There is no `pages/` directory: `src/router.options.ts` hands Nuxt the
   // existing route table wholesale. Routing still has to be switched on for
   // that hook to be read at all.

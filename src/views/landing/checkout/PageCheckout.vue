@@ -34,6 +34,7 @@ import logger from '@/lib/logger.ts'
 import type { Order } from '@/features/orders/order.model.ts'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useEditionStore } from '@/features/events/edition.store'
+import { useSeo } from '@/composables/useSeo'
 
 const tenantStore = useTenantStore()
 const editionStore = useEditionStore()
@@ -148,6 +149,9 @@ watch(
   },
   { deep: true },
 )
+
+// Personal, and empty to anyone who is not part-way through buying something.
+useSeo({ noindex: true })
 
 onMounted(async (): Promise<void> => {
   try {

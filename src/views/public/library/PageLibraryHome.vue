@@ -120,8 +120,24 @@ import {
   SortOption,
 } from '@/features/library/games/service.ts'
 import { FunnelIcon, SparklesIcon } from '@heroicons/vue/20/solid'
+import { useSeo } from '@/composables/useSeo'
+import { useTenantStore } from '@/features/tenant/tenant.store'
+import { useEditionStore } from '@/features/events/edition.store'
 
 const { t } = useI18n()
+
+const tenantStore = useTenantStore()
+const editionStore = useEditionStore()
+
+// No game count in the description: the list lives in `GameList`, and lifting
+// it up here to say "213 games" would be a refactor for one sentence.
+useSeo({
+  title: () => t('public.library.title'),
+  description: () =>
+    t('public.library.seo.description', {
+      name: editionStore.edition?.name ?? tenantStore.tenant?.name ?? '',
+    }),
+})
 
 const searchQuery = ref('')
 const selectedFilters = ref<Record<string, string[]>>({})

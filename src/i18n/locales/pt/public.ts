@@ -42,6 +42,9 @@ export default {
     },
   },
   library: {
+    seo: {
+      description: 'A ludoteca de jogos de tabuleiro — {name}.',
+    },
     title: 'Ludoteca',
     games: 'Jogos',
     search: 'Pesquisar jogos...',
@@ -69,6 +72,12 @@ export default {
     },
   },
   tournaments: {
+    seo: {
+      withCount:
+        '{count} torneios em {name}. Vê todos e garante o teu lugar antes que esgote.',
+      description:
+        'Todos os torneios de {name}. Vê todos e garante o teu lugar antes que esgote.',
+    },
     title: 'Torneios',
     description:
       'Vê todos os torneios do evento e garante o teu lugar antes que esgote.',
