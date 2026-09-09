@@ -137,31 +137,60 @@ const hasTournaments = computed(
 /**
  * What a crawler and a link preview see for this page.
  *
- * No title: the landing page is the site, and `useSeo` already titles it with
- * the edition's name. The description prefers whatever the tenant wrote about
- * this edition over anything we can assemble for them.
+ * Between them the title and the description carry everything the tenant has
+ * said about this edition — its name, when it runs, where, and whatever it
+ * wrote about itself — in the order a result page makes use of them. Every
+ * part is assembled from what actually exists, so a tenant that has filled in
+ * less gets a shorter sentence rather than a placeholder standing where a fact
+ * should be.
  */
-useSeo({
-  // The edition's name alone only helps somebody who already knows the event.
-  // `hero.defaultTitle` is what this app is for, and it is already the phrase
-  // shown to a visitor when a tenant has written nothing of their own. A field
-  // on the tenant would be better — see step 7 of `docs/ssr-migration.md`.
-  tagline: () => t('landing.hero.defaultTitle'),
-  description: () => {
-    const name = edition.value?.name ?? tenant.value?.name ?? ''
-    const start = edition.value?.start_date
-    const end = edition.value?.end_date
+const seoDates = computed(() => {
+  const start = edition.value?.start_date
+  const end = edition.value?.end_date
 
-    return (
-      edition.value?.description ??
-      tenant.value?.shortDescription ??
-      (start && end
-        ? t('landing.seo.withDates', {
-            name,
-            dates: formatDateRange(start, end, locale.value),
-          })
-        : t('landing.seo.description', { name }))
-    )
+  return start && end ? formatDateRange(start, end, locale.value) : undefined
+})
+
+const seoPlace = computed(() => edition.value?.location?.title || undefined)
+
+/**
+ * When and where, as one sentence, from whichever of the two we have.
+ *
+ * The year is deliberately not forced in: `formatDateRange` drops it inside a
+ * single year, the edition's name usually carries it, and the `Event` JSON-LD
+ * below states the real dates to anything that parses rather than reads.
+ */
+const seoFacts = computed(() => {
+  const dates = seoDates.value
+  const location = seoPlace.value
+
+  if (dates && location)
+    return t('landing.seo.whenAndWhere', { location, dates })
+  if (dates) return t('landing.seo.when', { dates })
+  if (location) return t('landing.seo.where', { location })
+
+  return undefined
+})
+
+useSeo({
+  // No `title`: the landing page is the site, so `useSeo` titles it with the
+  // edition's name and this follows it. The dates are what tell somebody
+  // scanning a list of results whether this is the year they came for, and the
+  // venue says which town it is in — either is worth more there than naming
+  // the category the app is in. `hero.defaultTitle` is the last resort now,
+  // for an edition with neither a date nor a place.
+  tagline: () =>
+    seoDates.value ?? seoPlace.value ?? t('landing.hero.defaultTitle'),
+  description: () => {
+    // The tenant's own line leads: it is the only part of this written for a
+    // reader rather than assembled for one.
+    const lead = edition.value?.description ?? tenant.value?.shortDescription
+
+    // Nothing stands in for the two of these that are missing. An edition with
+    // no description, no date and no venue gets no description tag at all,
+    // which leaves the result page to quote the page itself — better than a
+    // sentence true of every tenant here.
+    return [lead, seoFacts.value].filter(Boolean).join(' ') || undefined
   },
 })
 

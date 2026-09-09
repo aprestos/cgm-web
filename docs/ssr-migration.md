@@ -712,18 +712,14 @@ disagreed with itself after hydration.
 
 ## Debts to clear
 
-None are outstanding. Kept here because each one records a decision, and two of
-them were closed by deciding rather than by building: one was not needed, and
-one is a duplication we would rather have than the thing that removes it.
-
-| Item                                       | Where                                                     | Outcome                                                |
-| ------------------------------------------ | --------------------------------------------------------- | ------------------------------------------------------ |
-| ~~`/not-found` answers 200~~               | `src/router/index.ts`                                     | Fixed in 7.3                                           |
-| ~~Legacy session and locale shims~~        | `src/lib/supabase.ts`, `src/i18n/localePreference.ts`     | Removed                                                |
-| `server/` repeats three queries and a list | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts` | Kept on purpose — see below                            |
-| ~~`noUncheckedIndexedAccess`~~             | `nuxt.config.ts`                                          | On; 22 sites fixed                                     |
-| ~~Better Stack gets no server-side logs~~  | `src/lib/logger.ts`                                       | Server lines POST to the ingest endpoint               |
-| ~~Per-request Supabase client~~            | `src/lib/supabase.ts`                                     | Not needed — nothing renders personal data on a server |
+| Item                                          | Where                                                                                    | When                                                                    |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `server/` repeats things `src/` already knows | `server/routes/sitemap.xml.ts`, `server/utils/locales.ts`, `server/middleware/locale.ts` | When Nitro can import `src/lib/supabase.ts`, or the tables change       |
+| Per-request Supabase client                   | `src/lib/supabase.ts`                                                                    | With checkout, not 5b — see 5b for why the public pages do not want one |
+| `noUncheckedIndexedAccess`                    | `nuxt.config.ts`                                                                         | Whenever; ~20 sites                                                     |
+| Better Stack gets no server-side logs         | `src/lib/logger.ts`                                                                      | When server logs matter                                                 |
+| ~~`/not-found` answers 200~~ — done           | `src/router/index.ts`                                                                    | Done — 7.3                                                              |
+| ~~Legacy session and locale shims~~ — removed | `src/lib/supabase.ts`, `src/i18n/localePreference.ts`                                    | Done — see below                                                        |
 
 **The two shims are gone.** `migrateLegacySession` carried a pre-cookie session
 out of localStorage (#82) and `migrateLegacyLocale` did the same for a language
@@ -734,61 +730,31 @@ nobody with a session old enough for either to find, and signing in again is
 the whole cost of being wrong. `plugins/legacy-session.client.ts` went with
 them, along with the three tests that covered the locale one.
 
-**`server/` still repeats three queries and a list of two languages, and that
-is the decision rather than a gap.** `server/` is bundled by Nitro and `src/`
-by Vite, so a server route cannot import `src/lib/supabase.ts` — it reads
-`import.meta.env` and checks `typeof window`, neither of which exists there.
-`sitemap.xml` therefore writes out its own version of the tenant, edition and
-settings lookups, and `server/utils/locales.ts` its own list of the languages
-we have catalogs for.
+The **per-request Supabase client** was expected to land with 5b and did not.
+The client in `src/lib/supabase.ts` is a module singleton, which on a server
+means one object shared by every concurrent request. That is safe only because
+the server build of it is deliberately stateless and anonymous: no session, no
+refresh timer, nothing to carry from one visitor to the next. The cost is that
+a server render is always signed out.
 
-Removing that was tried, with the queries in a `shared/` module both bundlers
-read. It worked and it was worse: three services had to take a Supabase client
-as a parameter and hand back untyped rows, and the alias needed teaching to
-eslint and to vitest, all so that one server route would not write four lines
-of `.from().select().eq()`. The indirection cost more than the duplication it
-removed, and it put the queries somewhere nobody reading a service would look.
+5b turned that cost into a feature. Everything the public views fetch during
+render is the same for every visitor, so an anonymous client is the correct
+one, and it is also the only one that lets 5a cache those renders. What still
+needs a client built from the request's own cookies is checkout and the account
+pages — views that are personal by nature, are not SEO surface, and must not be
+cached. Building one for them is a smaller job than building one for everything,
+and it should stay a per-request client rather than making this singleton
+stateful.
 
-So the duplication stays, and what it needs is not removal but a way to notice
-drift. The languages have one: `src/i18n/__tests__/locales.spec.ts` fails if
-the two lists stop matching. The three queries do not, because you cannot test
-the shape of a query without a database — if a column is renamed, both copies
-have to be found, and the comment in each one says where the other is.
+**`noUncheckedIndexedAccess`** is turned off in `nuxt.config.ts`. Nuxt's
+generated tsconfig turns it on and the SPA's did not, so adopting the generated
+config wholesale failed on about twenty pre-existing unchecked array and record
+accesses. Tightening those is worth doing and has nothing to do with rendering
+on a server.
 
-**`noUncheckedIndexedAccess` is on**, and the twenty-two places it found are
-fixed rather than asserted away. Most were an index straight after a length
-check the compiler could not follow — `dates[0]` after `dates.length === 0` —
-and read better once the check became `if (!first || !last)`. Two were a
-`v-for` that re-indexed its own array instead of using the loop variable. The
-tests reach for `wrapper.get('li')` now, which throws with a useful message,
-rather than indexing `findAll` and hoping.
-
-**Better Stack gets server-side logs.** `@logtail/browser` batches and flushes
-on browser lifecycle events a render does not have, so server lines went to the
-console and stopped at whatever was reading stdout. They are POSTed to the same
-ingest endpoint the SDK would have used — no `@logtail/node` dependency for the
-sake of one request — fire-and-forget, and swallowing their own failures:
-logging is never allowed to be the thing that breaks a render.
-
-They carry no tenant. Reading it means `getActivePinia()`, which between two
-concurrent renders points at whichever request suspended last, and a line
-stamped with the wrong tenant is worse than one stamped with none. Putting the
-tenant back would mean a request-scoped logger, which is a different change.
-
-**The per-request Supabase client was never needed.** It was written down when
-5b was expected to make public views fetch personal data during a render. They
-do not: everything the public pages fetch is the same for every visitor, which
-is what 5a's cache depends on. And every page that _is_ personal is
-client-rendered — `/checkout` and `/admin` and `/auth` already were, and
-`/users/**` joins them here, because it is `robots.txt`-disallowed, shows one
-person's withdrawal history, and loaded all of it in `onMounted` anyway, so its
-server render was an empty shell.
-
-So there is nothing left that would use such a client, and building one now
-would be machinery with no caller. The condition to reopen this is specific: a
-page that must render a signed-in visitor's own data on the server. Nothing
-does today, and any page that wanted to would also have to be excluded from the
-cache in 5a.
+**`/not-found` answered 200** — fixed in 7.3. The catch-all used to redirect to
+a route that rendered a not-found page with a success status, which a crawler
+indexes happily. It was invisible in a SPA.
 
 ## Suggested order
 

@@ -70,23 +70,14 @@ export const tenantService = {
     tenantId: string,
     updates: Partial<Tenant>,
   ): Promise<Tenant | null> {
-    // Filter out undefined values to only update defined fields
-    const filteredUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([, value]) => value !== undefined),
-    )
-
-    // If no valid updates, return null
-    if (Object.keys(filteredUpdates).length === 0) {
-      logger.info('No valid updates provided for tenant')
-      return null
-    }
+    if (!updates) return null
 
     const { data, error } = await supabase
       .from('tenants')
-      .update(toSnakeCase(filteredUpdates))
+      .update(toSnakeCase(updates))
       .eq('id', tenantId)
       .select()
-      .single<Tenant>()
+      .single()
 
     if (error) {
       logger.error('Error updating tenant:', { error })
@@ -95,7 +86,10 @@ export const tenantService = {
       )
     }
 
-    return data
+    // The row comes back snake_case. Callers merge it straight into the tenant
+    // store, so it has to be converted here or the store ends up holding both
+    // `short_description` (new) and `shortDescription` (stale).
+    return data ? toCamelCaseAs<Tenant>(data) : null
   },
 }
 
