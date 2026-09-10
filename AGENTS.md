@@ -8,11 +8,12 @@
 
 ## High-value architecture
 
-- The real app boundary is: **views/components → feature services → Supabase**. Most backend access lives in `src/features/**/service.ts`.
+- The real app boundary is: **pages/components → feature services → Supabase**. Most backend access lives in `src/features/**/service.ts`.
+- **Every `.vue` lives in `src/components/`, and its folder is the page it belongs to.** Root level means shared across unrelated pages (`CButton.vue`, `DataTable.vue`); a subfolder mirrors the path under `src/pages/` that uses it (`components/admin/orders/overview/` ← `pages/admin/orders/overview.vue`). Something two pages use is hoisted to their common ancestor. `src/views/` is gone, and `src/features/` holds no UI — services, models and stores only.
 - Global state is **Pinia stores**, one instance per app: `src/features/tenant/tenant.store.ts`, `src/features/events/edition.store.ts`, `src/features/settings/useSettings.store.ts`, `src/features/cart/cart.store.ts`. They are request-scoped on purpose — a module-level ref would be shared by every concurrent render and leak one tenant's data into another's page.
 - Bootstrap lives in `src/plugins/`, one plugin per concern (`tenant`, `i18n`, `vue-countdown`, and two `.client` ones). `plugins/tenant.ts` resolves the tenant from the request's `Host` header on the server and from `location.hostname` in the browser, then loads the current edition and settings. If you add code that depends on tenant/edition/settings, assume they are already loaded.
 - **Anything running on the server must take its request context before its first `await`.** Pinia's active instance and Nuxt's current request are module globals that change at every suspension point, so `useSomeStore()` or `useRequestEvent()` called after an `await` can answer with another visitor's request. Capture them up front and pass them down — see `src/plugins/tenant.ts`.
-- Routing is split by audience in `src/router/index.ts`, which exports a plain route table; `src/router.options.ts` hands it to Nuxt instead of a `pages/` directory. Admin access is enforced with route `meta.guard`/`meta.requiresAuth`, helpers in `src/router/guards.ts`, and the global middleware in `src/middleware/auth.global.ts`.
+- Routes come from the `src/pages/` tree; `src/router.options.ts` only adds `scrollBehavior`. A page declares its own name and layout with `definePageMeta`, and parent pages like `src/pages/admin/orders.vue` render `<NuxtPage>` for their children. Admin access is enforced with route `meta.guard`/`meta.requiresAuth`, helpers in `src/router/guards.ts`, and the global middleware in `src/middleware/auth.global.ts`.
 
 ## Data and service patterns
 
@@ -30,14 +31,14 @@
 
 - Use `<script setup lang="ts">` and typed refs/props/emits throughout. ESLint is strict about this (`eslint.config.ts`).
 - Reusable field components already carry the project’s validation/error display style; prefer them over raw inputs. Example: `src/components/CInput.vue` + `src/components/ValidationErrors.vue`.
-- Form validation uses **Regle** in feature views (`useRegle` + `@regle/rules`), e.g. `src/views/admin/settings/organization/BasicInformation.vue`.
-- Settings pages often compose multiple child forms and trigger saves through `defineExpose({ save, isSaving })`, then aggregate with `SettingsBottomBar`. See `src/views/admin/settings/organization/OrganizationSettings.vue`.
-- Feature flags from `useSettingsStore()` drive navigation visibility. `src/views/admin/HomeView.vue` filters admin/public nav items based on `settingsStore.settings?.<feature>.enabled`.
+- Form validation uses **Regle** in feature components (`useRegle` + `@regle/rules`), e.g. `src/components/admin/settings/organization/BasicInformation.vue`.
+- Settings pages compose multiple child forms, each exposing `defineExpose({ save, isSaving })`, and the page awaits them together behind a `FloatingActionBar`. See `src/pages/admin/settings/organization.vue`.
+- Feature flags from `useSettingsStore()` drive navigation visibility. `src/pages/admin.vue` builds the nav items with `enabled: settingsStore.settings?.<feature>.enabled`, and `src/components/navigation/SidebarNavLinks.vue` filters on it.
 - File uploads go through `src/components/FilePondUploadDialog.vue` and `src/utils/fileUpload.ts`; uploads require an authenticated user and a caller-supplied Supabase bucket/path.
 
 ## Auth / navigation specifics
 
-- Sign-in is **email OTP**, not password-first UI. Flow lives in `src/views/auth/SignInView.vue` and `src/features/auth/service.ts`.
+- Sign-in is **email OTP**, not password-first UI. Flow lives in `src/pages/auth/sign-in.vue` and `src/features/auth/service.ts`.
 - `authService.getUser()` derives access from Supabase JWT claims and indexes tenant-specific roles by the current tenant id. Role checks should reuse `authService.hasAnyOfTheRoles()` or router guards.
 - Route names are centralized in `src/router/routeNames.ts`; use them instead of hardcoded strings.
 

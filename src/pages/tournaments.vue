@@ -3,10 +3,10 @@ import { RouteNames } from '@/router/routeNames'
 import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
-import TournamentToolbar from '@/views/public/tournaments/TournamentToolbar.vue'
-import TournamentStatusTabs from '@/views/public/tournaments/TournamentStatusTabs.vue'
-import TournamentGrid from '@/views/public/tournaments/TournamentGrid.vue'
-import DialogTournamentDetails from '@/views/public/tournaments/dialogs/details/DialogTournamentDetails.vue'
+import TournamentToolbar from '@/components/tournaments/TournamentToolbar.vue'
+import TournamentStatusTabs from '@/components/tournaments/TournamentStatusTabs.vue'
+import TournamentGrid from '@/components/tournaments/TournamentGrid.vue'
+import DialogTournamentDetails from '@/components/tournaments/details/DialogTournamentDetails.vue'
 import FilterSidebar from '@/components/FilterSidebar.vue'
 import FilterRadioGroup from '@/components/FilterRadioGroup.vue'
 import {
@@ -16,7 +16,7 @@ import {
   sortTournaments,
   STATUS_TABS,
   type StatusTab,
-} from '@/views/public/tournaments/tournaments.filters.ts'
+} from '@/components/tournaments/tournaments.filters.ts'
 import {
   type Tournament,
   TournamentStatus,

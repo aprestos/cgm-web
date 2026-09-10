@@ -18,10 +18,10 @@ import { formatPrice } from '@/utils/price'
 import PageHeader from '@/components/PageHeader.vue'
 import ConfirmationDialog from '@/components/ConfirmationDialog.vue'
 import ListDetailLayout from '@/components/ListDetailLayout.vue'
-import DialogCreateTicket from '@/views/admin/tickets/DialogCreateTicket.vue'
-import TicketDayLimits from '@/views/admin/tickets/overview/TicketDayLimits.vue'
-import TicketListRow from '@/views/admin/tickets/overview/TicketListRow.vue'
-import TicketDetailPanel from '@/views/admin/tickets/overview/TicketDetailPanel.vue'
+import DialogCreateTicket from '@/components/admin/tickets/DialogCreateTicket.vue'
+import TicketDayLimits from '@/components/admin/tickets/TicketDayLimits.vue'
+import TicketListRow from '@/components/admin/tickets/TicketListRow.vue'
+import TicketDetailPanel from '@/components/admin/tickets/TicketDetailPanel.vue'
 
 definePageMeta({
   name: RouteNames.admin.tickets.overview,

@@ -6,12 +6,12 @@ import { useI18n } from 'vue-i18n'
 import type { User } from '@/features/auth/user.model'
 import { authService } from '@/features/auth/service'
 import { type CartItem, useCart } from '@/features/cart/cart.store'
-import ProgressView from '@/views/landing/checkout/ProgressView.vue'
-import AccountStep from '@/views/landing/checkout/AccountStep.vue'
-import TicketsStep from '@/views/landing/checkout/TicketsStep.vue'
-import PaymentStep from '@/views/landing/checkout/PaymentStep.vue'
-import CompletedStep from '@/views/landing/checkout/CompletedStep.vue'
-import OrderSummary from '@/views/landing/checkout/OrderSummary.vue'
+import ProgressView from '@/components/checkout/ProgressView.vue'
+import AccountStep from '@/components/checkout/AccountStep.vue'
+import TicketsStep from '@/components/checkout/TicketsStep.vue'
+import PaymentStep from '@/components/checkout/PaymentStep.vue'
+import CompletedStep from '@/components/checkout/CompletedStep.vue'
+import OrderSummary from '@/components/checkout/OrderSummary.vue'
 import type {
   AccountForm,
   CheckoutProgressStep,
@@ -19,7 +19,7 @@ import type {
   CheckoutStepId,
   CompletedOrder,
   TicketAttendee,
-} from '@/views/landing/checkout/checkout.model'
+} from '@/components/checkout/checkout.model'
 import { formatWeekday } from '@/utils/date.ts'
 import { RouteNames } from '@/router/routeNames.ts'
 import { orderService } from '@/features/orders/service.ts'
@@ -27,7 +27,7 @@ import {
   clearCheckoutDraft,
   loadCheckoutDraft,
   saveCheckoutDraft,
-} from '@/views/landing/checkout/checkout.draft.ts'
+} from '@/components/checkout/checkout.draft.ts'
 import paymentsService from '@/features/payments/service.ts'
 import { toast } from 'vue-sonner'
 import logger from '@/lib/logger.ts'

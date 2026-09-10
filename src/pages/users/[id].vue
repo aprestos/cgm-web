@@ -7,8 +7,8 @@ import { userService, type User } from '@/features/users/service.ts'
 import libraryWithdrawService, {
   type LibraryWithdraw,
 } from '@/features/library/withdraws/service.ts'
-import UserHeader from '@/views/public/UserHeader.vue'
-import WithdrawUserHistory from '@/views/public/WithdrawUserHistory.vue'
+import UserHeader from '@/components/users/UserHeader.vue'
+import WithdrawUserHistory from '@/components/users/WithdrawUserHistory.vue'
 import { RouteNames } from '@/router/routeNames.ts'
 import CButton from '@/components/CButton.vue'
 import { useEditionStore } from '@/features/events/edition.store'

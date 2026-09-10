@@ -52,9 +52,9 @@ const publicPage = {
  * Nuxt replaces the hand-rolled Vite SPA so the public pages can be rendered
  * on a server. See `docs/ssr-migration.md` for why.
  *
- * The app still lives in `src/`, still uses the routes in `src/router`, and
- * still boots Pinia, i18n and unhead — those moved from `src/main.ts` into
- * `src/plugins/`. What changed is who renders first.
+ * The app still lives in `src/` and still boots Pinia, i18n and unhead —
+ * those moved from `src/main.ts` into `src/plugins/`. What changed is who
+ * renders first, and that the routes are now a directory rather than a table.
  */
 export default defineNuxtConfig({
   compatibilityDate: '2026-09-08',
@@ -74,9 +74,9 @@ export default defineNuxtConfig({
     supabaseAnonKey: process.env.VITE_API_ANON_PUBLIC_JWT,
   },
 
-  // There is no `pages/` directory: `src/router.options.ts` hands Nuxt the
-  // existing route table wholesale. Routing still has to be switched on for
-  // that hook to be read at all.
+  // Routes are the `src/pages/` tree. `src/router.options.ts` is only
+  // `scrollBehavior` now — the hand-written table it used to hand over is
+  // gone. Switched on explicitly because the directory is not Nuxt's default.
   pages: true,
 
   // Same list, and the same order, as the imports at the top of the old
