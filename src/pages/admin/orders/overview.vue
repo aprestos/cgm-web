@@ -11,16 +11,16 @@ import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useEditionStore } from '@/features/events/edition.store'
 import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
-import OrdersStatsGrid from '@/views/admin/orders/overview/OrdersStatsGrid.vue'
-import OrdersOverTimeChart from '@/views/admin/orders/overview/OrdersOverTimeChart.vue'
+import OrdersStatsGrid from '@/components/admin/orders/overview/OrdersStatsGrid.vue'
+import OrdersOverTimeChart from '@/components/admin/orders/overview/OrdersOverTimeChart.vue'
 import type {
   Period,
   PeriodParams,
   RecentOrder,
-} from '@/views/admin/orders/overview/orders.types.ts'
+} from '@/components/admin/orders/orders.types.ts'
 import PageHeader from '@/components/PageHeader.vue'
-import TicketsDistributionCard from '@/views/admin/orders/overview/TicketsDistributionCard.vue'
-import DialogCreateOrder from '@/views/admin/orders/DialogCreateOrder.vue'
+import TicketsDistributionCard from '@/components/admin/orders/overview/TicketsDistributionCard.vue'
+import DialogCreateOrder from '@/components/admin/orders/DialogCreateOrder.vue'
 
 definePageMeta({
   name: RouteNames.admin.orders.overview,

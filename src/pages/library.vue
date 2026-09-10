@@ -113,9 +113,9 @@ import FilterRadioGroup from '@/components/FilterRadioGroup.vue'
 import FilterChips from '@/components/FilterChips.vue'
 import type { FilterChip } from '@/components/filterChips.model.ts'
 import SortSelect from '@/components/SortSelect.vue'
-import GameList from '@/views/public/library/GameList.vue'
-import ReservationList from '@/views/public/library/ReservationList.vue'
-import LibraryFilters from '@/views/public/library/LibraryFilters.vue'
+import GameList from '@/components/library/GameList.vue'
+import ReservationList from '@/components/library/ReservationList.vue'
+import LibraryFilters from '@/components/library/LibraryFilters.vue'
 import {
   type FilterOptions,
   SortOption,

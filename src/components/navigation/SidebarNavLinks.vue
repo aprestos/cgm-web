@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import SidebarNavLink from '@/components/navigation/SidebarNavLink.vue'
-import type { NavigationItem } from '@/navigation/navigation.model.ts'
+import type { NavigationItem } from '@/components/navigation/navigation.model.ts'
 
 const props = defineProps<{
   topNavigation: NavigationItem[]

@@ -25,9 +25,9 @@
 <script setup lang="ts">
 import { RouteNames } from '@/router/routeNames'
 import { ref, computed } from 'vue'
-import BasicInformation from '@/views/admin/settings/organization/BasicInformation.vue'
-import BrandingSettings from '@/views/admin/settings/organization/BrandingSettings.vue'
-import UserRoles from '@/views/admin/settings/organization/UserRoles.vue'
+import BasicInformation from '@/components/admin/settings/organization/BasicInformation.vue'
+import BrandingSettings from '@/components/admin/settings/organization/BrandingSettings.vue'
+import UserRoles from '@/components/admin/settings/organization/UserRoles.vue'
 import CButton from '@/components/CButton.vue'
 import FloatingActionBar from '@/components/FloatingActionBar.vue'
 import { IconDeviceFloppy } from '@tabler/icons-vue'

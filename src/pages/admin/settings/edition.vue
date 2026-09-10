@@ -104,7 +104,7 @@
 import { RouteNames } from '@/router/routeNames'
 import { ref, onMounted } from 'vue'
 import { toast } from 'vue-sonner'
-import EditionPoster from '@/views/admin/settings/edition/EditionPoster.vue'
+import EditionPoster from '@/components/admin/settings/edition/EditionPoster.vue'
 import { editionService } from '@/features/events/service.ts'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useEditionStore } from '@/features/events/edition.store'

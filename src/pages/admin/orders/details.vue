@@ -9,10 +9,10 @@ import orderService from '@/features/orders/service'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import logger from '@/lib/logger'
 import { useI18n } from 'vue-i18n'
-import OrdersDataTable from '@/views/admin/orders/details/OrdersDataTable.vue'
-import DialogOrderDetails from '@/views/admin/orders/details/DialogOrderDetails.vue'
-import DialogCreateOrder from '@/views/admin/orders/DialogCreateOrder.vue'
-import type { RecentOrder } from '@/views/admin/orders/overview/orders.types.ts'
+import OrdersDataTable from '@/components/admin/orders/details/OrdersDataTable.vue'
+import DialogOrderDetails from '@/components/admin/orders/details/DialogOrderDetails.vue'
+import DialogCreateOrder from '@/components/admin/orders/DialogCreateOrder.vue'
+import type { RecentOrder } from '@/components/admin/orders/orders.types.ts'
 
 definePageMeta({
   name: RouteNames.admin.orders.details,

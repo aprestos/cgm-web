@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
-import type { NavigationItem } from '@/navigation/navigation.model.ts'
+import type { NavigationItem } from '@/components/navigation/navigation.model.ts'
 
 const { t } = useI18n()
 

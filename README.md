@@ -125,24 +125,42 @@ congrem is a modern, full-featured web application designed to help organizers m
 ```
 src/
 ├── assets/              # Static assets (images, fonts, styles)
-├── components/          # Reusable UI components
-│   ├── CButton.vue      # Custom button component
-│   ├── CInput.vue       # Custom input component
-│   ├── FilePondUploadDialog.vue  # File upload component
-│   └── ...
+├── pages/               # Routes — Nuxt builds the router from this tree
+├── layouts/             # Page shells (landing, public)
+├── components/          # Every .vue the pages are built from
+│   ├── CButton.vue      # Root level: shared across the whole app
+│   ├── CInput.vue
+│   ├── navigation/      # Sidebar, top bar, secondary nav
+│   ├── home/            # Sections of pages/index.vue
+│   ├── library/         # Parts of pages/library.vue
+│   ├── tournaments/     # Parts of pages/tournaments.vue
+│   │   └── details/     # One tournament's detail blocks, reused by admin
+│   ├── checkout/        # Parts of pages/checkout.vue
+│   ├── users/           # Parts of pages/users/[id].vue
+│   └── admin/           # Mirrors pages/admin/**
+│       ├── library/
+│       ├── orders/
+│       ├── settings/
+│       ├── tickets/
+│       └── tournaments/
 ├── composables/         # Reusable composition functions
-├── features/            # Feature-based modules
+├── features/            # Data layer — services, models, Pinia stores. No UI.
 │   ├── auth/            # Authentication
 │   ├── events/          # Event management
 │   ├── library/         # Game library
 │   ├── queues/          # Task queue management
 │   └── ...
+├── plugins/             # Bootstrap, one plugin per concern
+├── middleware/          # Route guards
 ├── lib/                 # Shared libraries and utilities
-├── router/              # Vue Router configuration
-├── stores/              # Pinia state stores
-├── utils/               # Utility functions
-└── views/               # Page-level components
+├── router/              # Route names and guard helpers
+└── utils/               # Utility functions
 ```
+
+A component's folder is the page it belongs to. Root of `components/` means
+it is shared across unrelated pages; a subfolder mirrors the path under
+`pages/` that uses it. Anything used by two pages lives at their common
+ancestor.
 
 ### Development Commands
 

@@ -7,10 +7,10 @@ import { IconPlus, IconTrophy } from '@tabler/icons-vue'
 import PageHeader from '@/components/PageHeader.vue'
 import CButton from '@/components/CButton.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
-import DialogCreateTournament from '@/views/admin/tournaments/DialogCreateTournament.vue'
-import DialogEditTournament from '@/views/admin/tournaments/DialogEditTournament.vue'
-import DialogTournamentParticipants from '@/views/admin/tournaments/DialogTournamentParticipants.vue'
-import TournamentCard from '@/views/admin/tournaments/TournamentCard.vue'
+import DialogCreateTournament from '@/components/admin/tournaments/DialogCreateTournament.vue'
+import DialogEditTournament from '@/components/admin/tournaments/DialogEditTournament.vue'
+import DialogTournamentParticipants from '@/components/admin/tournaments/DialogTournamentParticipants.vue'
+import TournamentCard from '@/components/admin/tournaments/TournamentCard.vue'
 import type {
   CreateTournament,
   Tournament,

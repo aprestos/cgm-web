@@ -2,8 +2,8 @@
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useSettingsStore } from '@/features/settings/useSettings.store'
 // Components
-import HeaderComponent from '@/views/landing/HeaderComponent.vue'
-import CartDrawer from '@/views/landing/CartDrawer.vue'
+import HeaderComponent from '@/components/layout/HeaderComponent.vue'
+import CartDrawer from '@/components/layout/CartDrawer.vue'
 import { useEditionStore } from '@/features/events/edition.store'
 
 const editionStore = useEditionStore()

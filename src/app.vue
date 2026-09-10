@@ -5,7 +5,7 @@ import 'vue-sonner/style.css'
 import { useFavicon } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 
-import DomainNotConfigured from '@/views/DomainNotConfigured.vue'
+import DomainNotConfigured from '@/components/DomainNotConfigured.vue'
 import { useTenantStore } from '@/features/tenant/tenant.store'
 import { useSeo } from '@/composables/useSeo'
 import { LogoType } from '~/features/tenant/tenant.model.ts'
