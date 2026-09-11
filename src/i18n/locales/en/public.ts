@@ -134,9 +134,11 @@ export default {
       fromTicketHolders: 'Add from ticket holders',
       addParticipant: 'Add participant',
       fullName: 'Full name',
-      namePlaceholder: 'Ana Ferreira',
+      namePlaceholder: 'John',
       email: 'Email',
-      emailPlaceholder: 'ana@email.com',
+      // See the note on the admin placeholder: a bare `@` is linked-message
+      // syntax and throws when the message is compiled.
+      emailPlaceholder: "john{'@'}example.com",
       pickTicketFirst: 'Pick a ticket holder first.',
       alreadySignedUp: 'Already signed up',
       noParticipantsYet: 'No participants yet',
@@ -145,7 +147,7 @@ export default {
       ticketsError: 'Unable to load your tickets. Try again later.',
       noMoreSlots: 'This sign-up already covers every remaining spot.',
       joining: 'Signing up...',
-      confirm: 'Confirm sign-up ({count})',
+      confirm: 'Confirm sign-up',
     },
     empty: 'No tournaments found',
     emptyDescription: 'Try adjusting your search or filters.',

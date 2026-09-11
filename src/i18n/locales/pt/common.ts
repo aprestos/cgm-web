@@ -36,4 +36,19 @@ export default {
     required: 'Este campo é obrigatório',
     emailInvalid: 'Por favor, insere um endereço de email válido',
   },
+  personPicker: {
+    tabSearch: 'Pesquisar',
+    tabManual: 'Criar',
+    personLabel: 'Pessoa',
+    personPlaceholder: 'Pesquisar por nome ou email',
+    ticketLabel: 'Bilhete',
+    ticketPlaceholder: 'Pesquisar por nome ou email do participante',
+    nameLabel: 'Nome',
+    namePlaceholder: 'Nome completo',
+    // `@` starts a linked message in vue-i18n, so a bare one throws at
+    // compile time and takes the whole form down with it. `{'@'}` is the
+    // literal-interpolation escape.
+    emailPlaceholder: "nome{'@'}email.com",
+    emailLabel: 'Email',
+  },
 } satisfies DeepPartial<typeof enCommon>

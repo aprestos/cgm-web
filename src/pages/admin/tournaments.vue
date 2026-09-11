@@ -9,7 +9,7 @@ import CButton from '@/components/CButton.vue'
 import SkeletonLoader from '@/components/SkeletonLoader.vue'
 import DialogCreateTournament from '@/components/admin/tournaments/DialogCreateTournament.vue'
 import DialogEditTournament from '@/components/admin/tournaments/DialogEditTournament.vue'
-import DialogTournamentParticipants from '@/components/admin/tournaments/DialogTournamentParticipants.vue'
+import DialogTournamentParticipants from '@/components/admin/tournaments/participants/DialogTournamentParticipants.vue'
 import TournamentCard from '@/components/admin/tournaments/TournamentCard.vue'
 import type {
   CreateTournament,
@@ -31,15 +31,17 @@ const { t } = useI18n()
 
 const tournaments = ref<Tournament[]>([])
 const isLoading = ref<boolean>(true)
-const isCreateDialogOpen = ref<boolean>(false)
-// Kept set while the dialog closes so its content does not blank out mid-transition
-const editTournament = ref<Tournament | null>(null)
-const isEditDialogOpen = ref<boolean>(false)
-const participantsTournament = ref<Tournament | null>(null)
-const isParticipantsDialogOpen = ref<boolean>(false)
+const openedDialog = ref<'create' | 'edit' | 'participants' | null>(null)
 
-const handleCreate = (): void => {
-  isCreateDialogOpen.value = true
+// Kept set while the dialog closes so its content does not blank out mid-transition
+const selectedTournament = ref<Tournament | null>(null)
+
+const openDialog = (dialog: 'create' | 'edit' | 'participants'): void => {
+  openedDialog.value = dialog
+}
+
+const closeDialog = (): void => {
+  openedDialog.value = null
 }
 
 const handleCreated = async (tournament: CreateTournament): Promise<void> => {
@@ -50,8 +52,8 @@ const handleCreated = async (tournament: CreateTournament): Promise<void> => {
 }
 
 const handleEdit = (tournament: Tournament): void => {
-  editTournament.value = tournament
-  isEditDialogOpen.value = true
+  selectedTournament.value = tournament
+  openDialog('edit')
 }
 
 // Each section of the edit dialog saves on its own, so the list is brought
@@ -62,13 +64,8 @@ const handleUpdated = async (): Promise<void> => {
 
 // The full roster is a table, which the edit dialog's column has no room for.
 const handleManageParticipants = (tournament: Tournament): void => {
-  isEditDialogOpen.value = false
-  handleParticipants(tournament)
-}
-
-const handleParticipants = (tournament: Tournament): void => {
-  participantsTournament.value = tournament
-  isParticipantsDialogOpen.value = true
+  openDialog('participants')
+  selectedTournament.value = tournament
 }
 
 async function loadTournaments(): Promise<void> {
@@ -103,7 +100,7 @@ onMounted(async () => {
       :title="t('admin.tournaments.title')"
       :description="t('admin.tournaments.description')"
       :action-label="t('admin.tournaments.newTournament')"
-      @action="handleCreate"
+      @action="() => openDialog('create')"
     >
       <template #action-icon>
         <IconPlus class="size-5" stroke="2" />
@@ -142,7 +139,7 @@ onMounted(async () => {
         :key="tournament.id"
         :tournament="tournament"
         @edit="handleEdit"
-        @participants="handleParticipants"
+        @participants="handleManageParticipants(tournament)"
       />
     </div>
 
@@ -162,7 +159,7 @@ onMounted(async () => {
       <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
         {{ t('admin.tournaments.emptyDescription') }}
       </p>
-      <CButton class="mt-6" @click="handleCreate">
+      <CButton class="mt-6" @click="() => openDialog('create')">
         <template #icon-left>
           <IconPlus class="size-5" stroke="2" />
         </template>
@@ -172,26 +169,26 @@ onMounted(async () => {
 
     <!-- Create tournament dialog -->
     <DialogCreateTournament
-      :open="isCreateDialogOpen"
-      @close="isCreateDialogOpen = false"
+      :open="openedDialog === 'create'"
+      @close="closeDialog"
       @created="handleCreated"
     />
 
     <!-- Edit tournament dialog -->
     <DialogEditTournament
-      :open="isEditDialogOpen"
-      :tournament="editTournament"
-      @close="isEditDialogOpen = false"
+      :open="openedDialog === 'edit'"
+      :tournament="selectedTournament"
+      @close="closeDialog"
       @updated="handleUpdated"
       @participants="handleManageParticipants"
     />
 
     <!-- Participants dialog -->
     <DialogTournamentParticipants
-      :open="isParticipantsDialogOpen"
-      :tournament="participantsTournament"
+      :open="openedDialog === 'participants'"
+      :tournament="selectedTournament"
       @updated="handleUpdated"
-      @close="isParticipantsDialogOpen = false"
+      @close="closeDialog"
     />
   </div>
 </template>

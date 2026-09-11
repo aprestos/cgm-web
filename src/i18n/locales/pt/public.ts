@@ -133,7 +133,9 @@ export default {
       fullName: 'Nome completo',
       namePlaceholder: 'Ana Ferreira',
       email: 'Email',
-      emailPlaceholder: 'ana@email.com',
+      // See the note on the admin placeholder: a bare `@` is linked-message
+      // syntax and throws when the message is compiled.
+      emailPlaceholder: "ana{'@'}email.com",
       pickTicketFirst: 'Escolhe primeiro um portador de bilhete.',
       alreadySignedUp: 'Já inscrito',
       noParticipantsYet: 'Ainda sem participantes',

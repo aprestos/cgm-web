@@ -20,17 +20,13 @@ import { slotsLeft as remainingSlots } from '@/components/tournaments/tournament
 interface Props {
   open: boolean
   tournament: Tournament | null
-  /** The people the current user already signed up for this tournament */
   participants: TournamentParticipant[]
   user: User | null
   canJoin?: boolean
-  /** Set when the dialog was opened from the join/edit button on the card */
-  focusSignUp?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   canJoin: false,
-  focusSignUp: false,
 })
 
 const emit = defineEmits<{
@@ -87,7 +83,7 @@ const isSubmitting = computed<boolean>(
 watch(
   () => props.open,
   async (open) => {
-    if (!open || !props.focusSignUp) return
+    if (!open) return
     await nextTick()
     roster.value?.scrollIntoView()
   },

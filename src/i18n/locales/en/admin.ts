@@ -88,10 +88,10 @@ export default {
     currentLocation: 'Current location',
     newLocation: 'New Location',
     moving: 'Moving...',
-    withdrawTo: 'Withdraw to',
-    searchUser: 'Search user',
-    searchAndSelectUser: 'Search and select a user',
-    createUser: 'Create user',
+    // Naming the borrower is PersonPicker's job, and its own wording — these
+    // are only what this screen says once the person is named.
+    userCreated: 'An account was created for {email}',
+    createUserFailed: 'Failed to create the account',
     withdrawing: 'Withdrawing...',
     noImage: 'No Image',
     year: 'Year',
@@ -153,14 +153,17 @@ export default {
         open: 'Add participant',
         title: 'Add participant',
         cancel: 'Cancel adding',
-        tabSearch: 'Existing user',
-        tabManual: 'Add manually',
-        userLabel: 'User',
+        tabSearch: 'Search',
+        tabManual: 'Create a participant',
+        userLabel: 'Participant',
         userPlaceholder: 'Search by name or email',
         nameLabel: 'Name',
         namePlaceholder: 'Participant name',
         emailLabel: 'Email',
-        emailPlaceholder: 'participant@email.com',
+        // `@` starts a linked message in vue-i18n, so a bare one throws at
+        // compile time and takes the whole form down with it. `{'@'}` is the
+        // literal-interpolation escape.
+        emailPlaceholder: "participant{'@'}email.com",
         submit: 'Add',
         submitting: 'Adding',
         success: '{name} was added to the tournament',
