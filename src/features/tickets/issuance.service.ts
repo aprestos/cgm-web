@@ -120,6 +120,32 @@ export const ticketIssuanceService = {
 
     return count ? IssuanceStatus.VALID : IssuanceStatus.REDEEMED
   },
+  async search(
+    tenantId: string,
+    editionId: number,
+    query: string,
+  ): Promise<TicketIssuance[]> {
+    const { data, error } = await supabase
+      .from('ticket_issuances')
+      .select('id,attendee_name,attendee_email')
+      .eq('tenant_id', tenantId)
+      .eq('edition_id', editionId)
+      .neq('status', IssuanceStatus.CANCELED)
+      .or(`attendee_name.ilike.%${query}%,attendee_email.ilike.%${query}%`)
+      .overrideTypes<TicketIssuance>()
+
+    if (error) {
+      logger.warn('Error searching for ticket issuances', {
+        tenantId,
+        editionId,
+        query,
+        error,
+      })
+      throw new Error('Unable to search ticket issuances')
+    }
+
+    return toCamelCaseAs(data ?? [])
+  },
 }
 
 export default ticketIssuanceService

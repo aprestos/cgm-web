@@ -38,54 +38,15 @@
       </div>
       <!-- Withdraw Form -->
       <form class="space-y-6" @submit.prevent="submit">
-        <FormTabs
-          v-model="selectedTab"
-          :tabs="tabs"
-          @tab-change="handleTabChange"
-        >
-          <!-- Tab 0: Search User -->
-          <template #tab-0>
-            <CCombobox
-              id="user"
-              v-model="formData.selectedUser"
-              :label="t('admin.library.withdrawTo')"
-              :placeholder="t('admin.library.searchAndSelectUser')"
-              :search-fn="
-                async (query) => {
-                  const results = await userService.search(query)
-                  return results.map((item) => ({
-                    value: item.id,
-                    label: item.name,
-                    secondaryLabel: item.email ? `(${item.email})` : undefined,
-                  })) as Array<Option<string>>
-                }
-              "
-              :errors="r$.$errors.selectedUser"
-            />
-          </template>
-
-          <!-- Tab 1: Create User -->
-          <template #tab-1>
-            <div class="space-y-4">
-              <CInput
-                id="new-user-name"
-                v-model="newUser.name"
-                :label="t('auth.displayName')"
-                type="text"
-                :placeholder="t('auth.enterDisplayName')"
-                :errors="newUserR$.$errors.name"
-              />
-              <CInput
-                id="new-user-email"
-                v-model="newUser.email"
-                :label="t('auth.email')"
-                type="email"
-                :placeholder="t('auth.enterEmailPlaceholder')"
-                :errors="newUserR$.$errors.email"
-              />
-            </div>
-          </template>
-        </FormTabs>
+        <!-- The dialog's footer already carries the action, so the picker's
+             `action` slot is left empty — it is asked for the person on
+             submit. -->
+        <PersonPicker
+          id="withdraw-user"
+          ref="picker"
+          mode="user"
+          :disabled="isSubmitting"
+        />
 
         <!-- Action Buttons -->
         <div class="flex flex-col sm:flex-row gap-3 sm:gap-2 sm:justify-end">
@@ -116,27 +77,23 @@
 </template>
 
 <script setup lang="ts">
-import { useRegle } from '@regle/core'
-import { required, email, minLength } from '@regle/rules'
-import { ref, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { toast } from 'vue-sonner'
 import 'vue-sonner/style.css'
 
 import DialogComponent from '@/components/DialogComponent.vue'
 import CButton from '@/components/CButton.vue'
-import CInput from '@/components/CInput.vue'
-import FormTabs from '@/components/FormTabs.vue'
-import type { TabConfig } from '@/components/FormTabs.vue'
+import PersonPicker from '@/components/people/PersonPicker.vue'
+import type {
+  PersonPickerApi,
+  PickedPerson,
+} from '@/components/people/person.model.ts'
 import type { LibraryGame } from '@/features/library/games/game.model.ts'
 import libraryWithdrawService from '@/features/library/withdraws/service.ts'
 import { userService } from '@/features/users/service.ts'
 import logger from '@/lib/logger.ts'
-import CCombobox from '@/components/CCombobox.vue'
-import type { Option } from '@/components/select.types'
 import {
-  IconSearch,
-  IconUserPlus,
   IconCalendarFilled,
   IconMapPin,
   IconArrowBarUp,
@@ -159,73 +116,56 @@ const emit = defineEmits<{
   close: []
 }>()
 
-const formData = ref({ selectedUser: undefined as string | undefined })
-
 const isSubmitting = ref(false)
+const picker = ref<PersonPickerApi | null>(null)
 
-const newUser = ref({
-  email: '',
-  name: '',
-})
+/**
+ * A withdrawal is recorded against an account, so someone typed into the
+ * picker's second tab gets one before the game leaves the shelf. `null` means
+ * the account could not be created and the withdrawal must not go ahead.
+ */
+const resolveUserId = async (person: PickedPerson): Promise<string | null> => {
+  if (person.userId) return person.userId
 
-const selectedTab = ref<number>(0)
-
-const tabs = computed<TabConfig[]>(() => [
-  {
-    label: t('admin.library.searchUser'),
-    icon: IconSearch,
-  },
-  {
-    label: t('admin.library.createUser'),
-    icon: IconUserPlus,
-  },
-])
-
-const handleTabChange = (index: number): void => {
-  selectedTab.value = index
+  try {
+    const created = await userService.create(person.name, person.email)
+    toast.success(t('admin.library.userCreated', { email: created.email }))
+    return created.id
+  } catch (error) {
+    logger.error('Failed to create a user to withdraw a game to', { error })
+    // The service speaks for itself here — "this email is already taken" is
+    // worth more than a generic failure.
+    toast.error(
+      error instanceof Error
+        ? error.message
+        : t('admin.library.createUserFailed'),
+    )
+    return null
+  }
 }
-
-// Main form validation
-const { r$ } = useRegle(formData, {
-  selectedUser: { required },
-})
-
-// New user form validation
-const { r$: newUserR$ } = useRegle(newUser, {
-  email: { required, email },
-  name: { required, minLength: minLength(2) },
-})
 
 const submit = async (): Promise<void> => {
   if (isSubmitting.value) return
 
-  isSubmitting.value = true
-  if (selectedTab.value === 1) {
-    await createUser()
-  }
-
-  // Validate form before submitting
-  const { valid, data } = await r$.$validate()
-
-  if (!valid) {
-    logger.debug('Form has validation errors')
-    return
-  }
+  // The picker reports on its own fields when there is no one to hand over.
+  const person = await picker.value?.pick()
+  if (!person) return
 
   const tenantId = tenantStore.tenant?.id
   const editionId = editionStore.edition?.id
-  if (!tenantId || !editionId) {
-    isSubmitting.value = false
-    return
-  }
+  if (!tenantId || !editionId) return
 
+  isSubmitting.value = true
   try {
+    const userId = await resolveUserId(person)
+    if (!userId) return
+
     // Call the withdraw service
     await libraryWithdrawService.create(
       tenantId,
       editionId,
       props.game?.id as number,
-      data.selectedUser,
+      userId,
     )
 
     toast.success(
@@ -238,44 +178,17 @@ const submit = async (): Promise<void> => {
     toast.error(t('admin.library.withdrawFailed'))
   } finally {
     isSubmitting.value = false
-    newUser.value = {
-      email: '',
-      name: '',
-    }
   }
 }
 
-const createUser = async (): Promise<void> => {
-  // Validate new user form
-  const { valid, data } = await newUserR$.$validate()
-
-  if (!valid) {
-    logger.debug('New user form has validation errors')
-    return
-  }
-
-  try {
-    //Call the user creation service
-    const response = await userService.create(data.name, data.email)
-
-    toast.success(`User ${response.email} created successfully.`)
-
-    // Automatically select the newly created user for withdrawal
-    formData.value.selectedUser = response.id
-
-    // Reset new user form and hide it
-    newUser.value.email = ''
-    newUser.value.name = ''
-
-    // Reset validation state
-    newUserR$.$reset()
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Failed to create user'
-    toast.error(message)
-    isSubmitting.value = false
-  }
-}
+// The dialog stays mounted between openings, so the last withdrawal's person
+// would still be sitting in the picker.
+watch(
+  () => props.open,
+  (open) => {
+    if (open) picker.value?.reset()
+  },
+)
 
 // Expose the submit function so parent components can call it
 defineExpose({

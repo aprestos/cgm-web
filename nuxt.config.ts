@@ -31,12 +31,35 @@ import tailwindcss from '@tailwindcss/vite'
  * 60s is a starting guess. `/library` is the one to watch: game availability
  * changes during a convention, though the browser's realtime subscription
  * corrects a stale list right after hydration.
+ *
+ * **Not in `nuxt dev`**, and that one is about the dev loop rather than about
+ * correctness. Nitro wraps the handler in `cachedEventHandler` in the dev
+ * server exactly as it does in a build, and two of its defaults then conspire
+ * against editing a page. The entry is invalidated by a hash of the *handler*,
+ * which is the renderer and does not change when a component is saved; and
+ * `maxAge` on its own leaves `swr` at Nitro's default of `true`, so once the
+ * 60s is up the stale entry is still what gets served, while the fresh render
+ * happens behind it. Every reload shows the render *before* the one you are
+ * waiting for. The store is `.nuxt/cache` on disk, so restarting the dev
+ * server does not clear it either — a page can sit a day behind `src/`.
+ *
+ * The test is written this way round on purpose. `nuxt dev` sets
+ * `NODE_ENV=development` and `nuxt build` sets `production`, so keying off
+ * *development* means anything that is not demonstrably a dev server keeps the
+ * cache, and an unset variable can never quietly ship the site uncached.
  */
+const cacheInProduction =
+  process.env.NODE_ENV === 'development'
+    ? {}
+    : {
+        cache: {
+          maxAge: 60,
+          varies: ['host', 'x-forwarded-host', 'x-app-locale'],
+        },
+      }
+
 const publicPage = {
-  cache: {
-    maxAge: 60,
-    varies: ['host', 'x-forwarded-host', 'x-app-locale'],
-  },
+  ...cacheInProduction,
 
   // For anything caching *in front* of us. Nitro answers `max-age=60`, and a
   // shared cache that took that at face value would have no idea the body

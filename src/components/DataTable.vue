@@ -51,10 +51,7 @@
       <tbody class="divide-y divide-gray-200 dark:divide-white/5">
         <!-- Loading skeleton rows -->
         <template v-if="props.loading">
-          <tr
-            v-for="i in Math.min(props.itemsPerPage, 10)"
-            :key="`skeleton-${i}`"
-          >
+          <tr v-for="i in skeletonRowCount" :key="`skeleton-${i}`">
             <td
               v-for="(column, colIndex) in columns"
               :key="column.key"
@@ -180,6 +177,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  count: {
+    type: Number,
+    default: undefined,
+  },
 })
 
 const scrollTrigger = ref<HTMLElement>()
@@ -187,6 +188,11 @@ const currentLoadedCount = ref(props.itemsPerPage)
 const isLoading = ref(false)
 const sortConfig = ref<SortConfig>({ key: null, direction: null })
 let observer: IntersectionObserver | null = null
+
+// Number of skeleton rows shown while loading
+const skeletonRowCount = computed(() => {
+  return props.count ?? Math.min(props.itemsPerPage, 3)
+})
 
 // Computed properties for sorting and infinite scroll
 const sortedItems = computed((): T[] => {

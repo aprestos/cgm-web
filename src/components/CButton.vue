@@ -3,6 +3,7 @@
     :type="type"
     :disabled="disabled || loading"
     :aria-busy="loading"
+    :aria-pressed="pressed"
     :class="buttonClasses"
     @click="$emit('click', $event)"
   >
@@ -39,24 +40,37 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import {
+  BUTTON_BASE,
+  BUTTON_CONTENT_GAP,
+  BUTTON_SIZE,
+  BUTTON_SPINNER_SIZE,
+  BUTTON_VARIANT,
+  BUTTON_VARIANT_PRESSED,
+  type ButtonSize,
+  type ButtonVariant,
+} from '@/components/button.styles'
 import { FIELD_RADIUS, FIELD_RADIUS_PILL } from '@/components/field.styles'
 
 interface Props {
-  variant?:
-    | 'primary'
-    | 'soft'
-    | 'secondary'
-    | 'tertiary'
-    | 'yellow'
-    | 'danger'
-    | 'transparent'
-  size?: 'sm' | 'md' | 'lg' | 'xl'
+  variant?: ButtonVariant
+  size?: ButtonSize
   type?: 'button' | 'submit' | 'reset'
   disabled?: boolean
   loading?: boolean
   loadingText?: string
   fullWidth?: boolean
   rounded?: boolean
+  /**
+   * Makes this a toggle button: it renders `aria-pressed` and holds a visible
+   * on-state until it is pressed again. `:active` cannot do this — it only
+   * lasts as long as the finger is down.
+   *
+   * Leave it undefined on a button that just fires an action. A blanket
+   * `aria-pressed="false"` would have screen readers announce "not pressed"
+   * on every Save and Cancel in the app.
+   */
+  pressed?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -69,205 +83,32 @@ const props = withDefaults(defineProps<Props>(), {
   loadingText: undefined,
   fullWidth: false,
   rounded: false,
+  // Explicitly undefined, not absent: Vue casts an absent boolean prop to
+  // `false`, which is the one value that must not reach the template here.
+  pressed: undefined,
 })
 
 defineEmits<{
   click: [event: MouseEvent]
 }>()
 
-const buttonClasses = computed(() => {
-  // Press feedback lives here rather than in the variants because it has to
-  // behave the same everywhere. Touch devices never get :hover, and the one
-  // they do get sticks after the finger lifts, so :active is what actually
-  // tells someone the tap landed. `transition` (not transition-colors) so the
-  // scale animates; :active cannot match a disabled button, so the press
-  // states need no disabled guard.
-  const baseClasses = [
-    'inline-flex',
-    'items-center',
-    'justify-center',
-    'font-medium',
-    'transition',
-    'duration-150',
-    'focus-visible:outline',
-    'focus-visible:outline-2',
-    'focus-visible:outline-offset-2',
-    'cursor-pointer',
-    'active:scale-[0.97]',
-    'motion-reduce:active:scale-100',
-    // Removes the ~300ms double-tap-zoom wait, and the grey flash Android and
-    // iOS paint over the top of our own press state.
-    'touch-manipulation',
-    '[-webkit-tap-highlight-color:transparent]',
-    'disabled:opacity-50',
-    'disabled:cursor-not-allowed',
-  ]
+// Every class list lives in button.styles.ts; all this does is pick between
+// them. Radius comes from the fields instead: a button and the input above it
+// are the same control shape, and an 8px button under a 12px field reads as
+// two different systems.
+const buttonClasses = computed(() =>
+  [
+    ...BUTTON_BASE,
+    ...BUTTON_SIZE[props.size],
+    ...(props.pressed
+      ? BUTTON_VARIANT_PRESSED[props.variant]
+      : BUTTON_VARIANT[props.variant]),
+    props.rounded ? FIELD_RADIUS_PILL : FIELD_RADIUS,
+    ...(props.fullWidth ? ['w-full'] : []),
+  ].join(' '),
+)
 
-  // A button sits a little tighter than the field beside it — 48/36 at md,
-  // 48/48 at lg, 56/52 at xl — rather than matching it outright. Deliberately
-  // close but not equal: the desktop step used to be 12px, which read as
-  // misalignment, while a 4px difference reads as a button being a button.
-  //
-  // Horizontal padding never steps down. A button pads around centred text, so
-  // its px should stay visibly wider than the field's at every width; the old
-  // `md:px-*` step collapsed the two to the same 12px at `md`, which made a
-  // desktop button look pinched against the input above it. Field px for
-  // comparison: 10 / 12 / 14 / 16.
-  //
-  // `sm` keeps its own thinner vertical scale: it is the size that rides in
-  // toolbars and table rows, where height is the scarce thing.
-  //
-  // Gaps live on the content span (the actual flex container), not here.
-  const sizeClasses = {
-    sm: ['px-3', 'py-1.5', 'text-sm', 'md:text-xs'],
-    md: ['px-4', 'py-3', 'text-base', 'md:py-2', 'md:text-sm'],
-    lg: ['px-5', 'py-3', 'text-base'],
-    xl: ['px-6', 'py-3.5', 'text-lg', 'md:text-base'],
-  }
+const contentClasses = computed(() => BUTTON_CONTENT_GAP[props.size])
 
-  // Variant classes — flat surfaces, colour-only hover. No coloured glows and
-  // no shadow growth on hover: those read as marketing CTAs, not app controls.
-  // Hover lightens a filled button; pressing pushes it past its resting colour
-  // in the other direction, so a press never looks like a lingering hover.
-  const variantClasses = {
-    primary: [
-      'bg-primary-600',
-      'text-white',
-      'shadow-xs',
-      'hover:bg-primary-500',
-      'active:bg-primary-700',
-      'focus-visible:outline-primary-600',
-      'dark:bg-primary-500',
-      'dark:shadow-none',
-      'dark:hover:bg-primary-400',
-      'dark:active:bg-primary-600',
-      'dark:focus-visible:outline-primary-500',
-    ],
-    // Brand hue, unfilled. For actions that are clearly interactive but are
-    // not the one thing the screen is asking for — an "add another" inside a
-    // form whose real submit sits in the footer. Deliberately shares primary's
-    // hue rather than introducing a neutral: a per-tenant theme repaints one
-    // hue and both variants follow, which a black/white variant could not do.
-    soft: [
-      'bg-primary-50',
-      'text-primary-700',
-      'ring-1',
-      'ring-inset',
-      'ring-primary-200',
-      'hover:bg-primary-100',
-      'active:bg-primary-200',
-      'focus-visible:outline-primary-600',
-      'dark:bg-primary-500/10',
-      'dark:text-primary-300',
-      'dark:ring-primary-400/20',
-      'dark:hover:bg-primary-500/20',
-      'dark:active:bg-primary-500/25',
-      'dark:focus-visible:outline-primary-500',
-    ],
-    secondary: [
-      'bg-white',
-      'text-gray-900',
-      'shadow-xs',
-      'ring-1',
-      'ring-inset',
-      'ring-gray-300',
-      'hover:bg-gray-50',
-      'active:bg-gray-100',
-      'focus-visible:outline-primary-600',
-      'dark:bg-white/10',
-      'dark:text-white',
-      'dark:shadow-none',
-      'dark:ring-white/10',
-      'dark:hover:bg-white/20',
-      'dark:active:bg-white/25',
-      'dark:focus-visible:outline-primary-500',
-    ],
-    tertiary: [
-      'bg-gray-100',
-      'text-gray-900',
-      'shadow-xs',
-      'hover:bg-gray-200',
-      'active:bg-gray-300',
-      'focus-visible:outline-gray-500',
-      'dark:bg-gray-700',
-      'dark:text-white',
-      'dark:shadow-none',
-      'dark:hover:bg-gray-600',
-      'dark:active:bg-gray-500',
-      'dark:focus-visible:outline-gray-400',
-    ],
-    yellow: [
-      'bg-amber-500',
-      'text-white',
-      'shadow-xs',
-      'hover:bg-amber-400',
-      'active:bg-amber-600',
-      'focus-visible:outline-amber-500',
-      'dark:shadow-none',
-      'dark:hover:bg-amber-400',
-      'dark:active:bg-amber-600',
-      'dark:focus-visible:outline-amber-500',
-    ],
-    danger: [
-      'bg-red-600',
-      'text-white',
-      'shadow-xs',
-      'hover:bg-red-500',
-      'active:bg-red-700',
-      'focus-visible:outline-red-600',
-      'dark:bg-red-500',
-      'dark:shadow-none',
-      'dark:hover:bg-red-400',
-      'dark:active:bg-red-600',
-      'dark:focus-visible:outline-red-500',
-    ],
-    transparent: [
-      'bg-transparent',
-      'text-gray-700',
-      'hover:bg-gray-100',
-      'active:bg-gray-200',
-      'focus-visible:outline-gray-500',
-      'dark:text-gray-300',
-      'dark:hover:bg-gray-800',
-      'dark:active:bg-gray-700',
-      'dark:focus-visible:outline-gray-400',
-    ],
-  }
-
-  // Shares the fields' radius rather than carrying its own: a button and the
-  // input above it are the same control shape, and an 8px button under a 12px
-  // field reads as two different systems.
-  const roundedClasses = props.rounded ? [FIELD_RADIUS_PILL] : [FIELD_RADIUS]
-
-  // Full width classes
-  const widthClasses = props.fullWidth ? ['w-full'] : []
-
-  return [
-    ...baseClasses,
-    ...sizeClasses[props.size],
-    ...variantClasses[props.variant],
-    ...roundedClasses,
-    ...widthClasses,
-  ].join(' ')
-})
-
-const CONTENT_GAP: Record<NonNullable<Props['size']>, string> = {
-  sm: 'gap-1.5',
-  md: 'gap-2',
-  lg: 'gap-2',
-  xl: 'gap-2.5',
-}
-
-const contentClasses = computed(() => CONTENT_GAP[props.size])
-
-// Matched to the label so the button keeps its height while loading, which
-// means it tracks the responsive label size too.
-const SPINNER_SIZE: Record<NonNullable<Props['size']>, string> = {
-  sm: 'size-4 md:size-3.5',
-  md: 'size-4.5 md:size-4',
-  lg: 'size-4.5 md:size-4.5',
-  xl: 'size-5 md:size-4.5',
-}
-
-const spinnerClasses = computed(() => SPINNER_SIZE[props.size])
+const spinnerClasses = computed(() => BUTTON_SPINNER_SIZE[props.size])
 </script>

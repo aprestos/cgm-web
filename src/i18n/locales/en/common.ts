@@ -38,4 +38,22 @@ export default {
     required: 'This field is required',
     emailInvalid: 'Please enter a valid email address',
   },
+  // PersonPicker's own wording. Naming a person reads the same wherever it is
+  // done, so these are not passed in; what is done with the person afterwards
+  // is the screen's own button, and its own wording.
+  personPicker: {
+    tabSearch: 'Search',
+    tabManual: 'Create',
+    personLabel: 'Person',
+    personPlaceholder: 'Search by name or email',
+    ticketLabel: 'Ticket',
+    ticketPlaceholder: 'Search by attendee name or email',
+    nameLabel: 'Name',
+    namePlaceholder: 'Full name',
+    // `@` starts a linked message in vue-i18n, so a bare one throws at
+    // compile time and takes the whole form down with it. `{'@'}` is the
+    // literal-interpolation escape.
+    emailPlaceholder: "name{'@'}email.com",
+    emailLabel: 'Email',
+  },
 }
